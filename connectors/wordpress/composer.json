@@ -1,11 +1,11 @@
 {
   "name": "mimic-manager/connector",
-  "description": "WordPress connector plugin for Mimic Manager",
+  "description": "WordPress connector plugin for OptiForge / Mimic Manager",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "authors": [
     {
-      "name": "Mimic Manager Team"
+      "name": "OptiForge Team"
     }
   ],
   "require": {
@@ -16,12 +16,14 @@
   },
   "autoload": {
     "psr-4": {
-      "MimicManager\\": "src/"
+      "MimicManager\\": "src/",
+      "OptiForge\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "MimicManager\\Tests\\": "tests/"
+      "MimicManager\\Tests\\": "tests/",
+      "OptiForge\\Tests\\": "tests/"
     }
   },
   "config": {

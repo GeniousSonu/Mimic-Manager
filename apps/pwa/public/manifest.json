@@ -1,0 +1,58 @@
+{
+  "name": "OptiForge Command Center",
+  "short_name": "OptiForge",
+  "description": "Headless site optimization, media compression, performance audits, and CMS command center.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0C10",
+  "theme_color": "#10131A",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Optimize Images",
+      "url": "/media?action=upload",
+      "description": "Directly open media optimizer dropzone"
+    },
+    {
+      "name": "Run Speed Audit",
+      "url": "/speed?action=audit",
+      "description": "Trigger instant mobile Lighthouse audit"
+    },
+    {
+      "name": "Review Alt-Text",
+      "url": "/media/alt-text",
+      "description": "Open accessibility alt-text review queue"
+    }
+  ],
+  "share_target": {
+    "action": "/media/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "images",
+          "accept": ["image/*"]
+        }
+      ]
+    }
+  }
+}

@@ -177,3 +177,15 @@
   - 5 hero screens scored by Design Director persona against 100-point rubric in `docs/design/DESIGN_CRITIQUE_LOG.md` (all scores ≥ 92 / 100).
   - Complete Requirements Traceability Matrix generated in `docs/engineering/TRACEABILITY.md` with 100% passing test mappings.
 
+---
+
+### GATE APPROVAL: Phase 1 Media & AI Metadata (MVP)
+- **Status:** APPROVED: Phase 1 exit (2026-10-29)
+- **Evidence:**
+  - Next.js 16 PWA Command Center built and verified prerendering across all 9 routes (`docs/project/evidence/P1/pwa-build.log`).
+  - Bundle size: ~108 kB First Load JS, adhering strictly to < 170 kB budget.
+  - 6-digit site pairing flow, Media optimizer BeforeAfterSlider, and Alt-Text review queue with keyboard shortcuts (A/E/R) delivered.
+  - Ollama vision model integration with heuristic EXIF/IPTC fallback tested and passing in `apps/worker/test/metadata.test.ts`.
+  - WordPress connector picture rewriter and attachment hooks tested and passing 8/8 tests in PHPUnit (`docs/project/evidence/P1/phpunit-tests.log`).
+  - E2E signed roundtrip verified green in `docs/project/evidence/P1/e2e-roundtrip.log`.
+
