@@ -1,0 +1,194 @@
+openapi: 3.1.0
+info:
+  title: OptiForge Engine API
+  version: 1.0.0
+  description: Headless site optimization, media compression, performance verification, and CMS control plane.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local Development Server
+  - url: https://optiforge.internal/api/v1
+    description: Production Cluster
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                    example: 3600.5
+  /sites/pair:
+    post:
+      summary: Pair a CMS connector with OptiForge instance
+      operationId: pairSite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pairingCode
+                - homeUrl
+                - name
+              properties:
+                pairingCode:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+                  example: '492817'
+                homeUrl:
+                  type: string
+                  format: uri
+                  example: 'https://example.com'
+                name:
+                  type: string
+                  example: 'Main E-Commerce Store'
+                environment:
+                  type: string
+                  enum: [production, staging, development]
+                  default: production
+      responses:
+        '200':
+          description: Site successfully paired
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  siteId:
+                    type: string
+                    format: uuid
+                  clientSecret:
+                    type: string
+                  webhookUrl:
+                    type: string
+                    format: uri
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+  /media/jobs:
+    post:
+      summary: Enqueue media optimization job
+      operationId: createMediaJob
+      parameters:
+        - name: X-OptiForge-Site-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-OptiForge-Timestamp
+          in: header
+          required: true
+          schema:
+            type: integer
+        - name: X-OptiForge-Nonce
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-OptiForge-Signature
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+          application/json:
+            schema:
+              type: object
+              required:
+                - sourceUrl
+              properties:
+                sourceUrl:
+                  type: string
+                  format: uri
+                quality:
+                  type: integer
+                  minimum: 1
+                  maximum: 100
+                  default: 80
+                formats:
+                  type: array
+                  items:
+                    type: string
+                    enum: [webp, avif]
+                  default: [webp, avif]
+      responses:
+        '202':
+          description: Optimization job accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    example: pending
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '422':
+          $ref: '#/components/responses/UnprocessableError'
+components:
+  responses:
+    BadRequestError:
+      description: Invalid request parameters or SSRF blocked
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    UnauthorizedError:
+      description: Authentication failure or signature mismatch
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    UnprocessableError:
+      description: Decompression bomb or corrupt image
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+  schemas:
+    ProblemDetails:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: ERR_AUTH_INVALID_SIGNATURE
+        message:
+          type: string
+          example: HMAC SHA-256 verification failed
+        details:
+          type: object
+          additionalProperties: true

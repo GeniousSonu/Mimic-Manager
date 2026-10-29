@@ -1,0 +1,56 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.16.1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: gd, curl, dom, mbstring, openssl, sodium, zip
+
+      - name: Install pnpm Dependencies
+        run: |
+          pnpm approve-builds --all
+          pnpm install
+
+      - name: Install Composer Dependencies
+        run: |
+          cd connectors/wordpress
+          composer install --no-interaction --prefer-dist
+          cd ../..
+
+      - name: Run WCAG Contrast Audit
+        run: pnpm --filter @mimic-manager/ui test
+
+      - name: Run Full TypeScript Test Suite & Typecheck
+        run: pnpm test
+
+      - name: Run WordPress Connector PHPUnit Suite
+        run: |
+          cd connectors/wordpress
+          ./vendor/bin/phpunit tests/
+          cd ../..
+
+      - name: Run End-to-End Signed Roundtrip
+        run: pnpm vitest run e2e/roundtrip.test.ts

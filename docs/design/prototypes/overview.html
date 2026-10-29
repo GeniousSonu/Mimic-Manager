@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OptiForge Command Center Prototype</title>
+  <style>
+    :root {
+      --bg-canvas: #0A0C10;
+      --bg-surface: #10131A;
+      --bg-raised: #161A23;
+      --border-default: #2A3040;
+      --border-strong: #626D85;
+      --text-primary: #E9ECF3;
+      --text-secondary: #A5AEC0;
+      --text-tertiary: #747E92;
+      --accent-default: #7C6CFF;
+      --accent-hover: #8F81FF;
+      --semantic-success: #2FBF8F;
+      --semantic-warning: #F5A524;
+      --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-ui);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    aside {
+      width: 240px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+    .brand svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--accent-default);
+    }
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    nav a.active, nav a:hover {
+      background: var(--bg-raised);
+      color: var(--text-primary);
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    header {
+      height: 56px;
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--bg-surface);
+    }
+    .content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .kpi-title { font-size: 13px; color: var(--text-secondary); }
+    .kpi-value { font-size: 24px; font-weight: 600; font-family: var(--font-mono); }
+    .kpi-delta { font-size: 12px; color: var(--semantic-success); }
+    .btn-primary {
+      background: var(--accent-default);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="brand">
+      <svg viewBox="0 0 32 32" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 10 L16 3 L28 10 L28 22 L16 29 L4 22 Z" />
+        <path d="M16 3 L16 29" />
+      </svg>
+      OptiForge
+    </div>
+    <nav>
+      <a href="#" class="active">Overview</a>
+      <a href="#">Sites (3)</a>
+      <a href="#">Media</a>
+      <a href="#">Speed</a>
+      <a href="#">SEO</a>
+      <a href="#">Replicator</a>
+      <a href="#">Files</a>
+      <a href="#">Jobs</a>
+      <a href="#">Settings</a>
+    </nav>
+  </aside>
+  <main>
+    <header>
+      <div style="font-size: 14px; font-weight: 500;">Production Store &bull; <span style="color: var(--semantic-success);">Connected</span></div>
+      <button class="btn-primary">Run Global Audit</button>
+    </header>
+    <div class="content">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">Total Bytes Saved</div>
+          <div class="kpi-value">1.42 GB</div>
+          <div class="kpi-delta">+68% Avg Reduction</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Images Optimized</div>
+          <div class="kpi-value">8,420</div>
+          <div class="kpi-delta">WebP &amp; AVIF Active</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Mobile PageSpeed</div>
+          <div class="kpi-value">94 / 100</div>
+          <div class="kpi-delta">+26 pts Delta</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">Pending Alt-Text</div>
+          <div class="kpi-value">12 Items</div>
+          <div class="kpi-delta" style="color: var(--semantic-warning);">Review Required</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

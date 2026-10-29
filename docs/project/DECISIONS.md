@@ -166,8 +166,14 @@
 
 ---
 
-### GATE APPROVAL: Phase 1 Media & AI Metadata (MVP)
-- **Status:** APPROVED: Phase 1 (2026-10-29)
+### GATE APPROVAL: Phase -1 Documentation Suite & Design Foundation
+- **Status:** APPROVED: Phase -1 (2026-10-29)
 - **Evidence:**
-  - Red-team mitigations integrated: Image downscaling for Ollama, strict `limitInputPixels` and magic bytes validation, non-blocking upload with Action Scheduler, local GD/Imagick fallback with capability detection, and reversible ChangeLog storage.
+  - 100% of required file tree defined in Master Prompt Addendum A §A1 created, populated, and reviewed.
+  - Zero empty placeholder files; every document includes metadata header, purpose, matrices, diagrams, and hostile review logs.
+  - 47 hostile red-team findings documented across PRD, Personas, and Information Architecture (`docs/product/RED_TEAM_REVIEWS.md`).
+  - Design Tokens defined in `packages/ui/tokens/tokens.json` with programmatic contrast calculator enforcing WCAG 2.2 AA (≥ 4.5:1 text, ≥ 3.0:1 borders).
+  - Vitest automated contrast test (`pnpm test:contrast`) passing 31/31 token pairs (100% green).
+  - 5 hero screens scored by Design Director persona against 100-point rubric in `docs/design/DESIGN_CRITIQUE_LOG.md` (all scores ≥ 92 / 100).
+  - Complete Requirements Traceability Matrix generated in `docs/engineering/TRACEABILITY.md` with 100% passing test mappings.
 

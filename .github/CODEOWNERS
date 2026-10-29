@@ -1,0 +1,11 @@
+# Global codeowners for OptiForge
+* @optiforge/core-maintainers
+
+# Security critical paths
+/packages/ssrf-guard/ @optiforge/security-leads
+/apps/api/src/common/guards/ @optiforge/security-leads
+/connectors/wordpress/src/Security/ @optiforge/security-leads
+
+# Design system
+/packages/ui/ @optiforge/design-leads
+/docs/design/ @optiforge/design-leads
