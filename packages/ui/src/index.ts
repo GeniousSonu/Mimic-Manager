@@ -5,3 +5,4 @@ export * from './components/BeforeAfterSlider.js';
 export * from './components/TierBadge.js';
 export * from './components/ReviewQueueCard.js';
 export * from './components/FixCard.js';
+export * from './components/AnimatedLogo.js';

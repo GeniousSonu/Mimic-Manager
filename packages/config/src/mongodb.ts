@@ -1,0 +1,31 @@
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | AGPL-3.0-or-later */
+
+import { MongoClient } from 'mongodb';
+
+export const DEFAULT_MONGODB_URI =
+  'mongodb+srv://wefikplugin_db_user:PS7dOJI1EYpXxqLt@mimic-manager.4llnuji.mongodb.net/mimic_manager?retryWrites=true&w=majority';
+
+export function getMongoUri(): string {
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.MIMIC_MANAGER_MONGODB_URI || process.env.MONGODB_URI || DEFAULT_MONGODB_URI;
+  }
+  return DEFAULT_MONGODB_URI;
+}
+
+export const client = new MongoClient(getMongoUri());
+
+export async function connectToMongoDB(): Promise<MongoClient | undefined> {
+  try {
+    await client.connect();
+    console.log('You successfully connected to MongoDB!');
+    return client;
+  } catch (err) {
+    console.dir(err);
+    throw err;
+  }
+}
+
+// Call this only when your application terminates
+export async function disconnectFromMongoDB(): Promise<void> {
+  await client.close();
+}

@@ -38,15 +38,15 @@ graph TD
 
 ## 3. Brand & Visual Identity
 - **Working Title:** Mimic Manager (white-label ready via `brand.config.ts`).
-- **Geometric Mark:** Hexagonal faceted anvil vector mark with round caps, crisp down to 16px.
-- **Typography:** Self-hosted `Inter Variable` for clean user interface rendering; `JetBrains Mono` for code snippets, database paths, and metrics.
+- **Geometric Mark:** Isometric 3D triple-layered floating frame with amber-gold gradient and crystal core (`mimic-manager-icon.svg`), crisp down to 16px with animated micro-interactions.
+- **Typography:** `SF Pro Display` / `SF Pro Text` / `San Francisco` (`-apple-system`, `BlinkMacSystemFont`) for interface; `SF Mono` (`SFMono-Regular`, `ui-monospace`) for code snippets, database paths, and metrics.
 
 ---
 
 ## 4. Theme & Token Architecture
-- **Default Theme:** Dark Mode (Canvas: `#0A0C10`, Surface: `#10131A`, Border: `#2A3040`, Accent: `#7C6CFF`).
-- **Light Theme Parity:** Light Mode (Canvas: `#F7F8FA`, Surface: `#FFFFFF`, Border: `#D1D5E0`, Accent: `#6351EB`).
-- **Automated Contrast Guarantee:** All 31 primary token pairings pass WCAG 2.2 AA in CI tests (`packages/ui/test/contrast.test.ts`).
+- **Default Theme:** Obsidian Amber Gold Dark Mode (Canvas: `#0A0805`, Surface: `#120E09`, Raised: `#1A140D`, Border: `#3A2B1C`, Accent: `#FFB000`).
+- **Light Theme Parity:** Warm Sand & Amber Gold Light Mode (Canvas: `#FAF8F5`, Surface: `#FFFFFF`, Border: `#D5C7B0`, Accent: `#D97706`).
+- **Automated Contrast Guarantee:** All primary token pairings pass WCAG 2.2 AA in CI tests (`packages/ui/test/contrast.test.ts`).
 
 ---
 

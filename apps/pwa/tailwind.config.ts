@@ -9,37 +9,55 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        canvas: '#0A0C10',
-        surface: '#10131A',
-        raised: '#161A23',
-        overlay: '#1C212C',
-        inset: '#0D1016',
+        canvas: '#0A0805',
+        surface: '#120E09',
+        raised: '#1A140D',
+        overlay: '#241C12',
+        inset: '#0E0B07',
         border: {
-          subtle: '#1F2430',
-          default: '#2A3040',
-          strong: '#626D85'
+          subtle: '#261C12',
+          default: '#3A2B1C',
+          strong: '#735639'
         },
         text: {
-          primary: '#E9ECF3',
-          secondary: '#A5AEC0',
-          tertiary: '#747E92',
-          disabled: '#4B5365'
+          primary: '#FFF8EE',
+          secondary: '#D4C4B0',
+          tertiary: '#9E8C78',
+          disabled: '#5E5244'
         },
         accent: {
-          default: '#7C6CFF',
-          hover: '#8F81FF',
-          pressed: '#6A59F0'
+          default: '#FFB000',
+          hover: '#FFC033',
+          pressed: '#D99400'
         },
         semantic: {
-          success: '#2FBF8F',
-          warning: '#F5A524',
-          danger: '#F2555A',
-          info: '#4DA3FF'
+          success: '#28C76F',
+          warning: '#FF9F43',
+          danger: '#EA5455',
+          info: '#00CFE8'
         }
       },
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace']
+        sans: [
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'SF Pro Display',
+          'SF Pro Text',
+          'SF Pro',
+          'San Francisco',
+          'system-ui',
+          'sans-serif'
+        ],
+        mono: [
+          'SF Mono',
+          'SFMono-Regular',
+          'ui-monospace',
+          'Menlo',
+          'Monaco',
+          'Consolas',
+          'Liberation Mono',
+          'monospace'
+        ]
       }
     }
   },

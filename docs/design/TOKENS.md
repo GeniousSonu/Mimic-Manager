@@ -45,8 +45,8 @@ Every token is verified programmatically via our automated contrast checker to e
 
 ## 3. Typography Tokens
 - **Font Families:**
-  - UI Sans: `Inter Variable`, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
-  - Code / Numbers: `JetBrains Mono`, SFMono-Regular, Menlo, Monaco, Consolas, monospace
+  - UI Sans: `-apple-system`, `BlinkMacSystemFont`, `"SF Pro Display"`, `"SF Pro Text"`, `"SF Pro"`, `"San Francisco"`, system-ui, sans-serif
+  - Code / Numbers: `"SF Mono"`, `SFMono-Regular`, `ui-monospace`, `Menlo`, `Monaco`, `Consolas`, monospace
 - **Type Scale:** 12px (16lh), 13px (18lh), 14px (20lh), 16px (24lh), 18px (26lh), 20px (28lh), 24px (32lh), 30px (38lh), 36px (44lh), 48px (56lh)
 - **Tabular Numerals:** Enforced on all metrics and scores via `font-variant-numeric: tabular-nums`.
 
