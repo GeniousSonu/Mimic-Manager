@@ -1,6 +1,6 @@
-# Contributing to OptiForge
+# Contributing to Mimic Manager
 
-Thank you for your interest in contributing to OptiForge! We are committed to building an open, sovereign, and verifiable site optimization platform.
+Thank you for your interest in contributing to Mimic Manager! We are committed to building an open, sovereign, and verifiable site optimization platform.
 
 ---
 
