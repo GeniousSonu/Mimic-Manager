@@ -21,7 +21,7 @@
     "@mimic-manager/ssrf-guard": "workspace:*",
     "@mimic-manager/types": "workspace:*",
     "@mimic-manager/worker": "workspace:*",
-    "@nestjs/common": "^11.0.11",
+    "@nestjs/common": "^12.2.0",
     "@nestjs/core": "^11.0.11",
     "@nestjs/platform-fastify": "^11.0.11",
     "@nestjs/swagger": "^11.0.6",
