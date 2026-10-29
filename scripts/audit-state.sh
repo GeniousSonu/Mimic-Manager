@@ -51,6 +51,8 @@ pnpm vitest run e2e/roundtrip.test.ts > "docs/project/evidence/e2e-roundtrip.log
 P_MINUS_1_STATUS="pass"
 P0_STATUS="pass"
 P1_STATUS="pass"
+P2_STATUS="pass"
+P3_STATUS="pass"
 
 if [ "$MISSING_FILES" -gt 0 ] || [ "${CONTRAST_FAIL:-0}" -gt 0 ]; then
   P_MINUS_1_STATUS="fail"
@@ -62,6 +64,11 @@ fi
 
 if [ "${PWA_FAIL:-0}" -gt 0 ] || [ "${E2E_FAIL:-0}" -gt 0 ]; then
   P1_STATUS="fail"
+fi
+
+if [ "${PHP_FAIL:-0}" -gt 0 ] || [ "${PWA_FAIL:-0}" -gt 0 ]; then
+  P2_STATUS="fail"
+  P3_STATUS="fail"
 fi
 
 cat <<EOF > "$AUDIT_JSON"
@@ -86,6 +93,17 @@ cat <<EOF > "$AUDIT_JSON"
       "status": "$P1_STATUS",
       "pwaBuild": "$([ "${PWA_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')",
       "e2eRoundtrip": "$([ "${E2E_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')"
+    },
+    "P2": {
+      "name": "SEO Engine",
+      "status": "$P2_STATUS",
+      "seoTests": "$([ "${PHP_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')"
+    },
+    "P3": {
+      "name": "PageSpeed Engine",
+      "status": "$P3_STATUS",
+      "fixEngineTests": "$([ "${PHP_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')",
+      "verifierTests": "$([ "${TESTS_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')"
     }
   }
 }

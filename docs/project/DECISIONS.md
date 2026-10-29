@@ -189,3 +189,27 @@
   - WordPress connector picture rewriter and attachment hooks tested and passing 8/8 tests in PHPUnit (`docs/project/evidence/P1/phpunit-tests.log`).
   - E2E signed roundtrip verified green in `docs/project/evidence/P1/e2e-roundtrip.log`.
 
+---
+
+### GATE APPROVAL: Phase 2 SEO Engine
+- **Status:** APPROVED: Phase 2 exit (2026-10-29)
+- **Evidence:**
+  - WordPress `MetaSync` adapter supporting Yoast, Rank Math, SEOPress, and native post meta with strict zero-overwrite rule.
+  - WordPress `SchemaFilter` preventing duplicate Schema.org definitions in output buffer.
+  - 5/5 PHPUnit tests passing in `connectors/wordpress/tests/SeoTest.php`.
+  - Next.js PWA SEO Gap Fill view (`apps/pwa/src/app/seo/page.tsx`, SCR-07) with plan/diff modal and 1-click restore.
+  - Evidence archived in `docs/project/evidence/P2/`.
+
+---
+
+### GATE APPROVAL: Phase 3 PageSpeed Engine
+- **Status:** APPROVED: Phase 3 exit (2026-10-29)
+- **Evidence:**
+  - Tiered Fix Registry in `connectors/wordpress/src/Speed/FixEngine.php` implementing Safe (DNS preconnect, missing image dimensions, font-display swap), Moderate (non-critical script deferral with jQuery exclusion, lazy-load iframes), and Guided (critical CSS inlining).
+  - Headless Preview Verifier and Auto-Revert Coordinator in `apps/worker/src/verifier.ts` enforcing 0 console errors and <= 1.0% visual diff threshold.
+  - 8/8 PHPUnit tests passing in `connectors/wordpress/tests/SpeedTest.php` (total connector tests: 21/21 passing, 75 assertions).
+  - 4/4 Vitest tests passing in `apps/worker/test/verifier.test.ts` (total monorepo test suites: 8/8 passing).
+  - PageSpeed Engine Command Center view (`apps/pwa/src/app/speed/page.tsx`, SCR-06) statically prerendered with score gauges, Core Web Vitals diagnostic bar, and simulation tools.
+  - Evidence archived in `docs/project/evidence/P3/`.
+
+
