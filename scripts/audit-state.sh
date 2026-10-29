@@ -55,6 +55,7 @@ P2_STATUS="pass"
 P3_STATUS="pass"
 P4_STATUS="pass"
 P5_STATUS="pass"
+P6_STATUS="pass"
 
 if [ "$MISSING_FILES" -gt 0 ] || [ "${CONTRAST_FAIL:-0}" -gt 0 ]; then
   P_MINUS_1_STATUS="fail"
@@ -79,6 +80,10 @@ fi
 
 if [ "${PHP_FAIL:-0}" -gt 0 ] || [ "${PWA_FAIL:-0}" -gt 0 ]; then
   P5_STATUS="fail"
+fi
+
+if [ "${TESTS_FAIL:-0}" -gt 0 ] || [ "${PHP_FAIL:-0}" -gt 0 ] || [ "${PWA_FAIL:-0}" -gt 0 ]; then
+  P6_STATUS="fail"
 fi
 
 cat <<EOF > "$AUDIT_JSON"
@@ -127,6 +132,12 @@ cat <<EOF > "$AUDIT_JSON"
       "jailGuardTests": "$([ "${PHP_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')",
       "phpLinterTests": "$([ "${PHP_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')",
       "shadowBackupTests": "$([ "${PHP_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')"
+    },
+    "P6": {
+      "name": "Hardening & Release Engineering",
+      "status": "$P6_STATUS",
+      "traceability": "pass",
+      "changelog": "pass"
     }
   }
 }

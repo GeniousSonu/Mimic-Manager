@@ -236,6 +236,18 @@
   - Visual File Manager view (`apps/pwa/src/app/files/page.tsx`, SCR-09) prerendered at 111 kB with jailed tree, syntax indicator, and sudo re-auth modal.
   - Evidence archived in `docs/project/evidence/P5/`.
 
+---
+
+### GATE APPROVAL: Phase 6 Hardening & Release Engineering
+- **Status:** APPROVED: Phase 6 exit (2026-10-29)
+- **Evidence:**
+  - End-to-end Requirements Traceability Matrix updated with live test suite mappings in `docs/engineering/TRACEABILITY.md`.
+  - Next.js upgraded to `15.5.28` resolving all security advisory warnings with zero critical/high vulnerabilities.
+  - `CHANGELOG.md` updated with release `[1.0.0-rc.1]`.
+  - Full workspace audit (`scripts/audit-state.sh`) executing contrast gate, unit tests, PHPUnit, and 13/13 static PWA route prerenders green.
+  - Evidence archived in `docs/project/evidence/P6/`.
+
+
 
 
 

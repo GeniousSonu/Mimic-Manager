@@ -6,6 +6,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0-rc.1] - 2026-10-29
+
+### Added
+- **Phase 1 Media Optimization & AI Metadata (MVP):**
+  - Next.js 15.5 Command Center shell (`apps/pwa`) with 13 prerendered routes and lightweight bundle footprint (< 130 kB).
+  - 6-digit site pairing protocol and HMAC-signed handshake.
+  - Interactive Before/After slider and multi-tier bulk media compression.
+  - Alt-Text review queue with keyboard triage (`A/E/R`) and Ollama vision integration with heuristic EXIF/IPTC fallback.
+  - WordPress Action Scheduler background tasks and picture rewriter.
+- **Phase 2 SEO Engine:**
+  - Plugin-aware `MetaSync` adapter supporting Yoast, Rank Math, SEOPress with strict zero-overwrite rule.
+  - Output buffer `SchemaFilter` eliminating duplicate Schema.org definitions.
+  - SEO Gap Fill dashboard (`SCR-07`) with diff preview modal and 1-click restore.
+- **Phase 3 PageSpeed Engine:**
+  - Tiered Fix Registry (`Safe`, `Moderate`, `Guided`) with 6 Core Web Vitals fixes.
+  - Headless Preview Verifier enforcing 0 JS error tolerance and <= 1.0% visual difference threshold.
+  - Auto-revert coordinator on regression with 10s undo window.
+  - PageSpeed Engine Command Center view (`SCR-06`).
+- **Phase 4 UI Replicator:**
+  - Package `@mimic-manager/ir` with multi-viewport Intermediate Representation schema.
+  - Native WordPress Core Gutenberg Block compiler (group, columns, heading, paragraph, button, image, list).
+  - Replicator Studio view (`SCR-08`) with 3-viewport responsive switcher and visual fidelity inspector.
+- **Phase 5 Visual File Manager:**
+  - Sandboxed `JailGuard` filesystem jail strictly contained within `wp-content/`.
+  - Path traversal and null byte injection defenses with sensitive file blacklists.
+  - Pre-save `PhpAstLinter` syntax checks preventing WSOD.
+  - `ShadowBackup` manager with timestamped backup creation and 1-click restore.
+  - Visual File Manager view (`SCR-09`) with code editor, syntax indicator, and sudo re-auth modal.
+- **Phase 6 Hardening & Release Engineering:**
+  - End-to-end Requirements Traceability Matrix updated with 100% test mappings.
+  - Full state audit and monorepo regression sweeps verified clean.
+
 ## [0.1.0-alpha] - 2026-10-29
 
 ### Added

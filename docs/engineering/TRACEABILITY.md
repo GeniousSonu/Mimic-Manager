@@ -10,20 +10,20 @@
 
 ## 1. Traceability Matrix
 
-| Requirement ID | Design Element | Architecture Component | API Route | Test ID | Status |
+| Requirement ID | Design Element | Architecture Component | API Route / Module | Test File & Function | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `FR-MEDIA-001` | `SCR-04` (Media Library) | `apps/worker` (Sharp Engine) | `POST /api/v1/media/jobs` | `TEST-MEDIA-001` | **PASSING** |
-| `FR-MEDIA-002` | `UploadDropzone` | `apps/worker` (Sharp Engine) | `POST /api/v1/media/jobs` | `TEST-MEDIA-002` | **PASSING** |
-| `FR-SPEED-001` | `SCR-06` (Speed Dashboard) | `apps/worker` (Audit Worker) | `POST /api/v1/pagespeed/audit` | `TEST-SPEED-001` | **PASSING** |
-| `FR-SPEED-002` | `FixCard` (Preview Diff) | `connectors/wordpress` (FixEngine) | `POST /api/v1/fixes/verify` | `TEST-SPEED-002` | **PASSING** |
-| `FR-SEO-001` | `SCR-07` (SEO Sync View) | `connectors/wordpress` (MetaSync) | `POST /api/v1/seo/sync` | `TEST-SEO-001` | **PASSING** |
-| `FR-REP-001` | `SCR-08` (Replicator Studio) | `apps/worker` (Chromium Crawler) | `POST /api/v1/replicator/crawl` | `TEST-REP-001` | **PASSING** |
-| `FR-REP-002` | `ElementPicker Overlay` | `packages/replicator-ir` (Compiler) | N/A (Client/Worker Lib) | `TEST-REP-002` | **PASSING** |
-| `FR-FILE-001` | `SCR-09` (Visual File Mgr) | `connectors/wordpress` (JailGuard) | `GET /wp-json/optiforge/v1/files` | `TEST-FILE-001` | **PASSING** |
-| `FR-FILE-002` | `CodeEditor` (Monaco) | `connectors/wordpress` (AstLinter) | `POST /wp-json/optiforge/v1/save` | `TEST-FILE-002` | **PASSING** |
-| `NFR-SEC-001` | `SCR-03` (Site Pairing) | `packages/types` (`HmacSigner`) | All signed routes | `TEST-AUTH-001` | **PASSING** |
-| `NFR-SEC-004` | `SCR-08` (Replicator URL) | `packages/ssrf-guard` (`SsrfGuard`) | Outbound URL Fetchers | `TEST-SSRF-001` | **PASSING** |
-| `NFR-A11Y-001`| `tokens.json` | `packages/ui` (`check-contrast`) | N/A (Build Step) | `TEST-A11Y-001` | **PASSING** |
+| `FR-MEDIA-001` | `SCR-04` (Media Library) | `apps/worker` & `connectors/wordpress` | `apps/worker/src/processor.ts` | `apps/worker/test/processor.test.ts`, `connectors/wordpress/tests/MediaTest.php` | **PASSING** |
+| `FR-MEDIA-002` | `SCR-05` (Alt-Text Queue) | `apps/worker` (Ollama/Heuristic) | `apps/worker/src/metadata.ts` | `apps/worker/test/metadata.test.ts` | **PASSING** |
+| `FR-SPEED-001` | `SCR-06` (Speed Dashboard) | `apps/worker` (Preview Verifier) | `apps/worker/src/verifier.ts` | `apps/worker/test/verifier.test.ts` | **PASSING** |
+| `FR-SPEED-002` | `SCR-06` (Tiered Fix Engine) | `connectors/wordpress/src/Speed` | `FixEngine::optimizeHtml` | `connectors/wordpress/tests/SpeedTest.php` | **PASSING** |
+| `FR-SEO-001` | `SCR-07` (SEO Sync View) | `connectors/wordpress/src/Seo` | `MetaSync::sync` & `SchemaFilter` | `connectors/wordpress/tests/SeoTest.php` | **PASSING** |
+| `FR-REP-001` | `SCR-08` (Replicator Studio) | `packages/ir` (Intermediate Rep) | `packages/ir/src/types.ts` | `packages/ir/test/ir.test.ts` | **PASSING** |
+| `FR-REP-002` | `SCR-08` (Gutenberg Compiler)| `packages/ir` (GutenbergCompiler) | `GutenbergCompiler::compile` | `packages/ir/test/ir.test.ts` | **PASSING** |
+| `FR-FILE-001` | `SCR-09` (Visual File Mgr) | `connectors/wordpress/src/FileManager` | `JailGuard::resolveSecurePath` | `connectors/wordpress/tests/FileManagerTest.php` | **PASSING** |
+| `FR-FILE-002` | `SCR-09` (Syntax & Shadow) | `connectors/wordpress/src/FileManager` | `PhpAstLinter` & `ShadowBackup` | `connectors/wordpress/tests/FileManagerTest.php` | **PASSING** |
+| `NFR-SEC-001` | `SCR-03` (Site Pairing) | `packages/types` & `connectors/wordpress` | `HmacSigner::sign` | `connectors/wordpress/tests/SecurityTest.php`, `packages/types/test/hmac.test.ts`, `e2e/roundtrip.test.ts` | **PASSING** |
+| `NFR-SEC-004` | `SCR-08` (Replicator URL) | `packages/ssrf-guard` (`SsrfGuard`) | Socket-level DNS pinning | `packages/ssrf-guard/test/ssrf.test.ts` (76 vectors) | **PASSING** |
+| `NFR-A11Y-001`| `tokens.json` | `packages/ui` (`check-contrast`) | Token Color Matrix | `packages/ui/test/contrast.test.ts` (30 token pairs) | **PASSING** |
 
 ---
 
