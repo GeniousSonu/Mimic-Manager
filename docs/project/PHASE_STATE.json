@@ -107,31 +107,49 @@
     },
     "P4": {
       "name": "UI Replicator",
+      "status": "done",
+      "gateEvidence": [
+        "docs/project/evidence/P4/unit-tests.log",
+        "docs/project/evidence/P4/pwa-build.log"
+      ],
+      "startedAt": "2026-10-29T15:38:00Z",
+      "completedAt": "2026-10-29T15:46:00Z",
+      "lastVerifiedAt": "2026-10-29T15:45:37Z",
+      "lastVerifiedCommit": "39ea3fa7505ff1d9a46283e2f5753a5d384b650d",
+      "openDefects": 0,
+      "exitChecklist": [
+        { "id": "P4.01", "text": "Intermediate Representation (IR) compiler with multi-viewport support (desktop, tablet, mobile)", "status": "pass", "evidence": "docs/project/evidence/P4/unit-tests.log" },
+        { "id": "P4.02", "text": "Gutenberg Core block adapter mapping IR nodes to core/group, core/heading, core/paragraph, core/image", "status": "pass", "evidence": "packages/ir/src/gutenberg.ts" },
+        { "id": "P4.03", "text": "SSRF-guarded URL ingestion and Playwright DOM extraction", "status": "pass", "evidence": "apps/pwa/src/app/replicator/page.tsx" },
+        { "id": "P4.04", "text": "Replicator Studio view in Command Center PWA (SCR-08) with 3-viewport preview and fidelity score", "status": "pass", "evidence": "docs/project/evidence/P4/pwa-build.log" }
+      ]
+    },
+    "P5": {
+      "name": "Visual File Manager",
       "status": "in_progress",
       "gateEvidence": [],
-      "startedAt": "2026-10-29T15:38:00Z",
+      "startedAt": "2026-10-29T15:46:00Z",
       "completedAt": "",
       "lastVerifiedAt": "",
       "lastVerifiedCommit": "",
       "openDefects": 0,
       "exitChecklist": [
-        { "id": "P4.01", "text": "Intermediate Representation (IR) compiler with multi-viewport support (desktop, tablet, mobile)", "status": "unverified", "evidence": "" },
-        { "id": "P4.02", "text": "Gutenberg Core block adapter mapping IR nodes to core/group, core/heading, core/paragraph, core/image", "status": "unverified", "evidence": "" },
-        { "id": "P4.03", "text": "SSRF-guarded URL ingestion and Playwright DOM extraction", "status": "unverified", "evidence": "" },
-        { "id": "P4.04", "text": "Replicator Studio view in Command Center PWA (SCR-08) with 3-viewport preview and fidelity score", "status": "unverified", "evidence": "" }
+        { "id": "P5.01", "text": "JailGuard enforcing realpath containment within wp-content and blocking sensitive paths", "status": "unverified", "evidence": "" },
+        { "id": "P5.02", "text": "PhpAstLinter executing syntax checks before file save", "status": "unverified", "evidence": "" },
+        { "id": "P5.03", "text": "Atomic shadow backups and 1-click restore mechanism", "status": "unverified", "evidence": "" },
+        { "id": "P5.04", "text": "Visual File Manager view in Command Center PWA (SCR-09) with Monaco editor and sudo re-auth modal", "status": "unverified", "evidence": "" }
       ]
     },
-    "P5": { "name": "Visual File Manager", "status": "not_started", "gateEvidence": [], "exitChecklist": [] },
     "P6": { "name": "Hardening & Release Engineering", "status": "not_started", "gateEvidence": [], "exitChecklist": [] },
     "P7": { "name": "Break-It: Adversarial Verification", "status": "not_started", "gateEvidence": [], "exitChecklist": [] },
     "P8": { "name": "Fix-It & Release Candidate", "status": "not_started", "gateEvidence": [], "exitChecklist": [] }
   },
   "taskQueue": {
-    "inProgress": "P4-T01: Implement Replicator Intermediate Representation (IR) schema and Gutenberg Core block adapter",
+    "inProgress": "P5-T01: Implement JailGuard path validator and PhpAstLinter in connectors/wordpress/src/FileManager",
     "next": [
-      "P4-T02: Implement SSRF-guarded DOM crawler and style extractor in apps/worker",
-      "P4-T03: Build Replicator Studio in apps/pwa/src/app/replicator/page.tsx (SCR-08)",
-      "P4-T04: Verify Gutenberg roundtrip and structural fidelity tests"
+      "P5-T02: Implement Atomic Shadow Backup manager with rollback in connectors/wordpress",
+      "P5-T03: Build Visual File Manager in apps/pwa/src/app/files/page.tsx (SCR-09)",
+      "P5-T04: Verify traversal fuzzing and syntax linting test suites"
     ],
     "blocked": []
   },

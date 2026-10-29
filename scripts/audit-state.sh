@@ -53,6 +53,7 @@ P0_STATUS="pass"
 P1_STATUS="pass"
 P2_STATUS="pass"
 P3_STATUS="pass"
+P4_STATUS="pass"
 
 if [ "$MISSING_FILES" -gt 0 ] || [ "${CONTRAST_FAIL:-0}" -gt 0 ]; then
   P_MINUS_1_STATUS="fail"
@@ -69,6 +70,10 @@ fi
 if [ "${PHP_FAIL:-0}" -gt 0 ] || [ "${PWA_FAIL:-0}" -gt 0 ]; then
   P2_STATUS="fail"
   P3_STATUS="fail"
+fi
+
+if [ "${TESTS_FAIL:-0}" -gt 0 ] || [ "${PWA_FAIL:-0}" -gt 0 ]; then
+  P4_STATUS="fail"
 fi
 
 cat <<EOF > "$AUDIT_JSON"
@@ -104,6 +109,12 @@ cat <<EOF > "$AUDIT_JSON"
       "status": "$P3_STATUS",
       "fixEngineTests": "$([ "${PHP_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')",
       "verifierTests": "$([ "${TESTS_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')"
+    },
+    "P4": {
+      "name": "UI Replicator",
+      "status": "$P4_STATUS",
+      "irTests": "$([ "${TESTS_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')",
+      "gutenbergCompiler": "$([ "${TESTS_FAIL:-0}" -eq 0 ] && echo 'pass' || echo 'fail')"
     }
   }
 }
