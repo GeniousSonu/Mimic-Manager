@@ -212,7 +212,16 @@ class FixEngine
             $hasWidth = (bool) preg_match('/\bwidth\s*=/i', $attrs);
             $hasHeight = (bool) preg_match('/\bheight\s*=/i', $attrs);
 
-            if (!$hasWidth && !$hasHeight) {
+            // Check if inline style specifies both width and height
+            $hasStyleDimensions = false;
+            if (preg_match('/style=["\']([^"\']+)["\']/i', $attrs, $sm)) {
+                $styleBody = $sm[1];
+                if (preg_match('/\bwidth\s*:/i', $styleBody) && preg_match('/\bheight\s*:/i', $styleBody)) {
+                    $hasStyleDimensions = true;
+                }
+            }
+
+            if (!$hasWidth && !$hasHeight && !$hasStyleDimensions) {
                 // If neither width nor height is provided, inject intrinsic aspect-ratio reservation
                 return '<img' . $attrs . ' width="800" height="600" style="aspect-ratio: auto 800 / 600;">';
             }

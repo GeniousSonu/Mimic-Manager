@@ -75,6 +75,23 @@ export class GutenbergCompiler {
     return `<!-- wp:column${attrs} -->\n<div class="wp-block-column">\n${innerContent}\n</div>\n<!-- /wp:column -->`;
   }
 
+  private escapeHtml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  private sanitizeUri(uri: string): string {
+    const trimmed = uri.trim();
+    if (/^(?:javascript|data|vbscript):/i.test(trimmed)) {
+      return '#';
+    }
+    return trimmed;
+  }
+
   private serializeHeading(node: IRNode): string {
     const levelMatch = node.tag?.match(/^h([1-6])$/i);
     const level = levelMatch ? parseInt(levelMatch[1], 10) : 2;
@@ -84,7 +101,7 @@ export class GutenbergCompiler {
       attrsObj.textAlign = textAlign;
     }
     const attrs = JSON.stringify(attrsObj);
-    const text = node.text || '';
+    const text = this.escapeHtml(node.text || '');
 
     const alignClass = textAlign !== 'left' ? ` has-text-align-${textAlign}` : '';
     return `<!-- wp:heading ${attrs} -->\n<h${level} class="wp-block-heading${alignClass}">${text}</h${level}>\n<!-- /wp:heading -->`;
@@ -98,14 +115,14 @@ export class GutenbergCompiler {
     }
     const attrs = Object.keys(attrsObj).length > 0 ? ` ${JSON.stringify(attrsObj)}` : '';
     const alignClass = textAlign && textAlign !== 'left' ? ` has-text-align-${textAlign}` : '';
-    const text = node.text || '';
+    const text = this.escapeHtml(node.text || '');
 
     return `<!-- wp:paragraph${attrs} -->\n<p class="${alignClass.trim()}">${text}</p>\n<!-- /wp:paragraph -->`;
   }
 
   private serializeImage(node: IRNode): string {
-    const src = node.attributes?.src || '';
-    const alt = node.attributes?.alt || '';
+    const src = this.sanitizeUri(node.attributes?.src || '');
+    const alt = this.escapeHtml(node.attributes?.alt || '');
     const width = node.attributes?.width ? parseInt(node.attributes.width, 10) : undefined;
     const height = node.attributes?.height ? parseInt(node.attributes.height, 10) : undefined;
 
@@ -120,8 +137,8 @@ export class GutenbergCompiler {
   }
 
   private serializeButton(node: IRNode): string {
-    const href = node.attributes?.href || '#';
-    const text = node.text || 'Button';
+    const href = this.sanitizeUri(node.attributes?.href || '#');
+    const text = this.escapeHtml(node.text || 'Button');
 
     return `<!-- wp:buttons -->\n<div class="wp-block-buttons"><!-- wp:button -->\n<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="${href}">${text}</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->`;
   }
@@ -132,7 +149,7 @@ export class GutenbergCompiler {
     const tag = isOrdered ? 'ol' : 'ul';
 
     const items = (node.children || [])
-      .map(child => `<!-- wp:list-item -->\n<li>${child.text || ''}</li>\n<!-- /wp:list-item -->`)
+      .map(child => `<!-- wp:list-item -->\n<li>${this.escapeHtml(child.text || '')}</li>\n<!-- /wp:list-item -->`)
       .join('\n');
 
     return `<!-- ${blockName} -->\n<${tag} class="wp-block-list">\n${items}\n</${tag}>\n<!-- /wp:list -->`;

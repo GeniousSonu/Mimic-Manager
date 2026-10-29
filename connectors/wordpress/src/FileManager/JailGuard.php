@@ -133,7 +133,14 @@ class JailGuard
      */
     public function assertNotSensitive(string $filename): void
     {
-        $lower = strtolower($filename);
+        // Strip alternate data streams (e.g. file.php::$DATA or file.php:stream)
+        if (str_contains($filename, ':')) {
+            $filename = explode(':', $filename)[0];
+        }
+
+        // Strip trailing dots and whitespace
+        $normalizedFilename = rtrim($filename, ". \t\n\r\0\x0B");
+        $lower = strtolower($normalizedFilename);
 
         // Exact match
         if (in_array($lower, $this->sensitiveFiles, true)) {

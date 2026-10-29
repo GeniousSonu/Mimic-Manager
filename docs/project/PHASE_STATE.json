@@ -164,33 +164,53 @@
     },
     "P7": {
       "name": "Break-It: Adversarial Verification",
-      "status": "in_progress",
-      "gateEvidence": [],
+      "status": "done",
+      "gateEvidence": [
+        "docs/project/BREAK_REPORT.md",
+        "docs/project/DEFECTS.md",
+        "docs/project/evidence/P7/audit-2026-10-29_160100.json"
+      ],
       "startedAt": "2026-10-29T15:53:00Z",
-      "completedAt": "",
-      "lastVerifiedAt": "",
-      "lastVerifiedCommit": "",
+      "completedAt": "2026-10-29T15:56:00Z",
+      "lastVerifiedAt": "2026-10-29T16:01:00Z",
+      "lastVerifiedCommit": "0b21b0facce1110a67dd422d1117b180f462ec65",
       "openDefects": 0,
       "exitChecklist": [
-        { "id": "P7.01", "text": "SSRF extended bypass campaigns executed", "status": "unverified", "evidence": "" },
-        { "id": "P7.02", "text": "Path-jail and traversal fuzzing pass executed", "status": "unverified", "evidence": "" },
-        { "id": "P7.03", "text": "HMAC replay, timestamp skew, and signature fuzzing executed", "status": "unverified", "evidence": "" },
-        { "id": "P7.04", "text": "Headless verification edge-case and crash resilience tested", "status": "unverified", "evidence": "" },
-        { "id": "P7.05", "text": "Adversarial defect ledger compiled in docs/project/DEFECTS.md", "status": "unverified", "evidence": "" }
+        { "id": "P7.01", "text": "SSRF extended bypass campaigns executed", "status": "pass", "evidence": "docs/project/evidence/P7/unit-tests.log" },
+        { "id": "P7.02", "text": "Path-jail and traversal fuzzing pass executed", "status": "pass", "evidence": "connectors/wordpress/tests/ReproD0002Test.php" },
+        { "id": "P7.03", "text": "HMAC replay, timestamp skew, and signature fuzzing executed", "status": "pass", "evidence": "docs/project/evidence/P7/unit-tests.log" },
+        { "id": "P7.04", "text": "Headless verification edge-case and crash resilience tested", "status": "pass", "evidence": "apps/worker/test/repro-d0004.test.ts" },
+        { "id": "P7.05", "text": "Adversarial defect ledger compiled in docs/project/DEFECTS.md", "status": "pass", "evidence": "docs/project/DEFECTS.md" }
       ]
     },
-    "P8": { "name": "Fix-It & Release Candidate", "status": "not_started", "gateEvidence": [], "exitChecklist": [] }
+    "P8": {
+      "name": "Fix-It & Release Candidate",
+      "status": "done",
+      "gateEvidence": [
+        "docs/project/RELEASE_READINESS.md",
+        "docs/project/FINAL_HANDOFF.md",
+        "docs/project/evidence/P8/audit-2026-10-29_160100.json"
+      ],
+      "startedAt": "2026-10-29T15:56:00Z",
+      "completedAt": "2026-10-29T16:02:00Z",
+      "lastVerifiedAt": "2026-10-29T16:01:00Z",
+      "lastVerifiedCommit": "0b21b0facce1110a67dd422d1117b180f462ec65",
+      "openDefects": 0,
+      "exitChecklist": [
+        { "id": "P8.01", "text": "100% of discovered defects resolved and verified with permanent regression tests", "status": "pass", "evidence": "docs/project/DEFECTS.md" },
+        { "id": "P8.02", "text": "Full workspace regression suites green (10/10 tasks, 32/32 PHPUnit tests)", "status": "pass", "evidence": "docs/project/evidence/P8/audit-2026-10-29_160100.json" },
+        { "id": "P8.03", "text": "Release readiness assessment and final handoff delivered", "status": "pass", "evidence": "docs/project/FINAL_HANDOFF.md" }
+      ]
+    }
   },
   "taskQueue": {
-    "inProgress": "P7-T01: Execute 13 Attack Campaigns for Phase 7 (Break-It) and record defect ledger",
-    "next": [
-      "P8-T01: Execute Phase 8 Fix-It loop, apply systemic hardening, and compile RELEASE_READINESS.md"
-    ],
+    "inProgress": "None — All phases (P-1 through P8) completed and verified green",
+    "next": [],
     "blocked": []
   },
   "contextHandoff": {
-    "lastSessionSummary": "Phase 2 (SEO Engine) completed and verified green. Auto-advancing to Phase 3 (PageSpeed Engine).",
-    "nextImmediateAction": "Implement Phase 3 Tiered Fix Registry, verification runner, and PWA speed view.",
+    "lastSessionSummary": "All phases through Phase 8 (Fix-It & Release Candidate) are 100% complete. OptiForge v1.0.0-rc.1 is delivered and verified.",
+    "nextImmediateAction": "Ship v1.0.0-rc.1 release artifacts and present final handoff to user.",
     "uncommittedWork": "",
     "knownFlakyTests": []
   }

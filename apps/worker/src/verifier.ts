@@ -58,6 +58,28 @@ export class PreviewVerifier {
   ): VerificationResult {
     const jsErrors = telemetry.consoleErrors;
     const visualDiffRatio = telemetry.visualDiffRatio;
+    // Pre-flight check: Telemetry metric sanity (guard against NaN or corrupt bounds)
+    if (
+      !Number.isFinite(visualDiffRatio) ||
+      visualDiffRatio < 0 ||
+      !Number.isFinite(telemetry.metrics.lcpBeforeMs) ||
+      !Number.isFinite(telemetry.metrics.lcpAfterMs) ||
+      telemetry.metrics.lcpBeforeMs <= 0 ||
+      telemetry.metrics.lcpAfterMs <= 0
+    ) {
+      return {
+        passed: false,
+        fixId: target.fixId,
+        siteId: target.siteId,
+        jsErrors,
+        visualDiffRatio: Number.isFinite(visualDiffRatio) ? visualDiffRatio : 1.0,
+        revertTriggered: true,
+        revertReason: 'Corrupted or out-of-bounds telemetry metrics received (NaN or non-positive value)',
+        timestamp: new Date().toISOString(),
+        metrics: telemetry.metrics,
+      };
+    }
+
     let passed = true;
     let revertTriggered = false;
     let revertReason: string | undefined;
