@@ -1,0 +1,20 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/admin.php?page=mimic-manager",
+  "preferredVersions": {
+    "php": "8.2",
+    "wp": "6.7"
+  },
+  "steps": [
+    {
+      "step": "installPlugin",
+      "pluginZipFile": {
+        "resource": "wordpress.org/plugins",
+        "slug": "mimic-manager"
+      },
+      "options": {
+        "activate": true
+      }
+    }
+  ]
+}

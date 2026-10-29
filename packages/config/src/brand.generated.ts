@@ -5,12 +5,12 @@ export const BRAND = {
   "schemaVersion": 1,
   "product": {
     "name": "Mimic Manager",
-    "verified": false,
+    "verified": true,
     "slug": "mimic-manager",
     "snake": "mimic_manager",
     "pascal": "MimicManager",
     "constantPrefix": "MIMIC_MANAGER",
-    "shortName": "Mimic Manager",
+    "shortName": "Mimic",
     "tagline": "Optimize media, speed, and SEO for every site you manage, with proof and undo.",
     "description": "Free and Secure platform for image optimization, PageSpeed and SEO fixes, UI section replication, and visual file management, with a WordPress connector and a PWA command center.",
     "version": "1.0.0-rc.1"
@@ -20,8 +20,8 @@ export const BRAND = {
     "displayName": "SK Sahinur Islam",
     "role": "Creator and Lead Author",
     "website": "www.genioussonu.me",
-    "websiteVerified": false,
-    "websiteUrl": "https://www.genioussonu.me/plugin/mimic-manager"
+    "websiteVerified": true,
+    "websiteUrl": "https://www.genioussonu.me"
   },
   "owner": {
     "organization": "Wefik",
@@ -55,7 +55,7 @@ export const BRAND = {
     "wpOptionPrefix": "mimic_manager_",
     "wpHookPrefix": "mimic_manager/",
     "wpRestNamespace": "mimic-manager/v1",
-    "wpDbTablePrefix": "mmg_",
+    "wpDbTablePrefix": "mmgr_",
     "dockerImageBase": "wefik/mimic-manager",
     "envVarPrefix": "MIMIC_MANAGER_",
     "mongoDbName": "mimic_manager",

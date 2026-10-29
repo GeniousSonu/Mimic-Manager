@@ -34,20 +34,20 @@ if (isReleaseGate) {
   }
 }
 
-// 3. Legacy Name Scan
-console.log('[brand:check] Scanning codebase for forbidden legacy placeholders (OptiForge, optiforge, etc.)...');
+// 3. Legacy Name & Typo Scan (Addendum H)
+console.log('[brand:check] Scanning codebase for forbidden legacy placeholders and typos (OptiForge, Manger, genioussonu.em, etc.)...');
 
-const legacyTerms = ['OptiForge', 'optiforge', 'OPTIFORGE', 'optiforge_'];
 let legacyViolationsCount = 0;
 
 try {
-  // Use ripgrep or git grep to scan non-ignored source files
-  const grepCmd = `git grep -inE "OptiForge|optiforge|OPTIFORGE|optiforge_" -- ":!pnpm-lock.yaml" ":!scripts/brand/check.ts" ":!docs/architecture/adr/" ":!docs/project/SESSION_LOG.md" ":!docs/project/DECISIONS.md" || true`;
+  // Use git grep to scan non-ignored source files
+  const grepPattern = "OptiForge|optiforge|OPTIFORGE|optiforge_|Manger|manger|MANGER|mimic-manger|mimic_manger|MimicManger|genioussonu\\.em";
+  const grepCmd = `git grep -inE "${grepPattern}" -- ":!pnpm-lock.yaml" ":!scripts/brand/check.ts" ":!docs/architecture/adr/" ":!docs/project/SESSION_LOG.md" ":!docs/project/DECISIONS.md" || true`;
   const output = execSync(grepCmd, { cwd: ROOT_DIR, encoding: 'utf-8' }).trim();
 
   if (output.length > 0) {
     const lines = output.split('\n').filter(Boolean);
-    console.error(`[FAIL] Found ${lines.length} occurrences of forbidden legacy placeholder strings:`);
+    console.error(`[FAIL] Found ${lines.length} occurrences of forbidden legacy placeholder or typo strings:`);
     for (const line of lines.slice(0, 20)) {
       console.error(`  ${line}`);
     }

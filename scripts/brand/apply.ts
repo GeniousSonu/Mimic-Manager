@@ -128,41 +128,24 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 require_once __DIR__ . '/includes/Brand.php';
+
+// Bootstrap plugin lifecycle
+add_action('plugins_loaded', static function (): void {
+    Plugin::getInstance();
+});
 `;
 fs.writeFileSync(mainPluginFile, mainPluginContent, 'utf-8');
 console.log(`[brand:apply] Generated: connectors/wordpress/mimic-manager.php`);
 
-// 3c. Generate connectors/wordpress/readme.txt
+// 3c. Synchronize connectors/wordpress/readme.txt
 const readmeTxtFile = path.join(ROOT_DIR, 'connectors/wordpress/readme.txt');
-const readmeTxtContent = `=== ${brand.product.name} ===
-Contributors: wefik, genioussonu
-Donate link: ${brand.owner.website}
-Tags: performance, optimization, images, seo, speed
-Requires at least: 6.0
-Tested up to: 6.7
-Requires PHP: 8.0
-Stable tag: ${brand.product.version}
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
-
-${brand.product.tagline}
-
-== Description ==
-
-${brand.product.description}
-Created by ${brand.creator.displayName}. A ${brand.owner.organization} project.
-
-== External Services ==
-
-This plugin communicates with your self-hosted ${brand.product.name} backend API using mutual HMAC-SHA256 authentication for media optimization, PageSpeed audits, and UI section replication.
-Zero third-party telemetry. 100% data sovereignty.
-
-== Changelog ==
-
-= ${brand.product.version} =
-* Official ${brand.product.name} release.
-`;
-fs.writeFileSync(readmeTxtFile, readmeTxtContent, 'utf-8');
+if (fs.existsSync(readmeTxtFile)) {
+  let rContent = fs.readFileSync(readmeTxtFile, 'utf-8');
+  rContent = rContent.replace(/=== .+ ===/, `=== ${brand.product.name} ===`);
+  rContent = rContent.replace(/Stable tag: .+/i, `Stable tag: ${brand.product.version}`);
+  fs.writeFileSync(readmeTxtFile, rContent, 'utf-8');
+  console.log(`[brand:apply] Synchronized: connectors/wordpress/readme.txt`);
+}
 console.log(`[brand:apply] Generated: connectors/wordpress/readme.txt`);
 
 // 3d. Update apps/pwa/public/manifest.json

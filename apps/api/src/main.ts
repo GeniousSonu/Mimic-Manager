@@ -165,7 +165,7 @@ if (process.argv[1]?.endsWith('main.js') || process.argv[1]?.endsWith('main.ts')
     const isFreeTier =
       process.env['RENDER'] === 'true' ||
       process.env['IN_PROCESS_WORKER'] === 'true' ||
-      process.env['MIMIC_MANGER_RUN_WORKER_IN_API'] === 'true';
+      process.env['MIMIC_MANAGER_RUN_WORKER_IN_API'] === 'true';
 
     if (isFreeTier) {
       console.log(
@@ -177,12 +177,11 @@ if (process.argv[1]?.endsWith('main.js') || process.argv[1]?.endsWith('main.ts')
       );
     }
 
-    // In-process worker activation (handles both MIMIC_MANAGER_ and MIMIC_MANGER_ typo variants)
+    // In-process worker activation
     const runWorkerInProcess =
       process.env['IN_PROCESS_WORKER'] === 'true' ||
       process.env['RUN_IN_PROCESS_WORKER'] === 'true' ||
       process.env['MIMIC_MANAGER_RUN_WORKER_IN_API'] === 'true' ||
-      process.env['MIMIC_MANGER_RUN_WORKER_IN_API'] === 'true' ||
       process.env['RENDER'] === 'true';
 
     if (runWorkerInProcess) {

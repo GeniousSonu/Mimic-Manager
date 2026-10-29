@@ -1,0 +1,17 @@
+Website Reachability Check Evidence
+Timestamp: 2026-10-29T18:17:45Z
+
+Target 1: https://www.genioussonu.me
+Status: HTTP/2 200 OK
+Headers:
+accept-ranges: bytes
+access-control-allow-origin: *
+cache-control: public, max-age=0, must-revalidate
+
+Target 2: https://www.wefik.in
+Status: HTTP/2 200 OK
+Headers:
+content-type: text/html; charset=utf-8
+cache-control: public, max-age=0, must-revalidate
+
+Result: REACHABLE - websiteVerified set to true.

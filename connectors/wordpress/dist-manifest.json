@@ -1,0 +1,203 @@
+{
+  "plugin": "mimic-manager",
+  "version": "1.0.0-rc.1",
+  "builtAt": "2026-10-29T13:00:22.444Z",
+  "gitCommit": "f021084f7ba7a1d5fc17a1afe2b5b3bc8cc6661f",
+  "zipFile": "mimic-manager-1.0.0-rc.1.zip",
+  "zipSizeBytes": 49171,
+  "zipSizeMb": "0.05",
+  "sha256": "f6bbd5fc5e2528c81ae3f04ef463af2d9e27b73c7cddfd0972a1c800eab0a65e",
+  "fileCount": 38,
+  "files": [
+    {
+      "path": "assets/css/admin.css",
+      "size": 2699,
+      "sha256": "7ece8d117602f8814fe7a2421448a1bf316c410efb6d851b7b88e6ba97bc4b17"
+    },
+    {
+      "path": "assets/js/admin.js",
+      "size": 2214,
+      "sha256": "3a0af8352018e27553562e5e8d5811308ac8f4038d2831453684f470d22ff40d"
+    },
+    {
+      "path": "composer.json",
+      "size": 881,
+      "sha256": "22ba5e130e2d02493488d01085f23a2d4c53ff69ebc5364a21f1d26990522029"
+    },
+    {
+      "path": "includes/Brand.php",
+      "size": 956,
+      "sha256": "9540db9e1d94f2e77dc88d7c2cd7ccf0ddb82c667695f4d402b6e64e9fabce42"
+    },
+    {
+      "path": "mimic-manager.php",
+      "size": 1073,
+      "sha256": "9d5f0e18af4b476cfed2ff877206e25f6a13edda5b078d9657b52e120e5f7a01"
+    },
+    {
+      "path": "readme.txt",
+      "size": 4477,
+      "sha256": "c2f4e37e7e085b988166227dab4124f478ead530faa6b879d4cb513473a5e350"
+    },
+    {
+      "path": "src/FileManager/JailGuard.php",
+      "size": 5405,
+      "sha256": "0670dc7418259126e89c192360acbcea3c681de04b1c40598065c8384ad001c4"
+    },
+    {
+      "path": "src/FileManager/PhpAstLinter.php",
+      "size": 2483,
+      "sha256": "97ab6af1fff9eae4728cf5d03c76eafa7cad0be83ec60981a606076bf546b452"
+    },
+    {
+      "path": "src/FileManager/ShadowBackup.php",
+      "size": 2653,
+      "sha256": "aaaef876c67c2582fc6d319b59fc94f27c13978a00be0e4ebb4217b817db1e85"
+    },
+    {
+      "path": "src/Media/AttachmentHook.php",
+      "size": 1476,
+      "sha256": "91b1372dcaa4f140c1116a0864cac5ed4cc44f0911087c1e0741b507149323e3"
+    },
+    {
+      "path": "src/Media/LocalOptimizer.php",
+      "size": 4970,
+      "sha256": "b327e872565182672d61a6af200661ea002a3ee00e3f25b0ff60dbc9198053c8"
+    },
+    {
+      "path": "src/Media/PictureRewriter.php",
+      "size": 1977,
+      "sha256": "0cd27216f2d11c72bcd1e5945441ed4d8447d47acfa9850ad391c9193db47842"
+    },
+    {
+      "path": "src/Plugin.php",
+      "size": 13960,
+      "sha256": "630d0f2cf24f43abf9bf5e19eff429d36366cf54aa6a80296f91d6199a3a9e4c"
+    },
+    {
+      "path": "src/Security/HmacSigner.php",
+      "size": 4522,
+      "sha256": "78da0ac393d6d4041468df4c3650308a184761921d0d0ee76c697eb96e935568"
+    },
+    {
+      "path": "src/Seo/MetaSync.php",
+      "size": 3097,
+      "sha256": "ecb6bcfea79daeddfae0a71fd06bd710b35093a00ec6d813bfb30bcdb47f02e1"
+    },
+    {
+      "path": "src/Seo/SchemaFilter.php",
+      "size": 2696,
+      "sha256": "9f3adea9952cad3267bc5403fe3d3f9cb1d3603fee7d3b425b3f7ceaf4474e6e"
+    },
+    {
+      "path": "src/Speed/FixEngine.php",
+      "size": 10899,
+      "sha256": "2b28e6e8b791afdd64dabf43c78b6df9ac60c8a2d5e67671f07f5ae0b9ea6970"
+    },
+    {
+      "path": "uninstall.php",
+      "size": 1708,
+      "sha256": "fdedb4624793eefbc074ffde94b2d24d7a86283efbce797489830bfbd824dae1"
+    },
+    {
+      "path": "vendor/autoload.php",
+      "size": 748,
+      "sha256": "5544d7c1b1bc8d6fd91f5d11063eaec5dbfa12a8ce72094e5f4248ace8c6477d"
+    },
+    {
+      "path": "vendor/bin/.phpunit.result.cache",
+      "size": 453,
+      "sha256": "7cdb41f2ee56adc8571515b9ee452cec13e0f288b0ed03ae20d76d1e22d95947"
+    },
+    {
+      "path": "vendor/composer/ClassLoader.php",
+      "size": 16378,
+      "sha256": "d4b2313e562edf942838ec316d983c1a3459ca67da3e5658e861200b0b3693c2"
+    },
+    {
+      "path": "vendor/composer/InstalledVersions.php",
+      "size": 17395,
+      "sha256": "1e4525198301d1ed1f87ac3df2a8555a6f139f8df30a703d0b775a61963c96e4"
+    },
+    {
+      "path": "vendor/composer/LICENSE",
+      "size": 1070,
+      "sha256": "c8cce4b6b9729f264ffdf9296d505d63432497feeed1f586d1902b942197e024"
+    },
+    {
+      "path": "vendor/composer/autoload_classmap.php",
+      "size": 1233,
+      "sha256": "c0a9de28fc1913f227608f4902a22c005103fa16de129bde90056ebef5e5b6f3"
+    },
+    {
+      "path": "vendor/composer/autoload_namespaces.php",
+      "size": 139,
+      "sha256": "ede505407590638a435137f4e060136f1008de79fc169b3de9793423b0cea38c"
+    },
+    {
+      "path": "vendor/composer/autoload_psr4.php",
+      "size": 262,
+      "sha256": "e7b3c99aa86b8c7107936bb500779a510145f90e55bfb8d6b3693cbb02764522"
+    },
+    {
+      "path": "vendor/composer/autoload_real.php",
+      "size": 1137,
+      "sha256": "889ea66dc27d4eb8905ae0c7525f5b169e3ff1c074e9e18eca3b4f9b4f7c9998"
+    },
+    {
+      "path": "vendor/composer/autoload_static.php",
+      "size": 2413,
+      "sha256": "d9b08eba63bf486a299dc7ca2f7ccfccfeec3d12aadebc7b302613da04c17f1d"
+    },
+    {
+      "path": "vendor/composer/installed.json",
+      "size": 70,
+      "sha256": "ce409de85451ae1b66aca736f5cafa2e76ad3dbc7f0aed6d79cdb84e76be46bb"
+    },
+    {
+      "path": "vendor/composer/installed.php",
+      "size": 773,
+      "sha256": "1b75aa86d7d982895d830807256d43e33bf3b1982e83762d870ec9b3f307d881"
+    },
+    {
+      "path": "vendor/composer/platform_check.php",
+      "size": 917,
+      "sha256": "6d589b8eadd21a66f4c7a64a724f73dc50fd148fedcc87982712191b84dc9cf0"
+    },
+    {
+      "path": "views/about.php",
+      "size": 2139,
+      "sha256": "6ecd45c95cb6379b5596f6ee59b0b282362c4f2f1470e8a13cc150741e12c8bd"
+    },
+    {
+      "path": "views/dashboard.php",
+      "size": 3203,
+      "sha256": "1a3b2d838c9199ac3778d32ce0053fd712f79c78a74dbe1171ba563820089326"
+    },
+    {
+      "path": "views/files.php",
+      "size": 1963,
+      "sha256": "14ef2ced870d2717d34bccc549d3cb7b180ccaf65380d4b17773a8dde31a72c7"
+    },
+    {
+      "path": "views/media.php",
+      "size": 2867,
+      "sha256": "13e5b30d12876e3662a89c7bbb4855b2ff1e4a518843f831a630e6f25f8ca1b4"
+    },
+    {
+      "path": "views/seo.php",
+      "size": 1713,
+      "sha256": "67a198e32437194b7b61c20bb02998c1959bdf4de3657a1fd47e641b90a32aeb"
+    },
+    {
+      "path": "views/settings.php",
+      "size": 2780,
+      "sha256": "42c8bc8a3e9f05e8041581d25e2479b137e50822045c96b90bce9bb6cf06b23a"
+    },
+    {
+      "path": "views/speed.php",
+      "size": 2484,
+      "sha256": "794d3c1aaa506e46c33d6480e7d59cdda636cea6a97e279151bb7975597189e3"
+    }
+  ]
+}

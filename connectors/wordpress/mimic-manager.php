@@ -7,7 +7,7 @@
  * Requires at least: 6.0
  * Requires PHP: 8.0
  * Author: SK Sahinur Islam
- * Author URI: https://www.genioussonu.me/plugin/mimic-manager
+ * Author URI: https://www.genioussonu.me
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: mimic-manager
@@ -27,3 +27,8 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
 }
 require_once __DIR__ . '/includes/Brand.php';
+
+// Bootstrap plugin lifecycle
+add_action('plugins_loaded', static function (): void {
+    Plugin::getInstance();
+});

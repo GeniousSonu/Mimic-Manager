@@ -62,7 +62,7 @@ When displaying the Mimic Manager mark alongside Wefik:
 
 | DO | DON'T |
 |---|---|
-| Use "Mimic Manager" with a space in documentation and UI | Never spell as "MimicManger" (typo) or "MimicManager" in prose |
+| Use "Mimic Manager" with a space in documentation and UI | Never spell with typos or as a single unspaced word in body prose |
 | Maintain 50% clear space around the vector mark | Never skew, rotate, or apply dropshadows to the SVG mark |
 | Credit Wefik and SK Sahinur Islam in attribution footers | Never claim individual ownership over official release binaries |
 | Use `pnpm brand:rename "<New Name>"` for agency white-label | Never manually edit derived brand identifiers across codebase |

@@ -28,8 +28,6 @@ services:
         value: "true"
       - key: MIMIC_MANAGER_RUN_WORKER_IN_API
         value: "true"
-      - key: MIMIC_MANGER_RUN_WORKER_IN_API
-        value: "true"
       - key: STORAGE_DRIVER
         value: local
       - key: STORAGE_PATH
@@ -39,8 +37,6 @@ services:
       - key: OPENAI_BASE_URL
         value: https://generativelanguage.googleapis.com/v1beta/openai
       - key: MIMIC_MANAGER_AI_BASE_URL
-        value: https://generativelanguage.googleapis.com/v1beta/openai
-      - key: MIMIC_MANGER_AI_BASE_URL
         value: https://generativelanguage.googleapis.com/v1beta/openai
       - key: GEMINI_MODEL
         value: gemini-flash-latest
@@ -63,8 +59,6 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: MIMIC_MANAGER_AI_API_KEY
-        sync: false
-      - key: MIMIC_MANGER_AI_API_KEY
         sync: false
       - key: QSTASH_TOKEN
         sync: false

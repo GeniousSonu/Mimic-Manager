@@ -1,6 +1,6 @@
 {
   "name": "Mimic Manager Command Center",
-  "short_name": "Mimic Manager",
+  "short_name": "Mimic",
   "description": "Free and Secure platform for image optimization, PageSpeed and SEO fixes, UI section replication, and visual file management, with a WordPress connector and a PWA command center.",
   "start_url": "/",
   "display": "standalone",
