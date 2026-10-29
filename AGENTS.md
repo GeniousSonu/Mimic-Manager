@@ -9,7 +9,7 @@
 
 ## 1. Project Summary
 
-**OptiForge** (working title *Mimic Manager*) is an open-source, self-hostable, headless site optimization platform. It combines a high-performance TypeScript backend (NestJS/Fastify, BullMQ, Redis, MongoDB, Sharp, Playwright) and a modern dark-first PWA command center with thin CMS connectors (WordPress first). Core pillars: (1) Media optimization, (2) Tiered & verified PageSpeed fixes with auto-revert, (3) Plugin-aware SEO gap fill, (4) UI Replicator generating clean Gutenberg blocks from multi-viewport IR, (5) Visual File Manager with strict jailed sandbox and syntax-checked editing. 100% Free and Open Source (AGPL-3.0 backend/PWA, GPL-2.0+ WordPress connector).
+**Mimic Manager** is an open-source, self-hostable, headless site optimization platform. It combines a high-performance TypeScript backend (NestJS/Fastify, BullMQ, Redis, MongoDB, Sharp, Playwright) and a modern dark-first PWA command center with thin CMS connectors (WordPress first). Core pillars: (1) Media optimization, (2) Tiered & verified PageSpeed fixes with auto-revert, (3) Plugin-aware SEO gap fill, (4) UI Replicator generating clean Gutenberg blocks from multi-viewport IR, (5) Visual File Manager with strict jailed sandbox and syntax-checked editing. 100% Free and Open Source (AGPL-3.0 backend/PWA, GPL-2.0+ WordPress connector).
 
 ---
 

@@ -1,4 +1,4 @@
-# OptiForge Observability & Telemetry Architecture
+# Mimic Manager Observability & Telemetry Architecture
 
 **Status:** ACTIVE  
 **Owner-persona:** SRE & Reliability Engineer  
@@ -9,8 +9,8 @@
 ---
 
 ## 1. Overview & Privacy-First Telemetry
-OptiForge adheres to strict privacy:
-- **Zero Phoning Home:** By default, OptiForge transmits zero telemetry, usage statistics, or crash reports to external servers.
+Mimic Manager adheres to strict privacy:
+- **Zero Phoning Home:** By default, Mimic Manager transmits zero telemetry, usage statistics, or crash reports to external servers.
 - **Local Metrics Only:** Health metrics, queue latencies, and conversion stats are aggregated locally in MongoDB and visualized in the Command Center PWA.
 
 ---
@@ -25,10 +25,10 @@ All backend services (API, Worker, Scheduler) emit structured JSON logs using Pi
 
 ## 3. Prometheus Metrics & Health Probes
 The API exposes an unauthenticated (or token-protected) `/metrics` endpoint formatted for Prometheus scraping:
-- `optiforge_queue_depth{queue="media_fast"}`
-- `optiforge_worker_processing_seconds_bucket`
-- `optiforge_image_bytes_saved_total`
-- `optiforge_circuit_breaker_state{site_id="..."}`
+- `mimic_manager_queue_depth{queue="media_fast"}`
+- `mimic_manager_worker_processing_seconds_bucket`
+- `mimic_manager_image_bytes_saved_total`
+- `mimic_manager_circuit_breaker_state{site_id="..."}`
 
 ---
 

@@ -1,4 +1,4 @@
-# OptiForge WordPress Connector Architecture
+# Mimic Manager WordPress Connector Architecture
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead WordPress Architect & Core Contributor  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview & Core Philosophy
-The OptiForge WordPress connector is a thin, robust bridge between WordPress core and the OptiForge centralized optimization hub.
+The Mimic Manager WordPress connector is a thin, robust bridge between WordPress core and the Mimic Manager centralized optimization hub.
 
 ### Core Tenets:
 1. **Never Break the Front-End (Zero WSOD):** Every hook, filter, and callback is wrapped in `try / catch (\Throwable $e)` with a circuit breaker.
@@ -22,7 +22,7 @@ The OptiForge WordPress connector is a thin, robust bridge between WordPress cor
 ## 2. Directory Structure & Namespace
 ```text
 connectors/wordpress/
-├── optiforge.php                  # Main plugin entry point (GPL-2.0-or-later)
+├── mimic-manager.php                  # Main plugin entry point (GPL-2.0-or-later)
 ├── src/
 │   ├── Autoloader.php             # Zero-dependency PSR-4 autoloader
 │   ├── Core/
@@ -49,10 +49,10 @@ connectors/wordpress/
 ---
 
 ## 3. Circuit Breaker Mechanism
-If any OptiForge operation causes an uncaught fatal exception or exceeds a 3-second execution timeout 5 consecutive times, the `CircuitBreaker` trips:
+If any Mimic Manager operation causes an uncaught fatal exception or exceeds a 3-second execution timeout 5 consecutive times, the `CircuitBreaker` trips:
 - Front-end rewrites (<picture> tags, asset defers) immediately deactivate to preserve front-end availability.
 - A persistent warning banner appears in wp-admin for administrators.
-- The incident is logged into `wp_optiforge_changelog`.
+- The incident is logged into `wp_mimic_manager_changelog`.
 
 ---
 

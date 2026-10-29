@@ -1,4 +1,4 @@
-# OptiForge Phase Ledger (Progress State)
+# Mimic Manager Phase Ledger (Progress State)
 
 **Authoritative JSON Source:** [`docs/project/PHASE_STATE.json`](file:///home/dayshift/Pictures/Mimic%20Manager/docs/project/PHASE_STATE.json)  
 **Run Mode:** `continue-all`  

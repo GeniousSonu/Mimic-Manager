@@ -1,6 +1,6 @@
 # Support & Community Resources
 
-Thank you for using OptiForge!
+Thank you for using Mimic Manager!
 
 ---
 
@@ -15,4 +15,5 @@ Please check our comprehensive documentation before asking for support:
 ## 2. Channels
 - **GitHub Issues:** Use for bug reports and feature requests with clear reproduction steps.
 - **GitHub Discussions:** Use for architecture discussions, show-and-tell, and self-hosting advice.
-- **Security Vulnerabilities:** Email `security@optiforge.org` directly per [SECURITY.md](file:///home/dayshift/Pictures/Mimic%20Manager/SECURITY.md).
+- **Support Contact:** Reach Wefik at `support@wefik.in` (https://www.wefik.in).
+- **Security Vulnerabilities:** Email `security@wefik.in` directly per [SECURITY.md](file:///home/dayshift/Pictures/Mimic%20Manager/SECURITY.md).

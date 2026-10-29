@@ -1,3 +1,4 @@
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | AGPL-3.0-or-later */
 import tokens from '../tokens/tokens.json' with { type: 'json' };
 
 function parseHex(hex: string): [number, number, number] {
@@ -106,7 +107,7 @@ export function runContrastAudit(): ContrastAuditResult[] {
 
 // Run if called directly
 if (process.argv[1]?.endsWith('check-contrast.ts')) {
-  console.log('Running OptiForge Design Tokens Contrast Audit...\n');
+  console.log('Running Mimic Manager Design Tokens Contrast Audit...\n');
   const results = runContrastAudit();
   let failures = 0;
 

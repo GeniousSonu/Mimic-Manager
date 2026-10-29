@@ -1,4 +1,4 @@
-# OptiForge Storage & File Pipeline Architecture
+# Mimic Manager Storage & File Pipeline Architecture
 
 **Status:** ACTIVE  
 **Owner-persona:** Storage Architect & Senior Backend Engineer  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview
-OptiForge manages three distinct classes of storage:
+Mimic Manager manages three distinct classes of storage:
 1. **Transient Media Cache:** Short-lived buffers during compression and conversion.
 2. **Persistent Artifact Store:** Audit reports, DOM snapshots, and diff screenshots.
 3. **Connector Shadow Backups:** Local original copies stored on the connected CMS server.
@@ -30,14 +30,14 @@ export interface StorageDriver {
 ```
 
 ### Supported Drivers:
-- **Local Filesystem Driver:** Default for single-node Docker Compose. Stores artifacts in `/var/optiforge/storage` with directory sharding (`aa/bb/aabb...`).
+- **Local Filesystem Driver:** Default for single-node Docker Compose. Stores artifacts in `/var/mimic-manager/storage` with directory sharding (`aa/bb/aabb...`).
 - **S3 / MinIO Compatible Driver:** Used for distributed multi-node deployments. Supports AWS S3, Cloudflare R2, MinIO, and Wasabi.
 
 ---
 
 ## 3. Original File Retention & Immutability
-- **Keep Originals Policy:** OptiForge NEVER overwrites or destroys an original image unless the site administrator explicitly triggers "Prune Originals" with typed confirmation.
-- **Original Path Naming:** WordPress originals are renamed with `.orig` suffix or archived into `wp-content/uploads/optiforge-originals/` with root permissions preserved.
+- **Keep Originals Policy:** Mimic Manager NEVER overwrites or destroys an original image unless the site administrator explicitly triggers "Prune Originals" with typed confirmation.
+- **Original Path Naming:** WordPress originals are renamed with `.orig` suffix or archived into `wp-content/uploads/mimic-manager-originals/` with root permissions preserved.
 
 ---
 
@@ -52,4 +52,4 @@ export interface StorageDriver {
 | Reviewer Persona | Verdict | Findings & Mitigations |
 | :--- | :--- | :--- |
 | **Storage Architect** | APPROVED | Two-character sharding (`ab/cd/abcdef...`) prevents Linux ext4 inode exhaustion in the local storage driver. |
-| **Security Engineer** | APPROVED | Confirmed strict path sanitization on all storage keys to prevent path traversal outside `/var/optiforge/storage`. |
+| **Security Engineer** | APPROVED | Confirmed strict path sanitization on all storage keys to prevent path traversal outside `/var/mimic-manager/storage`. |

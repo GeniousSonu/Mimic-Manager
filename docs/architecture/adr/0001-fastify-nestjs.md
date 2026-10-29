@@ -8,7 +8,7 @@
 ---
 
 ## Context
-OptiForge's API gateway must handle both high-frequency REST operations (queue status, audits, site handshakes) and heavy multi-megabyte binary image streaming without thread starvation or memory leaks. We required a robust modular architecture with clean dependency injection while achieving maximum raw throughput.
+Mimic Manager's API gateway must handle both high-frequency REST operations (queue status, audits, site handshakes) and heavy multi-megabyte binary image streaming without thread starvation or memory leaks. We required a robust modular architecture with clean dependency injection while achieving maximum raw throughput.
 
 ---
 

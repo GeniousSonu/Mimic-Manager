@@ -1,4 +1,4 @@
-# OptiForge Coding Standards & Style Conventions
+# Mimic Manager Coding Standards & Style Conventions
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Software Architect & Quality Auditor  

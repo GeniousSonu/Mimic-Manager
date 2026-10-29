@@ -8,12 +8,12 @@
 ---
 
 ## Context
-OptiForge must fetch remote web pages and image assets during audits and UI Replicator crawls. Hostile web pages can attempt Server-Side Request Forgery (SSRF) to pivot into internal cloud metadata endpoints (`169.254.169.254`), container interfaces, or local network databases. Naive URL validation is vulnerable to DNS Rebinding (Time-of-Check to Time-of-Use).
+Mimic Manager must fetch remote web pages and image assets during audits and UI Replicator crawls. Hostile web pages can attempt Server-Side Request Forgery (SSRF) to pivot into internal cloud metadata endpoints (`169.254.169.254`), container interfaces, or local network databases. Naive URL validation is vulnerable to DNS Rebinding (Time-of-Check to Time-of-Use).
 
 ---
 
 ## Decision
-We implement a dedicated `@optiforge/ssrf-guard` package providing **pre-resolution IP validation and custom socket-level DNS pinning**. The HTTP connection is pinned directly to the validated IP address, completely preventing DNS rebinding.
+We implement a dedicated `@mimic-manager/ssrf-guard` package providing **pre-resolution IP validation and custom socket-level DNS pinning**. The HTTP connection is pinned directly to the validated IP address, completely preventing DNS rebinding.
 
 ---
 

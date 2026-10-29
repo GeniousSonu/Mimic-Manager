@@ -1,14 +1,15 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\FileManager;
+namespace Wefik\MimicManager\FileManager;
 
 use ParseError;
 use Throwable;
 
 /**
- * OptiForge PHP Syntax & AST Linter.
+ * Mimic Manager PHP Syntax & AST Linter.
  * 
  * Pre-screens PHP code before saving to disk to prevent syntax errors and WSOD.
  */

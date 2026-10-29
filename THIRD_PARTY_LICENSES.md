@@ -1,6 +1,6 @@
 # Third-Party Open Source Licenses
 
-The following open-source libraries and components are used within OptiForge:
+The following open-source libraries and components are used within Mimic Manager (a Wefik project, created by SK Sahinur Islam):
 
 | Dependency | License | Primary Purpose | Link |
 |---|---|---|---|
@@ -17,4 +17,4 @@ The following open-source libraries and components are used within OptiForge:
 | **Inter Variable Font**| OFL-1.1 | Self-hosted modern UI typography | https://github.com/rsms/inter |
 | **JetBrains Mono** | OFL-1.1 | Self-hosted monospaced code typography | https://github.com/JetBrains/JetBrainsMono |
 
-All third-party licenses are compatible with AGPL-3.0-only for the core server and GPL-2.0-or-later for the WordPress plugin.
+All third-party licenses are compatible with AGPL-3.0-or-later for the core server and GPL-2.0-or-later for the WordPress plugin.

@@ -1,12 +1,13 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\Tests;
+namespace Wefik\MimicManager\Tests;
 
 use PHPUnit\Framework\TestCase;
-use OptiForge\Media\PictureRewriter;
-use OptiForge\Media\AttachmentHook;
+use Wefik\MimicManager\Media\PictureRewriter;
+use Wefik\MimicManager\Media\AttachmentHook;
 
 final class MediaTest extends TestCase {
     private PictureRewriter $rewriter;
@@ -45,8 +46,8 @@ final class MediaTest extends TestCase {
 
         $updated = $this->hook->handleAttachmentMetadata($metadata, 42);
 
-        $this->assertSame('pending', $updated['optiforge_status']);
-        $this->assertSame('2026/10/banner.jpg', $updated['optiforge_original']);
+        $this->assertSame('pending', $updated['mimic_manager_status']);
+        $this->assertSame('2026/10/banner.jpg', $updated['mimic_manager_original']);
     }
 
     public function testAttachmentHookIgnoresUnsupportedMime(): void {
@@ -56,6 +57,6 @@ final class MediaTest extends TestCase {
         ];
 
         $updated = $this->hook->handleAttachmentMetadata($metadata, 43);
-        $this->assertArrayNotHasKey('optiforge_status', $updated);
+        $this->assertArrayNotHasKey('mimic_manager_status', $updated);
     }
 }

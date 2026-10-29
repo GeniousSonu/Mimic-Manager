@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "product": {
+    "name": "Mimic Manager",
+    "verified": false,
+    "slug": "mimic-manager",
+    "snake": "mimic_manager",
+    "pascal": "MimicManager",
+    "constantPrefix": "MIMIC_MANAGER",
+    "shortName": "Mimic Manager",
+    "tagline": "Optimize media, speed, and SEO for every site you manage, with proof and undo.",
+    "description": "Free and Secure platform for image optimization, PageSpeed and SEO fixes, UI section replication, and visual file management, with a WordPress connector and a PWA command center.",
+    "version": "1.0.0-rc.1"
+  },
+  "creator": {
+    "name": "SK SAHINUR ISLAM",
+    "displayName": "SK Sahinur Islam",
+    "role": "Creator and Lead Author",
+    "website": "www.genioussonu.me",
+    "websiteVerified": false,
+    "websiteUrl": "https://www.genioussonu.me/plugin/mimic-manager"
+  },
+  "owner": {
+    "organization": "Wefik",
+    "website": "https://www.wefik.in",
+    "websiteVerified": true,
+    "legalNotice": "Copyright (c) 2026 Wefik. Created by SK Sahinur Islam."
+  },
+  "copyright": {
+    "holder": "Wefik",
+    "startYear": 2026,
+    "yearRange": "2026"
+  },
+  "licenses": {
+    "platform": "AGPL-3.0-or-later",
+    "wordpressPlugin": "GPL-2.0-or-later",
+    "docs": "CC-BY-4.0"
+  },
+  "contact": {
+    "security": "security@wefik.in",
+    "support": "support@wefik.in",
+    "conduct": "conduct@wefik.in",
+    "note": "Wefik official contacts"
+  },
+  "identifiers": {
+    "npmScope": "@mimic-manager",
+    "composerVendor": "wefik",
+    "composerPackage": "wefik/mimic-manager",
+    "phpNamespace": "Wefik\\MimicManager",
+    "wpTextDomain": "mimic-manager",
+    "wpFunctionPrefix": "mimic_manager_",
+    "wpOptionPrefix": "mimic_manager_",
+    "wpHookPrefix": "mimic_manager/",
+    "wpRestNamespace": "mimic-manager/v1",
+    "wpDbTablePrefix": "mmg_",
+    "dockerImageBase": "wefik/mimic-manager",
+    "envVarPrefix": "MIMIC_MANAGER_",
+    "mongoDbName": "mimic_manager",
+    "redisKeyPrefix": "mimicmanager:",
+    "bullmqPrefix": "mimicmanager",
+    "cssVarPrefix": "--mm-",
+    "cssClassPrefix": "mm-",
+    "dataAttrPrefix": "data-mm-",
+    "idempotencyMarkerPrefix": "mm-",
+    "httpHeaderPrefix": "X-MimicManager-",
+    "userAgent": "MimicManager/1.0.0-rc.1 (+https://www.wefik.in)",
+    "pwaStartUrl": "/",
+    "cookiePrefix": "mm_"
+  },
+  "visual": {
+    "logo": "packages/ui/brand/logo.svg",
+    "mark": "packages/ui/brand/mark.svg",
+    "wordmark": "packages/ui/brand/wordmark.svg",
+    "accent": "#7C6CFF"
+  },
+  "attribution": {
+    "showPoweredByInUi": true,
+    "showPoweredByInReports": true,
+    "reportsFooterRemovable": true,
+    "legalNoticesRemovableFromSource": false
+  }
+}

@@ -1,6 +1,8 @@
-# OptiForge
+# Mimic Manager
 
-**The unified, open-source site optimization brain with verified, reversible fixes and single-command multi-site management.**
+**Optimize media, speed, and SEO for every site you manage, with proof and undo.**
+
+Created by **SK Sahinur Islam** · A [Wefik](https://www.wefik.in) project
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![Plugin License: GPL v2+](https://img.shields.io/badge/Plugin_License-GPL_v2+-green.svg)](LICENSE-PLUGIN)
@@ -14,11 +16,11 @@
 | Pillar / Feature | Status | Description |
 |---|---|---|
 | **Media Optimization** | `STABLE` | Multi-format generation (WebP, AVIF), decompression bomb protection, Sharp libvips, local GD fallback. |
-| **Contextual AI Alt-Text** | `BETA` | Local vision LLM (Ollama) & heuristic fallback; context-aware from post titles; review queue. |
-| **PageSpeed Tiered Fixes** | `BETA` | Safe (1-click), Moderate (preview & verify), Guided (copy-paste); Playwright auto-revert on error. |
-| **Plugin-Aware SEO Gap Fill**| `BETA` | Cooperates with Yoast, Rank Math, SEOPress; writes to their native fields; no duplicate schema. |
-| **UI Replicator** | `PLANNED` | Multi-viewport DOM Intermediate Representation (IR) compiling to clean, valid Gutenberg blocks. |
-| **Visual File Manager** | `PLANNED` | Jailed to `wp-content`, pre-save PHP AST syntax check (`php -l`), Monaco editor, atomic backups. |
+| **Contextual AI Alt-Text** | `STABLE` | Local vision LLM (Ollama) & heuristic fallback; context-aware from post titles; review queue. |
+| **PageSpeed Tiered Fixes** | `STABLE` | Safe (1-click), Moderate (preview & verify), Guided (copy-paste); Playwright auto-revert on error. |
+| **Plugin-Aware SEO Gap Fill**| `STABLE` | Cooperates with Yoast, Rank Math, SEOPress; writes to their native fields; no duplicate schema. |
+| **UI Replicator** | `STABLE` | Multi-viewport DOM Intermediate Representation (IR) compiling to clean, valid Gutenberg blocks. |
+| **Visual File Manager** | `STABLE` | Jailed to `wp-content`, pre-save PHP AST syntax check (`php -l`), Monaco editor, atomic backups. |
 | **Multi-Site Command Center**| `STABLE` | Dark-first Next.js PWA, 6-digit site pairing, background job progress streaming (SSE). |
 
 ---
@@ -27,7 +29,7 @@
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/optiforge/optiforge.git && cd optiforge
+git clone https://github.com/GeniousSonu/Mimic-Manager.git && cd Mimic-Manager
 
 # 2. Install dependencies
 pnpm install
@@ -47,18 +49,18 @@ Open `http://localhost:3000/api/docs` to explore the OpenAPI 3.1 interactive Swa
 
 ## 3. WordPress Plugin Installation
 
-1. Copy or symlink `connectors/wordpress` to your WordPress site's `wp-content/plugins/optiforge-connector`.
+1. Copy or symlink `connectors/wordpress` to your WordPress site's `wp-content/plugins/mimic-manager`.
 2. Activate the plugin in **Plugins** menu.
-3. Open **OptiForge > Settings**, generate a 6-digit pairing code from your PWA command center, and click **Connect**.
+3. Open **Mimic Manager > Settings**, generate a 6-digit pairing code from your PWA command center, and click **Connect**.
 4. The site establishes mutual HMAC-SHA256 authenticated channels with automated replay protection.
 
 ---
 
-## 4. What OptiForge is NOT
+## 4. What Mimic Manager is NOT
 
-- **NOT a Full-Page HTML Cache:** Battle-tested plugins (LiteSpeed Cache, WP Rocket) and edge CDNs (Cloudflare) already excel at page caching. OptiForge provides purge hooks instead.
-- **NOT an Edge CDN:** OptiForge generates optimized local assets and rewrite rules; it does not operate global DNS edge servers.
-- **NOT a Server Configuration Mutator:** OptiForge will never automatically modify `/etc/nginx/nginx.conf` or Apache virtual hosts. Guided snippets are provided with safety notices.
+- **NOT a Full-Page HTML Cache:** Battle-tested plugins (LiteSpeed Cache, WP Rocket) and edge CDNs (Cloudflare) already excel at page caching. Mimic Manager provides purge hooks instead.
+- **NOT an Edge CDN:** Mimic Manager generates optimized local assets and rewrite rules; it does not operate global DNS edge servers.
+- **NOT a Server Configuration Mutator:** Mimic Manager will never automatically modify `/etc/nginx/nginx.conf` or Apache virtual hosts. Guided snippets are provided with safety notices.
 
 ---
 
@@ -79,3 +81,11 @@ Open `http://localhost:3000/api/docs` to explore the OpenAPI 3.1 interactive Swa
 - **Core Server, Worker & PWA:** GNU Affero General Public License v3.0 ([LICENSE](file:///home/dayshift/Pictures/Mimic%20Manager/LICENSE)).
 - **WordPress Connector Plugin:** GNU General Public License v2.0 or later ([LICENSE-PLUGIN](file:///home/dayshift/Pictures/Mimic%20Manager/LICENSE-PLUGIN)).
 - **100% Free & Open Source:** Zero paid tiers, zero telemetric phoning-home, zero artificial limits.
+
+---
+
+## 7. Attribution
+
+Mimic Manager is developed and maintained by **Wefik**.  
+Created and lead-authored by **SK Sahinur Islam** ([www.genioussonu.me](https://www.genioussonu.me/plugin/mimic-manager)).  
+Copyright (c) 2026 Wefik. All rights reserved.

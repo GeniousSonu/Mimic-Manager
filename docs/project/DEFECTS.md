@@ -1,4 +1,4 @@
-# OptiForge Defect Ledger (Phase 7 Break-It)
+# Mimic Manager Defect Ledger (Phase 7 Break-It)
 
 **Total Findings:** 4  
 **Severity Breakdown:** Critical: 0 | High: 3 | Medium: 1 | Low: 0  

@@ -1,4 +1,4 @@
-# OptiForge Data Model & Persistence Specification
+# Mimic Manager Data Model & Persistence Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Database Architect & Senior Backend Engineer  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview & Purpose
-This document defines the single source of truth for all data stored across the OptiForge platform. It encompasses both the centralized backend data store (MongoDB 7 / PostgreSQL hybrid) and the WordPress connector local database tables.
+This document defines the single source of truth for all data stored across the Mimic Manager platform. It encompasses both the centralized backend data store (MongoDB 7 / PostgreSQL hybrid) and the WordPress connector local database tables.
 
 ### How to Read This Document
 - Section 2 defines the Entity-Relationship (ER) model across centralized and distributed domains.
@@ -45,7 +45,7 @@ erDiagram
 ## 3. Centralized Store: MongoDB Collections
 
 ### 3.1 Collection: `sites`
-Primary registry of paired websites managed by the OptiForge instance.
+Primary registry of paired websites managed by the Mimic Manager instance.
 
 | Field Name | Type | Required | Index / Constraint | TTL | PII | Encryption | Description |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -108,11 +108,11 @@ Stores historical PageSpeed, SEO, and accessibility audit results.
 
 The WordPress connector uses custom tables for high-frequency logs and atomic rollback indexes, created and upgraded via `dbDelta()`.
 
-### 4.1 Table: `wp_optiforge_changelog`
+### 4.1 Table: `wp_mimic_manager_changelog`
 Records every mutation performed by the connector (speed tweaks, metadata updates, code injections) with exact pre-mutation state for 1-click rollback.
 
 ```sql
-CREATE TABLE {$wpdb->prefix}optiforge_changelog (
+CREATE TABLE {$wpdb->prefix}mimic_manager_changelog (
     id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
     action_id varchar(64) NOT NULL,
     fix_id varchar(64) NOT NULL,
@@ -135,11 +135,11 @@ CREATE TABLE {$wpdb->prefix}optiforge_changelog (
 
 ---
 
-### 4.2 Table: `wp_optiforge_job_map`
+### 4.2 Table: `wp_mimic_manager_job_map`
 Maintains mapping between backend BullMQ task IDs and local Action Scheduler job IDs for idempotency and pull synchronization.
 
 ```sql
-CREATE TABLE {$wpdb->prefix}optiforge_job_map (
+CREATE TABLE {$wpdb->prefix}mimic_manager_job_map (
     id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
     remote_job_id varchar(64) NOT NULL,
     local_action_id bigint(20) unsigned NOT NULL,
@@ -159,11 +159,11 @@ CREATE TABLE {$wpdb->prefix}optiforge_job_map (
 
 ---
 
-### 4.3 Table: `wp_optiforge_backups`
+### 4.3 Table: `wp_mimic_manager_backups`
 Tracks filesystem shadow backups generated prior to Visual File Manager edits.
 
 ```sql
-CREATE TABLE {$wpdb->prefix}optiforge_backups (
+CREATE TABLE {$wpdb->prefix}mimic_manager_backups (
     id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
     backup_id varchar(64) NOT NULL,
     relative_path varchar(512) NOT NULL,

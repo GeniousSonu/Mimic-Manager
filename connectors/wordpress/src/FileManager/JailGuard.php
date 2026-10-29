@@ -1,14 +1,15 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\FileManager;
+namespace Wefik\MimicManager\FileManager;
 
 use InvalidArgumentException;
 use RuntimeException;
 
 /**
- * OptiForge Sandboxed Jail Guard.
+ * Mimic Manager Sandboxed Jail Guard.
  * 
  * Enforces strict filesystem containment within wp-content/, protects against
  * path traversal, symlink escapes, and denies access to sensitive configuration files.

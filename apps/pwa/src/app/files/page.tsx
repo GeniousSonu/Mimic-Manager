@@ -52,12 +52,12 @@ const INITIAL_TREE: FileItem[] = [
     type: 'directory',
     children: [
       {
-        name: 'optiforge-connector',
-        path: 'wp-content/plugins/optiforge-connector',
+        name: 'mimic-manager',
+        path: 'wp-content/plugins/mimic-manager',
         type: 'directory',
         children: [
-          { name: 'optiforge.php', path: 'wp-content/plugins/optiforge-connector/optiforge.php', type: 'file', size: '3.1 KB', modified: '2026-10-29 15:00' },
-          { name: 'composer.json', path: 'wp-content/plugins/optiforge-connector/composer.json', type: 'file', size: '1.2 KB', modified: '2026-10-29 15:00' },
+          { name: 'mimic-manager.php', path: 'wp-content/plugins/mimic-manager/mimic-manager.php', type: 'file', size: '3.1 KB', modified: '2026-10-29 15:00' },
+          { name: 'composer.json', path: 'wp-content/plugins/mimic-manager/composer.json', type: 'file', size: '1.2 KB', modified: '2026-10-29 15:00' },
         ],
       },
     ],
@@ -136,7 +136,7 @@ export default function VisualFileManagerPage() {
     setSudoPin('');
     setSudoError(null);
     setIsDirty(false);
-    showToast('Atomic shadow backup created in .optiforge-backups/ and file saved cleanly.');
+    showToast('Atomic shadow backup created in .mm-backups/ and file saved cleanly.');
   };
 
   const showToast = (msg: string) => {

@@ -20,3 +20,13 @@ All items listed here are intentional architectural boundaries, out-of-scope fea
 
 - **Phase 0 Active:** Currently constructing foundational monorepo, SSRF guard, cross-language HMAC primitives, and minimal vertical slice.
 - **AI Providers:** Ollama and Heuristic providers are foundational. Proprietary commercial providers (OpenAI, Anthropic, Gemini) are strictly optional BYOK (Bring Your Own Key).
+
+---
+
+## 3. Unverified Identity Items (Master Prompt Addendum C §C0)
+
+| Item | Value | Status | Release Impact | Resolution Requirement |
+|---|---|---|---|---|
+| **Product Name** | `Mimic Manager` | UNVERIFIED: owner must confirm | Release Gate Blocker (`brand:check --release`) | Owner/creator must verify final naming before P8 release tag. |
+| **Creator Domain** | `www.genioussonu.me` | UNVERIFIED: owner must confirm | Release Gate Blocker (`brand:check --release`) | Domain DNS resolution & ownership verification required before release tag. |
+

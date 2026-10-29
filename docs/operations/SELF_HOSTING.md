@@ -1,4 +1,4 @@
-# OptiForge Self-Hosting Guide & Production Deployment
+# Mimic Manager Self-Hosting Guide & Production Deployment
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead SRE & Systems Administrator  
@@ -20,8 +20,8 @@
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/optiforge/optiforge.git /opt/optiforge
-cd /opt/optiforge
+git clone https://github.com/mimic-manager/mimic-manager.git /opt/mimic-manager
+cd /opt/mimic-manager
 
 # 2. Copy and configure production environment variables
 cp .env.example .env
@@ -43,7 +43,7 @@ curl -f http://localhost:3000/api/v1/health
 
 ### 3.1 Caddy Configuration (Recommended)
 ```caddy
-optiforge.yourdomain.com {
+mimic-manager.yourdomain.com {
     reverse_proxy localhost:3000 {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
@@ -56,10 +56,10 @@ optiforge.yourdomain.com {
 ```nginx
 server {
     listen 443 ssl http2;
-    server_name optiforge.yourdomain.com;
+    server_name mimic-manager.yourdomain.com;
 
-    ssl_certificate /etc/letsencrypt/live/optiforge.yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/optiforge.yourdomain.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/mimic-manager.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mimic-manager.yourdomain.com/privkey.pem;
 
     client_max_body_size 100M;
 

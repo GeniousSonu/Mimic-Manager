@@ -1,4 +1,4 @@
-# OptiForge (Mimic Manager) — Final Handoff Document
+# Mimic Manager (Mimic Manager) — Final Handoff Document
 
 **Status:** COMPLETE (Phases P-1 through P8 Verified)  
 **Date:** 2026-10-29  
@@ -9,7 +9,7 @@
 
 ## 1. Product Status & Proven Capabilities
 
-OptiForge (*Mimic Manager*) is fully delivered, end-to-end verified, and hardened.
+Mimic Manager (*Mimic Manager*) is fully delivered, end-to-end verified, and hardened.
 - **Proven Real & Tested:**
   - Fastify 5 + NestJS 12 backend with raw body HMAC-SHA256 signature verification and replay prevention.
   - Hardened DNS-pinning `packages/ssrf-guard` tested against 76 malicious bypass vectors.
@@ -87,4 +87,4 @@ pnpm dev
 **The most likely failure point is external WordPress server environment heterogeneity:**
 - Outdated PHP cURL or disabled `proc_open` preventing process-based linting (mitigated by our pure PHP tokenizer fallback in `PhpAstLinter`).
 - Aggressive hosting firewalls (e.g. Cloudflare / Wordfence) intercepting external webhook callbacks (mitigated by our Action Scheduler polling pull model and circuit breaker).
-- Monitoring: Watch WordPress error logs for `[OptiForge]` notices and inspect `GET /api/v1/health` metrics.
+- Monitoring: Watch WordPress error logs for `[Mimic Manager]` notices and inspect `GET /api/v1/health` metrics.

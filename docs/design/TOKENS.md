@@ -1,4 +1,4 @@
-# OptiForge Design Tokens Specification
+# Mimic Manager Design Tokens Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Design Systems Architect & Accessibility Specialist  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview
-All colors, typography, spacing, radii, elevations, and motion curves in OptiForge are defined as deterministic design tokens in `packages/ui/tokens/tokens.json`.
+All colors, typography, spacing, radii, elevations, and motion curves in Mimic Manager are defined as deterministic design tokens in `packages/ui/tokens/tokens.json`.
 
 **Single Source of Truth Rule:** No component or screen may specify arbitrary hex colors, pixel margins, or timing curves. All values are emitted as CSS Custom Properties (`var(--color-bg-canvas)`) and Tailwind theme utilities.
 

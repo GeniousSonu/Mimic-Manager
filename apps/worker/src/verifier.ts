@@ -1,5 +1,6 @@
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | AGPL-3.0-or-later */
 /**
- * OptiForge Speed Preview Verifier & Auto-Revert Coordinator
+ * Mimic Manager Speed Preview Verifier & Auto-Revert Coordinator
  * 
  * Conducts automated preview verification before and after applying tiered performance fixes.
  * Enforces zero console error tolerance and <= 1.0% visual difference threshold.
@@ -19,7 +20,7 @@ export interface VerificationResult {
   jsErrors: string[];
   visualDiffRatio: number;
   revertTriggered: boolean;
-  revertReason?: string;
+  revertReason?: string | undefined;
   timestamp: string;
   metrics: {
     lcpBeforeMs: number;

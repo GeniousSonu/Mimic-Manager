@@ -1,8 +1,9 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace MimicManager\Security;
+namespace Wefik\MimicManager\Security;
 
 class HmacSigner
 {

@@ -1,13 +1,14 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\Tests;
+namespace Wefik\MimicManager\Tests;
 
 use PHPUnit\Framework\TestCase;
-use OptiForge\FileManager\JailGuard;
-use OptiForge\FileManager\PhpAstLinter;
-use OptiForge\FileManager\ShadowBackup;
+use Wefik\MimicManager\FileManager\JailGuard;
+use Wefik\MimicManager\FileManager\PhpAstLinter;
+use Wefik\MimicManager\FileManager\ShadowBackup;
 use RuntimeException;
 
 class FileManagerTest extends TestCase
@@ -18,7 +19,7 @@ class FileManagerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempJail = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'optiforge_test_jail_' . uniqid();
+        $this->tempJail = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'mimic_manager_test_jail_' . uniqid();
         mkdir($this->tempJail, 0755, true);
         mkdir($this->tempJail . DIRECTORY_SEPARATOR . 'themes', 0755, true);
         mkdir($this->tempJail . DIRECTORY_SEPARATOR . 'plugins', 0755, true);
@@ -108,7 +109,7 @@ class FileManagerTest extends TestCase
 
     public function testShadowBackupAndRestore(): void
     {
-        $backupDir = $this->tempJail . DIRECTORY_SEPARATOR . '.optiforge-backups';
+        $backupDir = $this->tempJail . DIRECTORY_SEPARATOR . '.mm-backups';
         $backupManager = new ShadowBackup($backupDir);
 
         $filePath = $this->tempJail . DIRECTORY_SEPARATOR . 'themes' . DIRECTORY_SEPARATOR . 'functions.php';

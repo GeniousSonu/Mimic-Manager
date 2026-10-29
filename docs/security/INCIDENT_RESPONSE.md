@@ -1,4 +1,4 @@
-# OptiForge Incident Response Plan & Security Playbook
+# Mimic Manager Incident Response Plan & Security Playbook
 
 **Status:** ACTIVE  
 **Owner-persona:** Security Operations Lead & Incident Commander  

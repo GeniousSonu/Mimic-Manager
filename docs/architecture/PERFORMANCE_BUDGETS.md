@@ -1,4 +1,4 @@
-# OptiForge Performance Budgets & Benchmarks
+# Mimic Manager Performance Budgets & Benchmarks
 
 **Status:** ACTIVE  
 **Owner-persona:** Performance Engineer & Web Vitals Specialist  
@@ -10,7 +10,7 @@
 
 ## 1. Overview & Core Web Vitals Budgets
 
-OptiForge enforces strict performance budgets both for its own software stack (PWA, API, WP connector) and for the optimization targets it applies to client websites.
+Mimic Manager enforces strict performance budgets both for its own software stack (PWA, API, WP connector) and for the optimization targets it applies to client websites.
 
 ---
 
@@ -31,7 +31,7 @@ OptiForge enforces strict performance budgets both for its own software stack (P
 
 ## 3. Client Optimization Targets (WordPress Sites)
 
-Sites running OptiForge optimization fixes are held to the following standards:
+Sites running Mimic Manager optimization fixes are held to the following standards:
 1. **Lighthouse Performance Score:** Target ≥ 90 on mobile; minimum +15 point improvement on sites starting below 60.
 2. **Cumulative Layout Shift (CLS):** Target < 0.05 on all public pages.
 3. **Payload Reduction:** Minimum 40% reduction in total image bytes transferred via WebP/AVIF substitution.

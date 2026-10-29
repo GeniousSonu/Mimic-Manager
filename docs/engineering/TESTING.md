@@ -1,4 +1,4 @@
-# OptiForge Testing Strategy & Test Execution Guide
+# Mimic Manager Testing Strategy & Test Execution Guide
 
 **Status:** ACTIVE  
 **Owner-persona:** QA Lead & Test Automation Architect  
@@ -10,7 +10,7 @@
 
 ## 1. Testing Pyramid & Test Types
 
-OptiForge enforces a multi-tier testing pyramid:
+Mimic Manager enforces a multi-tier testing pyramid:
 1. **Unit & Mathematical Precision Tests:**
    - Cryptographic HMAC vector validation across TypeScript and PHP (`hmac-vectors.json`).
    - Programmatic contrast checker (`pnpm test:contrast`) verifying WCAG 2.2 AA token ratios.
@@ -32,7 +32,7 @@ OptiForge enforces a multi-tier testing pyramid:
 pnpm test
 
 # Run contrast audit on design tokens
-pnpm --filter @optiforge/ui test:contrast
+pnpm --filter @mimic-manager/ui test:contrast
 
 # Run PHPUnit test suite for WordPress connector
 pnpm test:php

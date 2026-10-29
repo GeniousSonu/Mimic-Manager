@@ -19,9 +19,9 @@
 - **Scenario 1: Successful background variant generation**
   - **Given** an uncompressed JPEG image is uploaded to WordPress media library,
   - **When** WordPress finishes storing the original master file,
-  - **Then** an Action Scheduler task is registered, original bytes are pushed to OptiForge API, the worker produces WebP and AVIF variants, delivers them via signed webhook, and WordPress updates attachment metadata with variant URLs.
+  - **Then** an Action Scheduler task is registered, original bytes are pushed to Mimic Manager API, the worker produces WebP and AVIF variants, delivers them via signed webhook, and WordPress updates attachment metadata with variant URLs.
 - **Scenario 2: Remote backend unavailable (Circuit Breaker fallback)**
-  - **Given** the OptiForge backend is offline or unresponsive,
+  - **Given** the Mimic Manager backend is offline or unresponsive,
   - **When** an image is uploaded,
   - **Then** the plugin falls back to local GD/Imagick WebP compression, wp-admin remains fast (< 5ms overhead), and no fatal error is thrown.
 

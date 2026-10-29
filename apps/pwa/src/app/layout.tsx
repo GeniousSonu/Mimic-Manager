@@ -17,8 +17,8 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'OptiForge Command Center',
-  description: 'Headless site optimization, media compression, performance audits, and CMS command center.',
+  title: 'Mimic Manager Command Center',
+  description: 'Free and Secure platform for image optimization, PageSpeed and SEO fixes, UI section replication, and visual file management.',
   manifest: '/manifest.json'
 };
 
@@ -54,7 +54,7 @@ export default function RootLayout({
               <path d="M28 10 L4 22" />
             </svg>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold tracking-tight text-[#E9ECF3]">OptiForge</span>
+              <span className="text-sm font-semibold tracking-tight text-[#E9ECF3]">Mimic Manager</span>
               <span className="text-[10px] font-mono text-[#747E92]">Command Center</span>
             </div>
           </div>

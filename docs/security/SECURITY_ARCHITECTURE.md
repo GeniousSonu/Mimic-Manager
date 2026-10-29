@@ -1,4 +1,4 @@
-# OptiForge Security Architecture Specification
+# Mimic Manager Security Architecture Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Chief Information Security Officer & Principal Architect  

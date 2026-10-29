@@ -1,4 +1,4 @@
-# OptiForge Performance Fix Registry
+# Mimic Manager Performance Fix Registry
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Web Performance Engineer & Security Auditor  
@@ -10,7 +10,7 @@
 
 ## 1. Overview & Tier Definitions
 
-OptiForge organizes all performance fixes into three tiers:
+Mimic Manager organizes all performance fixes into three tiers:
 - **Safe Tier (Green):** Non-breaking changes that can be applied with zero risk of breaking JavaScript runtime or layout (e.g. DNS preconnect, image dimensions, font-display swap).
 - **Moderate Tier (Yellow):** Behavioral optimizations that delay or reorder non-critical assets (e.g. defer non-critical JS, lazy load below-the-fold iframes). Requires automated headless verification before committing.
 - **Guided Tier (Blue):** Structural modifications (e.g. CSS critical extraction, removing unused scripts) requiring human review and explicit administrator confirmation.

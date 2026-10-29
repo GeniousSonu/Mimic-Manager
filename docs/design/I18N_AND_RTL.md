@@ -1,4 +1,4 @@
-# OptiForge Internationalization (i18n) & RTL Specification
+# Mimic Manager Internationalization (i18n) & RTL Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Localization Architect & Global UX Specialist  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview & Formatting Rules
-All user-facing copy in OptiForge is externalized into structured JSON catalogs using **ICU MessageFormat**:
+All user-facing copy in Mimic Manager is externalized into structured JSON catalogs using **ICU MessageFormat**:
 - **Zero Hard-Coded Strings:** Lint rules forbid raw string literals in JSX/TSX.
 - **Locale-Aware Formatting:** Numbers, percentages, dates, and file sizes are formatted via `Intl.NumberFormat` and `Intl.DateTimeFormat`.
 - **Shipped Locales:** English (`en-US`) and automated Pseudo-Localization (`qps-ploc`) for catching UI clipping.
@@ -24,7 +24,7 @@ All user-facing copy in OptiForge is externalized into structured JSON catalogs 
 ---
 
 ## 3. Pseudo-Localization & Truncation Testing
-In CI, OptiForge builds an automated pseudo-localized variant where:
+In CI, Mimic Manager builds an automated pseudo-localized variant where:
 - All vowels receive diacritics (`[!! ÕptíFõrgé !!]`).
 - Strings are expanded by 30% in length to simulate German and Finnish text expansion.
 - Automated visual regression verifies that zero buttons, table headers, or cards suffer text truncation.

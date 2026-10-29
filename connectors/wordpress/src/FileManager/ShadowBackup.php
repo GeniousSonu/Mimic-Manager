@@ -1,13 +1,14 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\FileManager;
+namespace Wefik\MimicManager\FileManager;
 
 use RuntimeException;
 
 /**
- * OptiForge Shadow Backup Manager.
+ * Mimic Manager Shadow Backup Manager.
  * 
  * Manages atomic snapshot backups before file writes and provides instant 1-click restore.
  */

@@ -1,11 +1,12 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace MimicManager\Tests;
+namespace Wefik\MimicManager\Tests;
 
 use PHPUnit\Framework\TestCase;
-use MimicManager\Security\HmacSigner;
+use Wefik\MimicManager\Security\HmacSigner;
 
 class HmacSignerTest extends TestCase
 {

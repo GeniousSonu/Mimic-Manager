@@ -8,7 +8,7 @@
 
 ## 1. Principles: Zero Telemetry by Default
 
-All metrics described in this document are **computed and stored strictly locally** within the user's self-hosted database instance. OptiForge does not transmit telemetry, analytics, or behavioral tracking to any external server.
+All metrics described in this document are **computed and stored strictly locally** within the user's self-hosted database instance. Mimic Manager does not transmit telemetry, analytics, or behavioral tracking to any external server.
 
 ---
 

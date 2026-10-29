@@ -1,4 +1,4 @@
-# OptiForge Master Design System & UI/UX Specification
+# Mimic Manager Master Design System & UI/UX Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Design Director & Lead Frontend Architect  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview & Master Architecture
-The OptiForge Design System defines the visual language, interaction patterns, component anatomy, and accessibility contracts for both the centralized Command Center PWA and the embedded WordPress Admin interface.
+The Mimic Manager Design System defines the visual language, interaction patterns, component anatomy, and accessibility contracts for both the centralized Command Center PWA and the embedded WordPress Admin interface.
 
 Designed to match the refined density, calm confidence, and micro-interaction polish of tools like **Linear, Raycast, Vercel, Apple Files, and Google Files**, it prioritizes high signal-to-noise ratio, instant optimistic feedback, and bulletproof safety guarantees.
 
@@ -37,7 +37,7 @@ graph TD
 ---
 
 ## 3. Brand & Visual Identity
-- **Working Title:** OptiForge (white-label ready via `brand.config.ts`).
+- **Working Title:** Mimic Manager (white-label ready via `brand.config.ts`).
 - **Geometric Mark:** Hexagonal faceted anvil vector mark with round caps, crisp down to 16px.
 - **Typography:** Self-hosted `Inter Variable` for clean user interface rendering; `JetBrains Mono` for code snippets, database paths, and metrics.
 

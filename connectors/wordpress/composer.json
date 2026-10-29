@@ -1,11 +1,13 @@
 {
-  "name": "mimic-manager/connector",
-  "description": "WordPress connector plugin for OptiForge / Mimic Manager",
+  "name": "wefik/mimic-manager",
+  "description": "Free and Secure platform for image optimization, PageSpeed and SEO fixes, UI section replication, and visual file management, with a WordPress connector and a PWA command center.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "authors": [
     {
-      "name": "OptiForge Team"
+      "name": "SK Sahinur Islam",
+      "homepage": "https://www.genioussonu.me/plugin/mimic-manager",
+      "role": "Creator and Lead Author"
     }
   ],
   "require": {
@@ -16,18 +18,18 @@
   },
   "autoload": {
     "psr-4": {
-      "MimicManager\\": "src/",
-      "OptiForge\\": "src/"
+      "Wefik\\MimicManager\\": "src/",
+      "Wefik\\MimicManager\\Includes\\": "includes/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "MimicManager\\Tests\\": "tests/",
-      "OptiForge\\Tests\\": "tests/"
+      "Wefik\\MimicManager\\Tests\\": "tests/"
     }
   },
   "config": {
     "sort-packages": true,
     "allow-plugins": {}
-  }
+  },
+  "homepage": "https://www.wefik.in"
 }

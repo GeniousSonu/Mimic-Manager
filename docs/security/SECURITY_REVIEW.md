@@ -1,4 +1,4 @@
-# OptiForge Security Review & Penetration Test Report
+# Mimic Manager Security Review & Penetration Test Report
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Penetration Tester & Red Team Lead  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Executive Summary
-An adversarial simulated penetration test was performed against the OptiForge Core Hub API, background workers, and WordPress connector to identify authorization flaws, injection vulnerabilities, and SSRF bypasses.
+An adversarial simulated penetration test was performed against the Mimic Manager Core Hub API, background workers, and WordPress connector to identify authorization flaws, injection vulnerabilities, and SSRF bypasses.
 
 ---
 
@@ -17,7 +17,7 @@ An adversarial simulated penetration test was performed against the OptiForge Co
 
 | Finding ID | Severity | Description | Status | Verification & Resolution |
 | :--- | :--- | :--- | :--- | :--- |
-| `SEC-FIND-001` | High | Potential DNS rebinding attack if remote image fetcher relies on single-check DNS resolution. | RESOLVED | Implemented `@optiforge/ssrf-guard` with socket-level DNS pinning directly to verified IP. |
+| `SEC-FIND-001` | High | Potential DNS rebinding attack if remote image fetcher relies on single-check DNS resolution. | RESOLVED | Implemented `@mimic-manager/ssrf-guard` with socket-level DNS pinning directly to verified IP. |
 | `SEC-FIND-002` | High | Decompression bomb via crafted 4K PNG with 1:1000 compression ratio. | RESOLVED | Sharp image worker enforces `limitInputPixels: 50,000,000` before decoding bitmap. |
 | `SEC-FIND-003` | Medium | Fastify JSON parser eating raw body before HMAC signature check. | RESOLVED | Fastify initialized with `{ rawBody: true }` to retain pristine request buffer. |
 | `SEC-FIND-004` | Medium | Inadvertent disclosure of database credentials in debug error stacks. | RESOLVED | RFC 7807 problem details handler strips internal database stack traces in production. |

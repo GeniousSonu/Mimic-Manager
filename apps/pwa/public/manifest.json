@@ -1,11 +1,11 @@
 {
-  "name": "OptiForge Command Center",
-  "short_name": "OptiForge",
-  "description": "Headless site optimization, media compression, performance audits, and CMS command center.",
+  "name": "Mimic Manager Command Center",
+  "short_name": "Mimic Manager",
+  "description": "Free and Secure platform for image optimization, PageSpeed and SEO fixes, UI section replication, and visual file management, with a WordPress connector and a PWA command center.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0A0C10",
-  "theme_color": "#10131A",
+  "theme_color": "#7C6CFF",
   "orientation": "any",
   "icons": [
     {
@@ -50,7 +50,9 @@
       "files": [
         {
           "name": "images",
-          "accept": ["image/*"]
+          "accept": [
+            "image/*"
+          ]
         }
       ]
     }

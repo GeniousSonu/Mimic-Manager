@@ -1,4 +1,4 @@
-# OptiForge Design QA Checklist & Verification Protocol
+# Mimic Manager Design QA Checklist & Verification Protocol
 
 **Status:** ACTIVE  
 **Owner-persona:** Design QA Lead & Design Systems Auditor  

@@ -1,12 +1,13 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\Tests;
+namespace Wefik\MimicManager\Tests;
 
 use PHPUnit\Framework\TestCase;
-use OptiForge\Seo\MetaSync;
-use OptiForge\Seo\SchemaFilter;
+use Wefik\MimicManager\Seo\MetaSync;
+use Wefik\MimicManager\Seo\SchemaFilter;
 
 final class SeoTest extends TestCase {
     private MetaSync $metaSync;

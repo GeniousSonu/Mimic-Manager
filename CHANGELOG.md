@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the OptiForge (Mimic Manager) platform will be documented in this file.
+All notable changes to the Mimic Manager platform will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -48,10 +48,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Design system specifications: Master Design System (`DESIGN.md`), Design Principles, Brand Identity & SVG mark, Components Catalog, Design Tokens (`tokens.json`), Motion Spec, Iconography Spec, Content Style Guide & 4-part error formula, WCAG 2.2 AA Accessibility Spec, i18n & RTL Spec, Responsive & PWA UX Spec, WordPress Admin Shadow DOM Integration Spec, Design QA Checklist, Design Critique Log with 100-point rubric scores, Usability Test Plan, and interactive HTML wireframe prototype.
   - Engineering & operations documentation: Development Guide, Coding Standards, Testing Strategy, CI/CD Pipeline, Release Process, Definition of Done, Traceability Matrix, Self-Hosting Guide, Configuration Reference, Operational Runbooks, Backup & Disaster Recovery, Upgrade & Migration Guide, Troubleshooting Manual, Android TWA Packaging Guide, WordPress.org Submission Checklist.
 - **Design Tokens & Programmatic Contrast Checker:**
-  - Automated WCAG 2.2 AA contrast checker in `@optiforge/ui` (`pnpm test:contrast`), validating 31/31 token pairs (100% green).
+  - Automated WCAG 2.2 AA contrast checker in `@mimic-manager/ui` (`pnpm test:contrast`), validating 31/31 token pairs (100% green).
 - **Phase 0 Monorepo Foundations & Spikes:**
-  - `@optiforge/types` with Zod schemas, error codes, and HMAC signer with cross-language test vectors.
-  - `@optiforge/ssrf-guard` with DNS pinning and 76 attack vector test suite.
+  - `@mimic-manager/types` with Zod schemas, error codes, and HMAC signer with cross-language test vectors.
+  - `@mimic-manager/ssrf-guard` with DNS pinning and 76 attack vector test suite.
   - `apps/api` with Fastify 5 + NestJS 12 modular monolith, raw body capture, and HMAC authentication guard.
   - `apps/worker` with Sharp 0.35 libvips image processor and signed webhook dispatcher.
   - `connectors/wordpress` with PHP PSR-4 library, HMAC signer, and PHPUnit test suite.

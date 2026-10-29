@@ -1,4 +1,4 @@
-# OptiForge Scaling & Capacity Planning Guide
+# Mimic Manager Scaling & Capacity Planning Guide
 
 **Status:** ACTIVE  
 **Owner-persona:** Cloud Infrastructure Architect & Capacity Planner  

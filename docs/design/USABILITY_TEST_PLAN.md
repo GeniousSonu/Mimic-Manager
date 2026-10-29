@@ -1,4 +1,4 @@
-# OptiForge Usability Test Plan & Persona Validation
+# Mimic Manager Usability Test Plan & Persona Validation
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead UX Researcher & Usability Analyst  
@@ -23,7 +23,7 @@ The Usability Test Plan validates that both novice non-technical site owners and
 
 ### Task 1: Connect a New WordPress Site
 - **Persona:** Sarah (Non-Technical Site Owner)
-- **Prompt:** "You have installed the OptiForge WordPress plugin. Connect your site to your OptiForge command center dashboard."
+- **Prompt:** "You have installed the Mimic Manager WordPress plugin. Connect your site to your Mimic Manager command center dashboard."
 - **Success Criteria:** Completed in ≤ 3 clicks and ≤ 60 seconds.
 
 ### Task 2: Bulk-Optimize 200 Images and Undo Conversion

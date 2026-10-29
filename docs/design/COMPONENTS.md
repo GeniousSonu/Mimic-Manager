@@ -1,4 +1,4 @@
-# OptiForge Component Library Catalog & Contracts
+# Mimic Manager Component Library Catalog & Contracts
 
 **Status:** ACTIVE  
 **Owner-persona:** Design Systems Engineer & Component Architect  

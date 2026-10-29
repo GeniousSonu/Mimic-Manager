@@ -1,4 +1,4 @@
-# OptiForge Accessibility Specification (WCAG 2.2 AA / AAA Standards)
+# Mimic Manager Accessibility Specification (WCAG 2.2 AA / AAA Standards)
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Accessibility Specialist & Compliance Auditor  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Compliance Target & Guarantees
-OptiForge targets **WCAG 2.2 Level AA compliance across all views**, actively implementing Level AAA standards where achievable without degrading pro-tool density.
+Mimic Manager targets **WCAG 2.2 Level AA compliance across all views**, actively implementing Level AAA standards where achievable without degrading pro-tool density.
 
 ---
 

@@ -1,4 +1,4 @@
-# OptiForge Supply Chain Security & Software Bill of Materials (SBOM)
+# Mimic Manager Supply Chain Security & Software Bill of Materials (SBOM)
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead DevSecOps Engineer & Release Manager  
@@ -10,7 +10,7 @@
 
 ## 1. Supply Chain Protection Strategy
 
-OptiForge implements strict measures to prevent compromised dependencies from entering the build pipeline:
+Mimic Manager implements strict measures to prevent compromised dependencies from entering the build pipeline:
 1. **Pnpm 12 Build Script Policy:** By default, pnpm 12 blocks all arbitrary `postinstall` lifecycle scripts unless explicitly approved via `.npmrc` (`only-built-dependencies`).
 2. **Automated Dependabot Security Scanning:** Dependabot scans weekly for vulnerable dependencies and submits automated patch PRs.
 3. **Lockfile Freezing in CI:** Production and CI builds enforce `pnpm install --frozen-lockfile` to guarantee identical dependency trees.

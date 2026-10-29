@@ -1,4 +1,4 @@
-# OptiForge Visual File Manager Security Architecture
+# Mimic Manager Visual File Manager Security Architecture
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Application Security Architect  
@@ -11,7 +11,7 @@
 ## 1. Historical Vulnerability Analysis (CVE-2020-25213)
 In 2020, over 700,000 WordPress sites were compromised due to an unauthenticated arbitrary file upload in the popular WP File Manager plugin (CVE-2020-25213). The plugin bundled an unauthenticated third-party elFinder library connector that allowed direct POST uploads to server directories without capability checks.
 
-### Architectural Invariants in OptiForge to Prevent All Similar Exploits:
+### Architectural Invariants in Mimic Manager to Prevent All Similar Exploits:
 1. **Zero Third-Party Vendor Connectors:** Zero bundled legacy PHP libraries (elFinder, Roxy Fileman).
 2. **Strict WordPress Capability Checks:** Every file manager REST endpoint requires `current_user_can('manage_options')` AND a verified WordPress nonce.
 3. **Double-Factor Step-Up Authentication:** Editing executable code (`.php`, `.js`) requires re-entering the admin password or an active 2FA confirmation token.

@@ -1,4 +1,4 @@
-# OptiForge UI Replicator Intermediate Representation (IR) Specification
+# Mimic Manager UI Replicator Intermediate Representation (IR) Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Frontend Architect & Compiler Engineer  

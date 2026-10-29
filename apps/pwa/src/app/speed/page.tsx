@@ -236,7 +236,7 @@ export default function PageSpeedEnginePage() {
         <div className="space-y-1">
           <span className="font-semibold text-[#E9ECF3]">Plugin Awareness Active:</span>
           <p className="text-[#A5AEC0]">
-            No conflicting caching plugins detected on active WordPress target. OptiForge output filters are active.
+            No conflicting caching plugins detected on active WordPress target. Mimic Manager output filters are active.
           </p>
         </div>
       </div>

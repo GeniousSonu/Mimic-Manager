@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "=========================================================="
-echo "          OptiForge Environment Doctor & Preflight        "
+echo "        Mimic Manager Environment Doctor & Preflight      "
 echo "=========================================================="
 
 FAILED=0

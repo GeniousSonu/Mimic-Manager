@@ -1,4 +1,4 @@
-# OptiForge Threat Model & STRIDE Matrix
+# Mimic Manager Threat Model & STRIDE Matrix
 
 **Status:** ACTIVE  
 **Owner-persona:** Principal Security Engineer & Penetration Tester  
@@ -19,14 +19,14 @@ graph TD
 
     subgraph Client Environment
         WPAdmin[WordPress Administrator]
-        WPPlugin[OptiForge WP Plugin]
+        WPPlugin[Mimic Manager WP Plugin]
     end
 
     subgraph Demilitarized Zone (DMZ)
         ReverseProxy[TLS Reverse Proxy]
     end
 
-    subgraph OptiForge Core (Internal Isolated Network)
+    subgraph Mimic Manager Core (Internal Isolated Network)
         FastifyAPI[Fastify API Gateway]
         RedisCache[Redis AOF / Queues]
         WorkerPool[Sharp & Audit Workers]
@@ -53,7 +53,7 @@ graph TD
 | **API Gateway** | **S**poofing | Attacker forges requests claiming to be connected site. | Mutual HMAC-SHA256 signature verification over all headers & body. | `NFR-SEC-001` | `TEST-AUTH-001` |
 | **API Gateway** | **T**ampering | Intermediary modifies image parameters in transit. | Cryptographic signature covers whole payload; reject on mismatch. | `NFR-SEC-002` | `TEST-AUTH-002` |
 | **API Gateway** | **R**epudiation | Site denies having requested file deletion. | Immutable signed audit trail logged in MongoDB with timestamp. | `NFR-SEC-003` | `TEST-AUDIT-001` |
-| **Worker / SSRF**| **I**nformation Disc. | Remote URL fetch probes internal AWS/GCP metadata (`169.254.169.254`). | `@optiforge/ssrf-guard` blocks loopbacks, private IPs, and pins DNS. | `NFR-SEC-004` | `TEST-SSRF-001` |
+| **Worker / SSRF**| **I**nformation Disc. | Remote URL fetch probes internal AWS/GCP metadata (`169.254.169.254`). | `@mimic-manager/ssrf-guard` blocks loopbacks, private IPs, and pins DNS. | `NFR-SEC-004` | `TEST-SSRF-001` |
 | **Sharp Worker** | **D**enial of Svc. | Decompression bomb (tiny 10KB zip/PNG expanding to 10GB). | Stream pixel limits (`limitInputPixels: 50,000,000`) and size limits. | `NFR-SEC-005` | `TEST-MEDIA-002` |
 | **Visual File Mgr**| **E**levation Priv. | Attacker traverses path to overwrite `wp-config.php` or execute RCE. | Strict jailing to `wp-content`, realpath check, AST pre-save syntax lint. | `NFR-SEC-006` | `TEST-FILE-001` |
 
@@ -63,7 +63,7 @@ graph TD
 
 ### 3.1 Scenario A: SSRF Pivot via UI Replicator
 - **Attack Vector:** Attacker provides URL `http://169.254.169.254/latest/meta-data/` to Replicator studio.
-- **Defense Mechanism:** `@optiforge/ssrf-guard` resolves IP before socket creation, detects link-local metadata address, throws `ERR_SSRF_PROHIBITED`, and aborts before TCP handshake.
+- **Defense Mechanism:** `@mimic-manager/ssrf-guard` resolves IP before socket creation, detects link-local metadata address, throws `ERR_SSRF_PROHIBITED`, and aborts before TCP handshake.
 
 ### 3.2 Scenario B: Fatal PHP Syntax Error via File Manager
 - **Attack Vector:** User saves a PHP file missing a semicolon or containing malicious syntax that would cause a fatal parse error on execution.

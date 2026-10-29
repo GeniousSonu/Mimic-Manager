@@ -58,7 +58,7 @@
 ## 2. Jobs-to-be-Done (JTBD) Framework
 
 ### Pillar 1: Media Optimization
-- **JTBD-MED-01:** *When* a content editor uploads a high-resolution raw image, *I want* OptiForge to automatically convert it to WebP/AVIF in the background without blocking the upload, *so I can* keep page load times fast while keeping the master original safe for future edits.
+- **JTBD-MED-01:** *When* a content editor uploads a high-resolution raw image, *I want* Mimic Manager to automatically convert it to WebP/AVIF in the background without blocking the upload, *so I can* keep page load times fast while keeping the master original safe for future edits.
 - **JTBD-MED-02:** *When* taking over an established site with 5,000 legacy images, *I want* to run a resumable bulk optimization with disk space savings estimates, *so I can* reclaim server storage and improve Core Web Vitals without crashing the hosting server.
 
 ### Pillar 2: AI Image Alt-Text & Metadata
@@ -70,8 +70,8 @@
 - **JTBD-SPD-02:** *When* applying aggressive script deferrals or CSS stripping, *I want* a headless browser to test the page in preview mode first and automatically revert if console errors or visual glitches occur, *so I can* maximize speed without ever breaking user checkout or forms.
 
 ### Pillar 4: SEO Gap Fill
-- **JTBD-SEO-01:** *When* managing a site with Yoast or Rank Math installed, *I want* OptiForge to write missing meta descriptions and focus tags directly into their native fields, *so I can* fix SEO gaps without introducing duplicate meta tags or conflicting plugins.
-- **JTBD-SEO-02:** *When* a structured data audit runs, *I want* OptiForge to verify rendered HTML before injecting schema, *so I can* prevent search engines from penalizing the site for duplicate `Organization` or `WebSite` JSON-LD blocks.
+- **JTBD-SEO-01:** *When* managing a site with Yoast or Rank Math installed, *I want* Mimic Manager to write missing meta descriptions and focus tags directly into their native fields, *so I can* fix SEO gaps without introducing duplicate meta tags or conflicting plugins.
+- **JTBD-SEO-02:** *When* a structured data audit runs, *I want* Mimic Manager to verify rendered HTML before injecting schema, *so I can* prevent search engines from penalizing the site for duplicate `Organization` or `WebSite` JSON-LD blocks.
 
 ### Pillar 5: UI Replicator
 - **JTBD-REP-01:** *When* redesigning a section of a site I own, *I want* to click a hero section on a live screenshot and extract its layout into clean native Gutenberg blocks, *so I can* recreate sections in seconds without manual HTML/CSS coding.

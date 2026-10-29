@@ -1,4 +1,4 @@
-# OptiForge AI Vision & Text Providers Specification
+# Mimic Manager AI Vision & Text Providers Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Machine Learning Architect & Privacy Officer  
@@ -9,11 +9,11 @@
 ---
 
 ## 1. Overview & 100% Free / Local Default
-OptiForge provides automated generation of high-quality, accessible image alt-text and SEO descriptions without requiring any paid API subscription.
+Mimic Manager provides automated generation of high-quality, accessible image alt-text and SEO descriptions without requiring any paid API subscription.
 
 ### Core Philosophy:
 - **Default Engine:** 100% Free & Local via Ollama running open vision models (e.g. `llama3.2-vision` or `moondream2`).
-- **Heuristic Fallback:** If no AI vision service is configured or available, OptiForge utilizes a smart rule-based fallback (extracting EXIF caption, IPTC headline, post context, and filename normalization).
+- **Heuristic Fallback:** If no AI vision service is configured or available, Mimic Manager utilizes a smart rule-based fallback (extracting EXIF caption, IPTC headline, post context, and filename normalization).
 - **Optional BYOK (Bring Your Own Key):** Users may optionally connect external providers (Gemini Flash, OpenAI, Claude) if they already possess API keys, but no feature is locked behind them.
 
 ---

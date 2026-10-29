@@ -1,3 +1,4 @@
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | AGPL-3.0-or-later */
 import { describe, it, expect } from 'vitest';
 import { GutenbergCompiler, IRDocument, IRDocumentSchema } from '../src/index.js';
 
@@ -26,7 +27,7 @@ describe('UI Replicator Intermediate Representation (IR) & Gutenberg Compiler', 
           id: 'hero-heading',
           type: 'heading',
           tag: 'h1',
-          text: 'Ship Faster with OptiForge',
+          text: 'Ship Faster with Mimic Manager',
           styles: {
             desktop: {
               fontSize: '48px',
@@ -120,7 +121,7 @@ describe('UI Replicator Intermediate Representation (IR) & Gutenberg Compiler', 
 
     expect(markup).toContain('<!-- wp:group {"layout":{"type":"flex"}} -->');
     expect(markup).toContain('<!-- wp:heading {"level":1,"textAlign":"center"} -->');
-    expect(markup).toContain('<h1 class="wp-block-heading has-text-align-center">Ship Faster with OptiForge</h1>');
+    expect(markup).toContain('<h1 class="wp-block-heading has-text-align-center">Ship Faster with Mimic Manager</h1>');
     expect(markup).toContain('<!-- wp:paragraph {"align":"center"} -->');
     expect(markup).toContain('<!-- wp:buttons -->');
     expect(markup).toContain('<!-- wp:button -->');

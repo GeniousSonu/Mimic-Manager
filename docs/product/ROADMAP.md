@@ -1,4 +1,4 @@
-# OptiForge Product Roadmap
+# Mimic Manager Product Roadmap
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Product Architect  
@@ -12,7 +12,7 @@
 
 ```mermaid
 gantt
-    title OptiForge Engineering Roadmap
+    title Mimic Manager Engineering Roadmap
     dateFormat  YYYY-MM-DD
     section Phase 0 (Done)
     Foundations, HMAC, SSRF Guard, Fastify API, Sharp Worker :done, p0, 2026-10-29, 2026-10-29

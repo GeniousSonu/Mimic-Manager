@@ -1,11 +1,12 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\Speed;
+namespace Wefik\MimicManager\Speed;
 
 /**
- * OptiForge Tiered Fix Engine.
+ * Mimic Manager Tiered Fix Engine.
  * 
  * Safely applies Core Web Vitals fixes across Safe, Moderate, and Guided tiers
  * via output buffer filtering and WordPress template hooks.
@@ -192,7 +193,7 @@ class FixEngine
             return $html;
         }
 
-        $links = "\n<!-- OptiForge DNS Preconnect -->\n";
+        $links = "\n<!-- Mimic Manager DNS Preconnect -->\n";
         foreach ($origins as $origin) {
             $origin = htmlspecialchars((string) $origin, ENT_QUOTES, 'UTF-8');
             $links .= "<link rel=\"dns-prefetch\" href=\"{$origin}\">\n";
@@ -283,7 +284,7 @@ class FixEngine
             }
 
             // Exclude admin or custom attributes
-            if (stripos($prefix . $suffix, 'data-optiforge-keep') !== false || stripos($src, 'wp-admin') !== false) {
+            if (stripos($prefix . $suffix, 'data-mm-keep') !== false || stripos($src, 'wp-admin') !== false) {
                 return $fullTag;
             }
 
@@ -315,7 +316,7 @@ class FixEngine
             return $html;
         }
 
-        $styleTag = "\n<!-- OptiForge Critical CSS -->\n<style id=\"optiforge-critical-css\">" . $criticalCss . "</style>\n";
+        $styleTag = "\n<!-- Mimic Manager Critical CSS -->\n<style id=\"mm-critical-css\">" . $criticalCss . "</style>\n";
         return preg_replace('/<\/head>/i', $styleTag . '</head>', $html, 1);
     }
 

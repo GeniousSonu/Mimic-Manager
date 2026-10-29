@@ -1,4 +1,4 @@
-# OptiForge Fix Authoring Guide
+# Mimic Manager Fix Authoring Guide
 
 **Status:** ACTIVE  
 **Owner-persona:** Core Engine Maintainer & Integration Specialist  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview & The 5-Method Contract
-Every performance fix implemented in OptiForge must implement the standard `FixContract` interface:
+Every performance fix implemented in Mimic Manager must implement the standard `FixContract` interface:
 
 ```typescript
 export interface FixContract {
@@ -37,7 +37,7 @@ export interface FixContract {
 
 ## 2. Idempotency Marker Rules
 Every applied fix must insert a traceable HTML comment or metadata marker to prevent double-application:
-- **Format:** `<!-- optiforge:fix id="FIX-PERF-001" action="applied" timestamp="1730198400" -->`
+- **Format:** `<!-- mimic-manager:fix id="FIX-PERF-001" action="applied" timestamp="1730198400" -->`
 - If this marker is already present in the target HTML or database entity, `detect()` must return `isApplicable: false`.
 
 ---

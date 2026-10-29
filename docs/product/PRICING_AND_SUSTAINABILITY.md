@@ -8,7 +8,7 @@
 
 ## 1. Zero Paid Tiers & Absolute Free Sovereignty
 
-OptiForge is and will always remain **100% Free and Open Source Software (FOSS)**.
+Mimic Manager is and will always remain **100% Free and Open Source Software (FOSS)**.
 - **No Paid Subscriptions:** There is no "Pro" tier, "Enterprise" license, or feature gating.
 - **No Credit Limits:** Users can optimize 10 images or 1,000,000 images with zero marginal software cost.
 - **No License Keys:** No server phoning-home to check activation status.

@@ -1,4 +1,4 @@
-# OptiForge Connector Authoring Guide
+# Mimic Manager Connector Authoring Guide
 
 **Status:** ACTIVE  
 **Owner-persona:** Platform Ecosystem Architect & Lead Integration Engineer  
@@ -9,9 +9,9 @@
 ---
 
 ## 1. Overview
-While WordPress is the primary reference connector, OptiForge is architected as a headless optimization brain capable of powering any CMS or static site framework (Shopify, Drupal, Next.js, Astro).
+While WordPress is the primary reference connector, Mimic Manager is architected as a headless optimization brain capable of powering any CMS or static site framework (Shopify, Drupal, Next.js, Astro).
 
-This guide specifies how to author a native CMS connector adhering to the OptiForge integration protocol.
+This guide specifies how to author a native CMS connector adhering to the Mimic Manager integration protocol.
 
 ---
 
@@ -20,7 +20,7 @@ This guide specifies how to author a native CMS connector adhering to the OptiFo
 Every connector must satisfy the following 4 pillars:
 1. **Cryptographic Handshake & Pairing:**
    - Display a 6-digit one-time pairing PIN in the CMS admin.
-   - Negotiate a shared secret with the OptiForge hub via `POST /api/v1/sites/pair`.
+   - Negotiate a shared secret with the Mimic Manager hub via `POST /api/v1/sites/pair`.
    - Store the resulting `siteId` and `clientSecret` securely in the CMS configuration store.
 2. **Mutual HMAC Authentication:**
    - Sign all outbound requests using `sha256=${timestamp}.${nonce}.${siteId}.${body}`.
@@ -37,7 +37,7 @@ Every connector must satisfy the following 4 pillars:
 ```mermaid
 sequenceDiagram
     participant CMS as CMS Connector
-    participant Hub as OptiForge Hub
+    participant Hub as Mimic Manager Hub
     
     CMS->>Hub: POST /api/v1/sites/pair (PIN + Site URL)
     Hub-->>CMS: Returns siteId + clientSecret

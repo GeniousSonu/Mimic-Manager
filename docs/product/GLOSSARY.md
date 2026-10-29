@@ -1,4 +1,4 @@
-# OptiForge Domain Glossary
+# Mimic Manager Domain Glossary
 
 **Status:** ACTIVE  
 **Last-reviewed:** 2026-10-29  
@@ -6,14 +6,19 @@
 
 ---
 
-| Term | Definition in OptiForge |
+| Term | Definition in Mimic Manager |
 |---|---|
+| **Mimic Manager** | The unified open-source, self-hostable site optimization platform combining headless backend brains with CMS connectors and PWA command center. |
+| **Wefik** | The software organization owning and publishing Mimic Manager (https://www.wefik.in). |
+| **Connector** | A lightweight integration package installed on target CMS platforms (e.g. WordPress plugin) establishing mutual HMAC communication with the hub. |
+| **Fix** | A registered performance modification adhering to the 5-method lifecycle (`detect`, `plan`, `apply`, `verify`, `revert`) within the Tiered Fix Registry. |
+| **Replicator** | The remote section extraction engine that converts visual multi-viewport web elements into clean, semantic WordPress Core Gutenberg blocks via IR. |
 | **Action Scheduler** | Battle-tested WordPress background job queue library originally created for WooCommerce; handles durable retryable tasks in PHP without blocking web requests. |
 | **Circuit Breaker** | Architectural pattern in the WordPress connector that trips after 3 consecutive backend failures, disabling remote requests for an exponential cooldown and gracefully falling back to local processing. |
 | **CLS** | Cumulative Layout Shift; Core Web Vital measuring visual stability during page render (target < 0.1). |
 | **Decompression Bomb** | Malicious compressed image (e.g. 10 KB file) that expands to tens of gigabytes in memory (100,000 x 100,000 pixels); mitigated via Sharp's `limitInputPixels`. |
 | **Fix Registry** | Centralized collection of performance modifications implementing the 5-method contract: `detect`, `plan`, `apply`, `verify`, and `revert`. |
-| **Guided Fix** | Performance finding that requires manual server or DNS configuration (e.g. Brotli compression, TTFB, hosting upgrade); OptiForge provides copy-paste snippets. |
+| **Guided Fix** | Performance finding that requires manual server or DNS configuration (e.g. Brotli compression, TTFB, hosting upgrade); Mimic Manager provides copy-paste snippets. |
 | **HMAC-SHA256** | Hash-based Message Authentication Code using SHA-256; ensures mutual request integrity, origin authentication, and replay protection between connector and API. |
 | **IR (Intermediate Representation)** | Normalized, viewport-aware DOM node tree `{id, tag, role, styles, layout, children, assets}` produced by the UI Replicator before compiling to Gutenberg blocks. |
 | **LCP** | Largest Contentful Paint; Core Web Vital measuring perceptual render speed of the largest above-the-fold content element (target < 2.5s). |

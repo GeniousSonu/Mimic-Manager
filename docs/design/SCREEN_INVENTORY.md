@@ -1,4 +1,4 @@
-# OptiForge Screen Inventory & Layout Specification
+# Mimic Manager Screen Inventory & Layout Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead UI Designer & Information Architect  
@@ -10,7 +10,7 @@
 
 ## 1. Overview & Complete Screen Matrix
 
-Every screen in OptiForge is documented with its primary action, data elements, all 7 layout states, and mapped requirement IDs.
+Every screen in Mimic Manager is documented with its primary action, data elements, all 7 layout states, and mapped requirement IDs.
 
 | Screen ID | Screen Name | Route | Primary Action | Mapped Req IDs |
 | :--- | :--- | :--- | :--- | :--- |

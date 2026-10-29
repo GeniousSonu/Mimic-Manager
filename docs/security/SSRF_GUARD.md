@@ -1,4 +1,4 @@
-# OptiForge SSRF Guard & DNS Pinning Technical Specification
+# Mimic Manager SSRF Guard & DNS Pinning Technical Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Senior Security Engineer & Network Security Specialist  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview
-The `@optiforge/ssrf-guard` package protects the backend services whenever outbound HTTP/HTTPS requests must be initiated towards user-supplied or crawled URLs (e.g. PageSpeed audits, UI Replicator crawls, remote image fetching).
+The `@mimic-manager/ssrf-guard` package protects the backend services whenever outbound HTTP/HTTPS requests must be initiated towards user-supplied or crawled URLs (e.g. PageSpeed audits, UI Replicator crawls, remote image fetching).
 
 ---
 

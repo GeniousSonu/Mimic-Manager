@@ -15,10 +15,10 @@
 
 ## 2. Reporting a Vulnerability
 
-We take the security of OptiForge seriously. If you discover a security vulnerability, please do NOT file a public issue.
+We take the security of Mimic Manager seriously. If you discover a security vulnerability, please do NOT file a public issue.
 
 **Reporting Procedure:**
-1. Email full details, reproduction steps, and potential impact to `security@optiforge.org`.
+1. Email full details, reproduction steps, and potential impact to `security@wefik.in`.
 2. Encrypt your report using our GPG key if appropriate.
 3. You will receive an acknowledgment within 24 hours and regular status updates every 48 hours until resolved.
 4. We adhere to a 90-day coordinated disclosure timeline before publishing CVEs or public disclosures.

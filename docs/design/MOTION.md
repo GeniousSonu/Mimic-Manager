@@ -1,4 +1,4 @@
-# OptiForge Motion & Animation Specification
+# Mimic Manager Motion & Animation Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Motion Designer & Accessibility Specialist  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Motion Philosophy & Principles
-Motion in OptiForge serves functional clarity rather than theatrical decoration:
+Motion in Mimic Manager serves functional clarity rather than theatrical decoration:
 - **Communicate Cause & Effect:** Show where an item expanded from, clarify spatial relationships, and confirm state changes.
 - **Never Block User Input:** Animations must not prevent clicks, keypresses, or navigation.
 - **Strict 60 FPS Budget:** All animations must utilize GPU-accelerated CSS properties (`transform`, `opacity`); zero animation of `width`, `height`, `margin`, or `top`.

@@ -20,8 +20,8 @@ Every contribution that modifies system behavior, APIs, or user interfaces must 
    - Docker Engine & Docker Compose
 2. Clone and install:
    ```bash
-   git clone https://github.com/optiforge/optiforge.git
-   cd optiforge
+   git clone https://github.com/GeniousSonu/Mimic-Manager.git
+   cd Mimic-Manager
    pnpm install
    cd connectors/wordpress && composer install && cd ../..
    ```
@@ -38,3 +38,4 @@ Every contribution that modifies system behavior, APIs, or user interfaces must 
 - Conventional Commits: `feat:`, `fix:`, `docs:`, `test:`, `chore:`, `perf:`
 - Pull requests must include passing tests and zero lint errors.
 - Never commit secrets, API keys, or binary blobs.
+- **Developer Certificate of Origin (DCO):** All commits must be signed off with `git commit -s` (`Signed-off-by: Your Name <your@email.com>`). No Contributor License Agreement (CLA) is required.

@@ -1,4 +1,4 @@
-# OptiForge Release Process & Versioning Policy
+# Mimic Manager Release Process & Versioning Policy
 
 **Status:** ACTIVE  
 **Owner-persona:** Release Manager & Core Maintainer  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Semantic Versioning (SemVer 2.0)
-OptiForge releases follow Semantic Versioning (`MAJOR.MINOR.PATCH`):
+Mimic Manager releases follow Semantic Versioning (`MAJOR.MINOR.PATCH`):
 - **MAJOR:** Breaking API changes or schema modifications requiring manual database migration.
 - **MINOR:** New optimization fixes, UI features, or connector integrations (fully backward-compatible).
 - **PATCH:** Security fixes, bug resolutions, and performance improvements.

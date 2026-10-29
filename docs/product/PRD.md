@@ -1,4 +1,4 @@
-# Product Requirements Document (PRD): OptiForge
+# Product Requirements Document (PRD): Mimic Manager
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Product Architect  
@@ -12,7 +12,7 @@
 
 Website performance, search engine optimization, media management, and section extraction are plagued by fragmented, expensive, and fragile tooling. Web developers and agency owners must maintain dozens of single-purpose plugins that conflict with each other, charge recurring credit fees, and silently break site functionality when aggressive script deferrals or style removals are applied.
 
-**OptiForge** is a self-hostable, headless optimization brain with thin CMS connectors (WordPress first) and a centralized PWA command center. Our core promise is **Unification plus Verification**: a single operational surface where every media conversion is lossless or optimal, every speed fix is tested in an isolated browser preview and automatically reverted upon regression, and every SEO gap is filled collaboratively without duplicating existing plugin data.
+**Mimic Manager** is a self-hostable, headless optimization brain with thin CMS connectors (WordPress first) and a centralized PWA command center. Our core promise is **Unification plus Verification**: a single operational surface where every media conversion is lossless or optimal, every speed fix is tested in an isolated browser preview and automatically reverted upon regression, and every SEO gap is filled collaboratively without duplicating existing plugin data.
 
 ---
 
@@ -25,8 +25,8 @@ Website performance, search engine optimization, media management, and section e
 4. **Zero Latency wp-admin Footprint:** Front-end overhead of the connector plugin is strictly < 5ms median with zero additional database queries on cached paths.
 
 ### Explicit Non-Goals
-1. **Full-Page Caching & CDN:** OptiForge will not build a custom full-page HTML cache or CDN edge network. Battle-tested tools (Cloudflare, LiteSpeed, WP Rocket) excel at this; OptiForge provides purge hooks and guided integration instructions instead.
-2. **Server Infrastructure Mutation:** OptiForge will never automatically edit host server files (`/etc/nginx/nginx.conf`, Apache virtual hosts). Guided copy-paste configuration snippets are provided with safety notices.
+1. **Full-Page Caching & CDN:** Mimic Manager will not build a custom full-page HTML cache or CDN edge network. Battle-tested tools (Cloudflare, LiteSpeed, WP Rocket) excel at this; Mimic Manager provides purge hooks and guided integration instructions instead.
+2. **Server Infrastructure Mutation:** Mimic Manager will never automatically edit host server files (`/etc/nginx/nginx.conf`, Apache virtual hosts). Guided copy-paste configuration snippets are provided with safety notices.
 3. **Proprietary Monetization / Paywalls:** No paid tiers, usage limits, or locked premium features.
 
 ---
@@ -116,7 +116,7 @@ Refer to [PERSONAS_AND_JTBD.md](file:///home/dayshift/Pictures/Mimic%20Manager/d
 
 #### `FR-SPEED-002`: Playwright Preview Verification & Auto-Revert
 - **Priority:** Must Have (P0)
-- **Rationale:** This is OptiForge's primary differentiator: eliminating the fear of broken sites.
+- **Rationale:** This is Mimic Manager's primary differentiator: eliminating the fear of broken sites.
 - **User Story:** As a site owner, I want any script optimization that causes a JavaScript console error to be reverted immediately.
 - **Acceptance Criteria:**
   - *Given* a Moderate fix applied in signed preview mode,
@@ -130,17 +130,17 @@ Refer to [PERSONAS_AND_JTBD.md](file:///home/dayshift/Pictures/Mimic%20Manager/d
 #### `FR-SEO-001`: Plugin-Aware Post-Meta Adapter
 - **Priority:** Must Have (P0)
 - **Rationale:** Incompatible SEO tag injection harms search engine rankings.
-- **User Story:** As a developer with Yoast or Rank Math active, I want OptiForge to write into their existing post-meta fields rather than generating conflicting tags.
+- **User Story:** As a developer with Yoast or Rank Math active, I want Mimic Manager to write into their existing post-meta fields rather than generating conflicting tags.
 - **Acceptance Criteria:**
   - *Given* Yoast SEO, Rank Math, SEOPress, or AIOSEO active on the site,
-  - *When* OptiForge generates missing meta descriptions,
+  - *When* Mimic Manager generates missing meta descriptions,
   - *Then* it writes directly to their specific meta keys and marks the record in ChangeLog.
 
 #### `FR-SEO-002`: Duplicate Schema Prevention
 - **Priority:** Must Have (P0)
 - **Rationale:** Multiple conflicting JSON-LD blocks for Organization or WebSite confuse search indexers.
 - **Acceptance Criteria:**
-  - Rendered HTML is parsed; if a schema type is already present, OptiForge suppresses its own output for that type.
+  - Rendered HTML is parsed; if a schema type is already present, Mimic Manager suppresses its own output for that type.
 
 ---
 
@@ -194,7 +194,7 @@ Refer to [PERSONAS_AND_JTBD.md](file:///home/dayshift/Pictures/Mimic%20Manager/d
 ## 7. Core User Flows
 
 1. **Site Pairing Flow:** Admin installs plugin → PWA displays 6-digit code → Admin enters code in wp-admin → Mutual HMAC secrets exchanged → Connection verified.
-2. **One-Click Speed Optimization:** User selects URL → OptiForge audits → Safe fixes applied instantly → Moderate fixes previewed with Playwright → Verification passed → Live activation with Undo toast.
+2. **One-Click Speed Optimization:** User selects URL → Mimic Manager audits → Safe fixes applied instantly → Moderate fixes previewed with Playwright → Verification passed → Live activation with Undo toast.
 3. **Bulk Image Optimization:** Admin opens Media Optimizer → System calculates potential savings → Admin selects quality preset → Action Scheduler pulls variants in background → Progress streamed via SSE → Completion summary with per-file restore.
 
 ---
@@ -213,7 +213,7 @@ Refer to [PERSONAS_AND_JTBD.md](file:///home/dayshift/Pictures/Mimic%20Manager/d
 
 ## 9. Risks and Key Assumptions
 
-- **Assumption:** WordPress hosts allow outbound HTTP calls to the self-hosted OptiForge backend. *Mitigation: Support local-only fallback mode in the plugin if remote networking is firewalled.*
+- **Assumption:** WordPress hosts allow outbound HTTP calls to the self-hosted Mimic Manager backend. *Mitigation: Support local-only fallback mode in the plugin if remote networking is firewalled.*
 - **Assumption:** Playwright Chromium container can run with minimal memory overhead. *Mitigation: Strict container memory limits (1.5 GB), single context per job, aggressive browser recycling.*
 
 ---
@@ -222,6 +222,8 @@ Refer to [PERSONAS_AND_JTBD.md](file:///home/dayshift/Pictures/Mimic%20Manager/d
 
 1. *Should PDF rasterization be bundled in Phase 1 or deferred?* **Decision:** Deferred to Phase 7 due to Ghostscript licensing and container weight; focus on raster images and SVGs.
 2. *Will WooCommerce checkout preview test require mocked payment gateways?* **Decision:** Yes, Playwright preview runs will detect WooCommerce and test with Stripe test tokens or standard cash-on-delivery mode to prevent live transactions.
+3. *Product Name Confirmation:* Product name given as "Mimic Manager". Status: `UNVERIFIED: owner must confirm` before final release tag.
+4. *Creator Domain Confirmation:* Creator domain given as `www.genioussonu.me`. Status: `UNVERIFIED: owner must confirm` before final release tag.
 
 ---
 

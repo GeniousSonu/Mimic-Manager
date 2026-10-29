@@ -1,4 +1,4 @@
-# OptiForge User Experience (UX) Flow & Interaction Specification
+# Mimic Manager User Experience (UX) Flow & Interaction Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead UX Architect & Interaction Designer  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview
-This specification details the user flows, screen interactions, input contracts, and error recovery paths for OptiForge's core journeys.
+This specification details the user flows, screen interactions, input contracts, and error recovery paths for Mimic Manager's core journeys.
 
 ---
 
@@ -21,9 +21,9 @@ sequenceDiagram
     actor Admin as WordPress Admin
     participant WP as WordPress Plugin
     participant PWA as Command Center PWA
-    participant API as OptiForge API
+    participant API as Mimic Manager API
 
-    Admin->>WP: Installs plugin & clicks "OptiForge"
+    Admin->>WP: Installs plugin & clicks "Mimic Manager"
     WP->>Admin: Displays 6-digit one-time PIN (e.g. 849201)
     Admin->>PWA: Clicks "+ Connect Site" & enters PIN + Site URL
     PWA->>API: POST /api/v1/sites/pair { pin, homeUrl }

@@ -1,4 +1,4 @@
-# OptiForge Visual File Manager Design Specification
+# Mimic Manager Visual File Manager Design Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Security Architect & Systems Engineer  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview
-The OptiForge Visual File Manager delivers a polished, desktop-grade file management experience (styled after Apple Files and Google Files) directly inside WordPress, while avoiding the catastrophic remote-code-execution (RCE) vulnerabilities that plagued legacy file manager plugins (e.g. CVE-2020-25213).
+The Mimic Manager Visual File Manager delivers a polished, desktop-grade file management experience (styled after Apple Files and Google Files) directly inside WordPress, while avoiding the catastrophic remote-code-execution (RCE) vulnerabilities that plagued legacy file manager plugins (e.g. CVE-2020-25213).
 
 ---
 
@@ -36,8 +36,8 @@ To eliminate the risk of crashing a site with a fatal syntax error ("White Scree
 ---
 
 ## 4. Shadow Backups & Atomic Writes
-- Before any file write is committed, the current version on disk is hashed (SHA-256) and copied to `wp-content/optiforge-backups/<backup_id>.bak`.
-- A record is inserted into `wp_optiforge_backups`.
+- Before any file write is committed, the current version on disk is hashed (SHA-256) and copied to `wp-content/mm-backups/<backup_id>.bak`.
+- A record is inserted into `wp_mimic_manager_backups`.
 - The new content is written via atomic temporary file rename (`rename(temp, target)`).
 - A 1-click restore button is available in the editor toolbar.
 

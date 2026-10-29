@@ -1,4 +1,4 @@
-# OptiForge REST API & Event Stream Specification
+# Mimic Manager REST API & Event Stream Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** API Architect & Lead Integration Engineer  
@@ -10,22 +10,22 @@
 
 ## 1. Overview & Conventions
 
-The OptiForge API provides a RESTful interface for command-and-control operations between the Command Center PWA, backend microservices, and connected CMS instances (e.g., WordPress).
+The Mimic Manager API provides a RESTful interface for command-and-control operations between the Command Center PWA, backend microservices, and connected CMS instances (e.g., WordPress).
 
 ### 1.1 Base URL & Content Negotiation
-- **Production Base URL:** `https://optiforge.internal/api/v1`
+- **Production Base URL:** `https://mimic-manager.internal/api/v1`
 - **Content-Type:** `application/json` (verbatim binary buffers for `/media/jobs`)
 - **Character Encoding:** UTF-8
 - **Date Format:** ISO 8601 (`YYYY-MM-DDTHH:mm:ss.sssZ`)
 
 ### 1.2 Authentication Methods
-OptiForge enforces two authentication models:
+Mimic Manager enforces two authentication models:
 1. **PWA Session & CLI Tokens:** Bearer token authentication via `Authorization: Bearer <jwt_or_api_key>` with scoped permissions (`read:sites`, `write:media`, `admin:all`).
 2. **Mutual HMAC-SHA256 Signing (CMS Connector):** Used for site-to-hub communication. Requests must supply:
-   - `X-OptiForge-Site-Id`: Site UUIDv4.
-   - `X-OptiForge-Timestamp`: UNIX timestamp in seconds (valid within ±300s window).
-   - `X-OptiForge-Nonce`: Random 32-character hex string (cached in Redis with 10-minute TTL to prevent replay).
-   - `X-OptiForge-Signature`: `sha256=<hex_digest>` computed over `${timestamp}.${nonce}.${siteId}.${body}`.
+   - `X-Mimic Manager-Site-Id`: Site UUIDv4.
+   - `X-Mimic Manager-Timestamp`: UNIX timestamp in seconds (valid within ±300s window).
+   - `X-Mimic Manager-Nonce`: Random 32-character hex string (cached in Redis with 10-minute TTL to prevent replay).
+   - `X-Mimic Manager-Signature`: `sha256=<hex_digest>` computed over `${timestamp}.${nonce}.${siteId}.${body}`.
 
 ---
 
@@ -79,7 +79,7 @@ Rate limiting is enforced globally and per site via Redis Token Bucket:
     {
       "siteId": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
       "clientSecret": "sec_7f9a12c8e3d14ab590ef18c4390b",
-      "webhookUrl": "https://optiforge.internal/api/v1/webhooks/connector"
+      "webhookUrl": "https://mimic-manager.internal/api/v1/webhooks/connector"
     }
     ```
 

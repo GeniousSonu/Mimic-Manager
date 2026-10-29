@@ -13,7 +13,7 @@ WordPress admin pages frequently suffer from severe CSS collisions. Global WordP
 ---
 
 ## Decision
-We mount the OptiForge React application inside an isolated **Shadow DOM root** (`attachShadow({ mode: 'open' })`) with design tokens and scoped CSS stylesheets injected directly inside the shadow boundary.
+We mount the Mimic Manager React application inside an isolated **Shadow DOM root** (`attachShadow({ mode: 'open' })`) with design tokens and scoped CSS stylesheets injected directly inside the shadow boundary.
 
 ---
 

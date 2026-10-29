@@ -1,4 +1,4 @@
-# OptiForge Design Critique Log & Rubric Evaluation
+# Mimic Manager Design Critique Log & Rubric Evaluation
 
 **Status:** ACTIVE  
 **Owner-persona:** Design Director & Hostile Review Board  
@@ -10,7 +10,7 @@
 
 ## 1. 100-Point Design Director Evaluation Rubric
 
-Every screen in OptiForge is formally evaluated by the **Design Director** persona against this strict 10-category rubric:
+Every screen in Mimic Manager is formally evaluated by the **Design Director** persona against this strict 10-category rubric:
 1. **Hierarchy & Clarity (Max 15):** Clear primary action; unambiguous visual hierarchy.
 2. **Consistency with Tokens & Components (Max 15):** 100% adherence to `tokens.json`; zero ad-hoc styling.
 3. **Interaction Quality & Feedback (Max 15):** Optimistic UI; instant feedback under 100ms; intuitive click/touch response.

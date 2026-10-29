@@ -2,6 +2,7 @@
   "name": "mimic-manager-monorepo",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Unified open-source site optimization platform",
   "license": "AGPL-3.0-only",
   "packageManager": "pnpm@12.16.1",
@@ -16,6 +17,9 @@
     "test": "turbo run test",
     "test:contrast": "pnpm --filter @mimic-manager/ui check-contrast",
     "test:php": "cd connectors/wordpress && vendor/bin/phpunit",
+    "brand:apply": "node scripts/brand/apply.ts",
+    "brand:check": "node scripts/brand/check.ts",
+    "brand:rename": "node scripts/brand/rename.ts",
     "test:coverage": "turbo run test:coverage",
     "clean": "turbo run clean && rm -rf node_modules"
   },

@@ -1,4 +1,4 @@
-# OptiForge Compatibility Matrix
+# Mimic Manager Compatibility Matrix
 
 **Status:** ACTIVE  
 **Owner-persona:** Release Engineer & QA Specialist  
@@ -20,7 +20,7 @@
 
 ---
 
-### 1.2 OptiForge Hub & Self-Hosting Stack
+### 1.2 Mimic Manager Hub & Self-Hosting Stack
 | Software | Minimum Version | Recommended Version | Notes |
 | :--- | :--- | :--- | :--- |
 | **Node.js** | 20.x LTS | 22.x LTS | API, worker, and command center runtime. |
@@ -34,11 +34,11 @@
 ### 1.3 Third-Party Plugin Coexistence Matrix
 | Plugin / Tool | Coexistence Mode | Potential Conflict | Mitigation Mechanism |
 | :--- | :--- | :--- | :--- |
-| **Yoast SEO** | Symbiotic | Duplicate meta description | OptiForge syncs to `_yoast_wpseo_metadesc`; front-end tag injection disabled. |
-| **Rank Math** | Symbiotic | Competing OpenGraph tags | OptiForge defers to Rank Math schema graph. |
-| **WP Rocket** | Selective | Double JS delay / minify | If WP Rocket JS delay is active, OptiForge disables `FIX-PERF-004`. |
+| **Yoast SEO** | Symbiotic | Duplicate meta description | Mimic Manager syncs to `_yoast_wpseo_metadesc`; front-end tag injection disabled. |
+| **Rank Math** | Symbiotic | Competing OpenGraph tags | Mimic Manager defers to Rank Math schema graph. |
+| **WP Rocket** | Selective | Double JS delay / minify | If WP Rocket JS delay is active, Mimic Manager disables `FIX-PERF-004`. |
 | **Autoptimize** | Selective | Double CSS inlining | Banner prompts user to disable CSS optimization in one tool. |
-| **ShortPixel / EWWW** | Disallowed | Duplicate WebP conversion | OptiForge displays conflict banner and pauses background media hooks. |
+| **ShortPixel / EWWW** | Disallowed | Duplicate WebP conversion | Mimic Manager displays conflict banner and pauses background media hooks. |
 
 ---
 

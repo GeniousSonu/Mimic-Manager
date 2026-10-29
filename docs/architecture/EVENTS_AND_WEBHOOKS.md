@@ -1,4 +1,4 @@
-# OptiForge Events & Signed Webhook Specification
+# Mimic Manager Events & Signed Webhook Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Distributed Systems Architect & Lead Security Engineer  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview
-OptiForge employs an asynchronous, event-driven architecture to communicate job progress, completion notifications, and health updates across services and external CMS connectors.
+Mimic Manager employs an asynchronous, event-driven architecture to communicate job progress, completion notifications, and health updates across services and external CMS connectors.
 
 Webhooks dispatched to CMS connectors are cryptographically signed using the shared secret established during site pairing.
 
@@ -31,11 +31,11 @@ Webhooks dispatched to CMS connectors are cryptographically signed using the sha
 ## 3. Webhook Delivery & Signing Protocol
 
 ### 3.1 Mutual Cryptographic Verification
-Webhooks sent from OptiForge Hub to CMS connectors must include the following headers:
-- `X-OptiForge-Event`: The event identifier (e.g. `media.optimized`).
-- `X-OptiForge-Delivery-Id`: Unique UUIDv4 per delivery attempt.
-- `X-OptiForge-Timestamp`: UNIX timestamp in seconds.
-- `X-OptiForge-Signature`: `sha256=<hex_digest>` computed using the site's shared secret.
+Webhooks sent from Mimic Manager Hub to CMS connectors must include the following headers:
+- `X-Mimic Manager-Event`: The event identifier (e.g. `media.optimized`).
+- `X-Mimic Manager-Delivery-Id`: Unique UUIDv4 per delivery attempt.
+- `X-Mimic Manager-Timestamp`: UNIX timestamp in seconds.
+- `X-Mimic Manager-Signature`: `sha256=<hex_digest>` computed using the site's shared secret.
 
 ### 3.2 Canonical Signature String
 ```text

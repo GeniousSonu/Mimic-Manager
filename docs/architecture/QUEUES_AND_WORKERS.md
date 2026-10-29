@@ -1,4 +1,4 @@
-# OptiForge Queues, Workers & Concurrency Architecture
+# Mimic Manager Queues, Workers & Concurrency Architecture
 
 **Status:** ACTIVE  
 **Owner-persona:** SRE & Lead Infrastructure Engineer  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Overview
-OptiForge isolates resource-intensive tasks (image compression, Chromium headless audits, AI alt-text inference) from the Fastify API Gateway using Redis-backed BullMQ queues and isolated worker processes.
+Mimic Manager isolates resource-intensive tasks (image compression, Chromium headless audits, AI alt-text inference) from the Fastify API Gateway using Redis-backed BullMQ queues and isolated worker processes.
 
 ---
 

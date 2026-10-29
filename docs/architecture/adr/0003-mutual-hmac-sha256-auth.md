@@ -8,7 +8,7 @@
 ---
 
 ## Context
-Connected websites (WordPress instances) communicate bi-directionally with the OptiForge hub. Standard API bearer tokens can be intercepted or leaked through reverse proxies and logs. Furthermore, static API keys do not guarantee message integrity against in-transit payload tampering.
+Connected websites (WordPress instances) communicate bi-directionally with the Mimic Manager hub. Standard API bearer tokens can be intercepted or leaked through reverse proxies and logs. Furthermore, static API keys do not guarantee message integrity against in-transit payload tampering.
 
 ---
 

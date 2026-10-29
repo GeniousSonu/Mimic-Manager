@@ -1,4 +1,4 @@
-# OptiForge Content Style Guide & UX Writing
+# Mimic Manager Content Style Guide & UX Writing
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead UX Writer & Content Designer  
@@ -21,7 +21,7 @@
 
 ## 2. The 4-Part Error Formula
 
-Every error message in OptiForge strictly adheres to this 4-part formula:
+Every error message in Mimic Manager strictly adheres to this 4-part formula:
 1. **What Happened:** State the failure clearly without panic.
 2. **Why It Happened:** Explain the root cause if known.
 3. **What You Can Do:** Provide the immediate next step or remediation action.

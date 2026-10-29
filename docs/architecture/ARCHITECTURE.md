@@ -13,13 +13,13 @@
 ### 1.1 Context Diagram (C4 Level 1)
 ```mermaid
 graph TD
-  User[Developer / Agency / Site Owner] -->|Manages Sites & Optimizations| PWA[OptiForge Command Center PWA]
+  User[Developer / Agency / Site Owner] -->|Manages Sites & Optimizations| PWA[Mimic Manager Command Center PWA]
   User -->|Installs Connector & Edits Files| WP[WordPress Site wp-admin]
 
-  PWA -->|REST API & SSE / Mutual HMAC| API[OptiForge Backend API]
+  PWA -->|REST API & SSE / Mutual HMAC| API[Mimic Manager Backend API]
   WP -->|Pushes Media / Receives Variants| API
   API -->|Enqueues Tasks| Queue[Redis Task Queues]
-  Queue -->|Dispatches Jobs| Worker[OptiForge Background Workers]
+  Queue -->|Dispatches Jobs| Worker[Mimic Manager Background Workers]
   Worker -->|Optimizes Images / Runs Browser| Worker
   Worker -->|Signed Webhook Notification| WP
 ```

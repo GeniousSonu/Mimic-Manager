@@ -1,11 +1,11 @@
-# Global codeowners for OptiForge
-* @optiforge/core-maintainers
+# Global codeowners for Mimic Manager
+* @mimic-manager/core-maintainers
 
 # Security critical paths
-/packages/ssrf-guard/ @optiforge/security-leads
-/apps/api/src/common/guards/ @optiforge/security-leads
-/connectors/wordpress/src/Security/ @optiforge/security-leads
+/packages/ssrf-guard/ @mimic-manager/security-leads
+/apps/api/src/common/guards/ @mimic-manager/security-leads
+/connectors/wordpress/src/Security/ @mimic-manager/security-leads
 
 # Design system
-/packages/ui/ @optiforge/design-leads
-/docs/design/ @optiforge/design-leads
+/packages/ui/ @mimic-manager/design-leads
+/docs/design/ @mimic-manager/design-leads

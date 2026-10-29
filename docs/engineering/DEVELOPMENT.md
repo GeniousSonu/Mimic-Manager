@@ -1,4 +1,4 @@
-# OptiForge Engineering & Local Development Guide
+# Mimic Manager Engineering & Local Development Guide
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Developer & Engineering Manager  

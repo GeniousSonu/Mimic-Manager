@@ -1,4 +1,4 @@
-# OptiForge CI/CD Pipeline & Automated Quality Gates
+# Mimic Manager CI/CD Pipeline & Automated Quality Gates
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead DevOps Engineer & Release Manager  

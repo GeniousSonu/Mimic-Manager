@@ -1,8 +1,9 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\Seo;
+namespace Wefik\MimicManager\Seo;
 
 final class MetaSync {
     public const PROVIDER_YOAST     = 'yoast';
@@ -27,9 +28,9 @@ final class MetaSync {
             'canonical'   => '_seopress_titles_canonical',
         ],
         self::PROVIDER_NATIVE => [
-            'title'       => '_optiforge_seo_title',
-            'description' => '_optiforge_seo_desc',
-            'canonical'   => '_optiforge_seo_canonical',
+            'title'       => '_mimic_manager_seo_title',
+            'description' => '_mimic_manager_seo_desc',
+            'canonical'   => '_mimic_manager_seo_canonical',
         ],
     ];
 

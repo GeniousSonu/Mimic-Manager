@@ -1,11 +1,12 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\Tests;
+namespace Wefik\MimicManager\Tests;
 
 use PHPUnit\Framework\TestCase;
-use OptiForge\Speed\FixEngine;
+use Wefik\MimicManager\Speed\FixEngine;
 
 class SpeedTest extends TestCase
 {
@@ -32,7 +33,7 @@ class SpeedTest extends TestCase
         $html = '<html><head><title>Test</title></head><body><h1>Hello</h1></body></html>';
         $optimized = $this->engine->optimizeHtml($html);
 
-        $this->assertStringContainsString('<!-- OptiForge DNS Preconnect -->', $optimized);
+        $this->assertStringContainsString('<!-- Mimic Manager DNS Preconnect -->', $optimized);
         $this->assertStringContainsString('<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>', $optimized);
         $this->assertStringContainsString('<link rel="dns-prefetch" href="https://fonts.gstatic.com">', $optimized);
     }
@@ -100,7 +101,7 @@ class SpeedTest extends TestCase
         $html = '<html><head><title>Test</title></head><body><h1>Hello</h1></body></html>';
         $optimized = $this->engine->optimizeHtml($html);
 
-        $this->assertStringContainsString('<style id="optiforge-critical-css">body{background:#000;color:#fff;}</style>', $optimized);
+        $this->assertStringContainsString('<style id="mm-critical-css">body{background:#000;color:#fff;}</style>', $optimized);
     }
 
     public function testRollbackAndAuditLog(): void

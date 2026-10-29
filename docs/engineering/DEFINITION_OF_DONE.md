@@ -1,4 +1,4 @@
-# OptiForge Definition of Done (DoD)
+# Mimic Manager Definition of Done (DoD)
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Quality Engineer & Scrum Master  
@@ -21,7 +21,7 @@ A task, feature, or phase is considered **DONE** only when all of the following 
 ### 1.2 Code & Architectural Gate
 - [ ] Strict TypeScript typing enforced (zero `any`).
 - [ ] Defensive PHP applied with `try / catch (\Throwable $e)` and circuit breaker integration.
-- [ ] All database writes and mutations recorded in `wp_optiforge_changelog` with atomic rollback capability.
+- [ ] All database writes and mutations recorded in `wp_mimic_manager_changelog` with atomic rollback capability.
 
 ### 1.3 Quality & Testing Gate
 - [ ] Unit tests written with ≥ 85% branch coverage on new logic.

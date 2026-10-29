@@ -1,4 +1,4 @@
-# OptiForge Responsive & Progressive Web App (PWA) UX Specification
+# Mimic Manager Responsive & Progressive Web App (PWA) UX Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Mobile Web Specialist & PWA Architect  
@@ -9,7 +9,7 @@
 ---
 
 ## 1. Responsive Breakpoints & Viewport Verification
-OptiForge views are built mobile-first and tested against 6 canonical viewports:
+Mimic Manager views are built mobile-first and tested against 6 canonical viewports:
 - **360px:** Small Mobile (Samsung Galaxy S8, compact Android).
 - **390px:** Standard Modern Mobile (iPhone 13/14/15/16).
 - **768px:** Tablet Portrait (iPad Mini, tablet devices).
@@ -28,7 +28,7 @@ The PWA manifest (`manifest.json`) defines native app-like launch shortcuts:
 - `Alt-Text Queue`: Jumps straight to the image accessibility review queue.
 
 ### 2.2 OS Share Target Integration
-On Android and ChromeOS, OptiForge registers as an OS **Share Target** for `image/*` MIME types. Users can share an image directly from Google Photos or their native camera into OptiForge for immediate WebP/AVIF compression.
+On Android and ChromeOS, Mimic Manager registers as an OS **Share Target** for `image/*` MIME types. Users can share an image directly from Google Photos or their native camera into Mimic Manager for immediate WebP/AVIF compression.
 
 ### 2.3 Offline Experience & App Shell Caching
 - **App Shell Cache:** Static assets, icons, and shell HTML are cached via Workbox.

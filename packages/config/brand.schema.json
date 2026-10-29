@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BrandConfig",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "product",
+    "creator",
+    "owner",
+    "copyright",
+    "licenses",
+    "identifiers",
+    "visual",
+    "attribution"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "product": {
+      "type": "object",
+      "required": ["name", "slug", "snake", "pascal", "constantPrefix", "shortName", "tagline", "description", "version"],
+      "properties": {
+        "name": { "type": "string" },
+        "verified": { "type": "boolean" },
+        "slug": { "type": "string" },
+        "snake": { "type": "string" },
+        "pascal": { "type": "string" },
+        "constantPrefix": { "type": "string" },
+        "shortName": { "type": "string" },
+        "tagline": { "type": "string" },
+        "description": { "type": "string" },
+        "version": { "type": "string" }
+      }
+    },
+    "creator": {
+      "type": "object",
+      "required": ["name", "displayName", "role", "website", "websiteVerified", "websiteUrl"],
+      "properties": {
+        "name": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string" },
+        "website": { "type": "string" },
+        "websiteVerified": { "type": "boolean" },
+        "websiteUrl": { "type": "string" }
+      }
+    },
+    "owner": {
+      "type": "object",
+      "required": ["organization", "website", "websiteVerified", "legalNotice"],
+      "properties": {
+        "organization": { "type": "string" },
+        "website": { "type": "string" },
+        "websiteVerified": { "type": "boolean" },
+        "legalNotice": { "type": "string" }
+      }
+    },
+    "copyright": {
+      "type": "object",
+      "required": ["holder", "startYear", "yearRange"],
+      "properties": {
+        "holder": { "type": "string" },
+        "startYear": { "type": "integer" },
+        "yearRange": { "type": "string" }
+      }
+    },
+    "licenses": {
+      "type": "object",
+      "required": ["platform", "wordpressPlugin", "docs"],
+      "properties": {
+        "platform": { "type": "string" },
+        "wordpressPlugin": { "type": "string" },
+        "docs": { "type": "string" }
+      }
+    },
+    "identifiers": {
+      "type": "object",
+      "required": [
+        "npmScope",
+        "composerVendor",
+        "composerPackage",
+        "phpNamespace",
+        "wpTextDomain",
+        "wpFunctionPrefix",
+        "wpOptionPrefix",
+        "wpHookPrefix",
+        "wpRestNamespace",
+        "wpDbTablePrefix",
+        "dockerImageBase",
+        "envVarPrefix",
+        "mongoDbName",
+        "redisKeyPrefix",
+        "bullmqPrefix",
+        "cssVarPrefix",
+        "cssClassPrefix",
+        "dataAttrPrefix",
+        "idempotencyMarkerPrefix",
+        "httpHeaderPrefix",
+        "userAgent",
+        "pwaStartUrl",
+        "cookiePrefix"
+      ]
+    },
+    "visual": {
+      "type": "object",
+      "required": ["logo", "mark", "wordmark", "accent"],
+      "properties": {
+        "logo": { "type": "string" },
+        "mark": { "type": "string" },
+        "wordmark": { "type": "string" },
+        "accent": { "type": "string" }
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "required": [
+        "showPoweredByInUi",
+        "showPoweredByInReports",
+        "reportsFooterRemovable",
+        "legalNoticesRemovableFromSource"
+      ]
+    }
+  }
+}

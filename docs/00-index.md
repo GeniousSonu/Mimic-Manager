@@ -1,4 +1,4 @@
-# OptiForge Documentation Index & Reading Order
+# Mimic Manager Documentation Index & Reading Order
 
 **Status:** ACTIVE  
 **Last-reviewed:** 2026-10-29  

@@ -1,4 +1,4 @@
-# OptiForge Upgrade & Database Migration Guide
+# Mimic Manager Upgrade & Database Migration Guide
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Release Engineer & Database Administrator  

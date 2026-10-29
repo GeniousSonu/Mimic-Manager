@@ -1,6 +1,14 @@
-OptiForge (working title Mimic Manager)
-Copyright (c) 2026 OptiForge Contributors
+Mimic Manager
+Copyright (c) 2026 Wefik
+Created by SK Sahinur Islam (https://www.genioussonu.me/plugin/mimic-manager)
+Official Website: https://www.wefik.in
 
-This product includes software developed by the OptiForge open-source community.
-Backend services and command center are licensed under the GNU AGPL-3.0-only.
-The WordPress connector plugin is licensed under the GNU GPL-2.0-or-later.
+This product includes software developed by Wefik and its contributors.
+
+Open Source Components & Attributions:
+- Next.js (MIT License) - Copyright (c) Vercel, Inc.
+- NestJS (MIT License) - Copyright (c) 2017-2026 Kamil Mysliwiec
+- Sharp (Apache-2.0) - Copyright (c) Lovell Fuller
+- Fastify (MIT License) - Copyright (c) Fastify contributors
+- Tailwind CSS (MIT License) - Copyright (c) Tailwind Labs, Inc.
+- Lucide Icons (ISC License) - Copyright (c) Lucide Contributors

@@ -1,8 +1,9 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\Media;
+namespace Wefik\MimicManager\Media;
 
 final class PictureRewriter {
     /**
@@ -44,7 +45,7 @@ final class PictureRewriter {
                 );
             }, $html);
         } catch (\Throwable $e) {
-            error_log('[OptiForge] PictureRewriter failed: ' . $e->getMessage());
+            error_log('[Mimic Manager] PictureRewriter failed: ' . $e->getMessage());
             return $html;
         }
     }

@@ -1,4 +1,4 @@
-# OptiForge Operational Runbooks & Emergency Procedures
+# Mimic Manager Operational Runbooks & Emergency Procedures
 
 **Status:** ACTIVE  
 **Owner-persona:** SRE Incident Commander & Operations Lead  
@@ -13,16 +13,16 @@
 ### 1.1 Runbook: BullMQ Task Queue Stuck
 - **Symptom:** Image conversion jobs remain in `pending` or `active` state without completing; queue depth increases.
 - **Impact:** Delay in WebP/AVIF generation; new uploads queued on WordPress connector.
-- **Detection:** Prometheus alert `optiforge_queue_depth > 100` or dashboard queue count badge alert.
+- **Detection:** Prometheus alert `mimic_manager_queue_depth > 100` or dashboard queue count badge alert.
 - **Diagnosis Steps:**
   1. Inspect worker container logs: `docker compose logs -f worker`.
   2. Check Redis memory usage: `docker compose exec redis redis-cli info memory`.
-  3. Inspect BullMQ stalled jobs: `pnpm --filter @optiforge/worker run queue:inspect`.
+  3. Inspect BullMQ stalled jobs: `pnpm --filter @mimic-manager/worker run queue:inspect`.
 - **Fix Steps:**
   1. Restart stuck worker processes: `docker compose restart worker`.
   2. Clear stalled locks in Redis: `docker compose exec redis redis-cli del "bull:media_fast:stalled-check"`.
   3. Drain dead-letter queue if poisonous payload caused crash loop.
-- **Verification:** Monitor `optiforge_queue_depth`; verify processing resumes and count decreases.
+- **Verification:** Monitor `mimic_manager_queue_depth`; verify processing resumes and count decreases.
 - **Prevention:** Enforce worker memory limits (`--max-old-space-size=1536`) and timeout guards.
 - **Escalation:** Escalate to Backend Lead if specific image payload causes repeated segmentation faults in libvips.
 
@@ -49,13 +49,13 @@
 ### 1.3 Runbook: Local Storage Partition Disk Full
 - **Symptom:** API returns `507 Insufficient Storage` or `ERR_PAYLOAD_TOO_LARGE`; sharp workers fail to write variants.
 - **Impact:** Optimization halts; WordPress connector falls back to local GD or skips conversion.
-- **Detection:** Disk monitor alert `disk_usage > 90%` on `/var/optiforge/storage`.
+- **Detection:** Disk monitor alert `disk_usage > 90%` on `/var/mimic-manager/storage`.
 - **Diagnosis Steps:**
-  1. Check disk allocation: `df -h /var/optiforge/storage`.
-  2. Identify largest directories: `du -sh /var/optiforge/storage/* | sort -hr | head -n 10`.
+  1. Check disk allocation: `df -h /var/mimic-manager/storage`.
+  2. Identify largest directories: `du -sh /var/mimic-manager/storage/* | sort -hr | head -n 10`.
 - **Fix Steps:**
   1. Run transient artifact pruning: `docker compose exec api node dist/scripts/prune-storage.js --older-than=30d`.
-  2. Clear orphaned temporary uploads: `rm -rf /var/optiforge/storage/tmp/*`.
+  2. Clear orphaned temporary uploads: `rm -rf /var/mimic-manager/storage/tmp/*`.
   3. In Command Center PWA, run "Prune Audit Screenshots" to free historical diff images.
 - **Verification:** Run `df -h` -> confirm available space > 25%.
 - **Prevention:** Configure automated cron job running `prune-storage.js` daily.
@@ -68,7 +68,7 @@
 - **Impact:** Speed audits and Replicator DOM crawls unavailable; image optimization unaffected.
 - **Detection:** Worker logs showing `Target page, context or browser has been closed` or exit code `137` (OOM).
 - **Diagnosis Steps:**
-  1. Check shared memory `/dev/shm` allocation in Docker: `docker inspect optiforge-worker | grep ShmSize`.
+  1. Check shared memory `/dev/shm` allocation in Docker: `docker inspect mimic-manager-worker | grep ShmSize`.
   2. Inspect system dmesg for kernel OOM killer events: `dmesg -T | grep -i oom`.
 - **Fix Steps:**
   1. Ensure container specifies `shm_size: '2gb'` in `docker-compose.yml`.

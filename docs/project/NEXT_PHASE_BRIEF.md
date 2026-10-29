@@ -19,7 +19,7 @@
 - Architecture: `connectors/wordpress/src/Seo/MetaSync.php` writing into Yoast/Rank Math/SEOPress post-meta.
 - Duplicate Schema.org JSON-LD graph avoidance filter.
 - Command Center PWA SEO Gap Fill screen (`/seo`, `SCR-07`).
-- Changelog rollback recording in `wp_optiforge_changelog`.
+- Changelog rollback recording in `wp_mimic_manager_changelog`.
 
 ## Entry checklist
 - [x] P1 exit verified with green test output (`docs/project/evidence/P1/`).

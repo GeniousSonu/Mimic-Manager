@@ -1,4 +1,4 @@
-# OptiForge Data Retention & Pruning Schedule
+# Mimic Manager Data Retention & Pruning Schedule
 
 **Status:** ACTIVE  
 **Owner-persona:** Database Administrator & Compliance Manager  
@@ -15,7 +15,7 @@
 | **Audit Reports** | MongoDB `audits` | 90 days | Automated TTL index on `expiresAt` | Can pin key audits to prevent pruning |
 | **Transient Job Payloads** | MongoDB `jobs` | 30 days | Automated TTL index on `expiresAt` | Summary stats preserved indefinitely |
 | **Nonce Cache** | Redis key store | 10 minutes | Key expiration via Redis EXPIRE | None (fixed security window) |
-| **Connector Backups** | Local `wp-content/optiforge-backups/` | 30 days or max 10 revisions per file | Cron cleanup task `optiforge_prune_backups` | Can pin critical pre-migration backups |
+| **Connector Backups** | Local `wp-content/mm-backups/` | 30 days or max 10 revisions per file | Cron cleanup task `mimic_manager_prune_backups` | Can pin critical pre-migration backups |
 
 ---
 

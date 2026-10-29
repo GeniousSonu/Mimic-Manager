@@ -1,4 +1,4 @@
-# OptiForge Configuration Reference & Environment Variables
+# Mimic Manager Configuration Reference & Environment Variables
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead DevOps Engineer & Security Architect  
@@ -10,7 +10,7 @@
 
 ## 1. Environment Variables Specification
 
-Every environment variable utilized by OptiForge is strictly typed, validated via Zod at application startup, and documented below:
+Every environment variable utilized by Mimic Manager is strictly typed, validated via Zod at application startup, and documented below:
 
 | Variable Name | Type | Default Value | Safe Range | Description & Effect |
 | :--- | :--- | :--- | :--- | :--- |
@@ -19,10 +19,10 @@ Every environment variable utilized by OptiForge is strictly typed, validated vi
 | `API_PREFIX` | `String` | `/api/v1` | URL path prefix | Global REST endpoint routing prefix. |
 | `JWT_SECRET` | `String` | None (Required)| ≥ 32 characters hex | Master cryptographic secret for signing user session tokens. |
 | `MASTER_KMS_KEY` | `String` | None (Required)| 32-byte hex (64 chars) | AES-256-GCM envelope encryption key for site client secrets. |
-| `MONGODB_URI` | `String` | `mongodb://localhost:27017/optiforge` | Valid Mongo URI | Connection string for persistent metadata repository. |
+| `MONGODB_URI` | `String` | `mongodb://localhost:27017/mimic-manager` | Valid Mongo URI | Connection string for persistent metadata repository. |
 | `REDIS_URI` | `String` | `redis://localhost:6379` | Valid Redis URI | Redis instance for BullMQ queues and nonce replay store. |
 | `STORAGE_DRIVER` | `Enum` | `local` | `local`, `s3`, `minio` | Active storage adapter for artifacts and media variants. |
-| `STORAGE_PATH` | `String` | `/var/optiforge/storage` | Writable directory path| Filesystem root for local storage driver. |
+| `STORAGE_PATH` | `String` | `/var/mimic-manager/storage` | Writable directory path| Filesystem root for local storage driver. |
 | `MAX_IMAGE_PIXELS`| `Integer`| `50000000` | `10000000 - 100000000`| Sharp decompression bomb pixel ceiling (50 MP). |
 | `MAX_UPLOAD_BYTES`| `Integer`| `52428800` | `1048576 - 104857600` | Maximum single file upload payload limit (50 MB). |
 | `RATE_LIMIT_MAX` | `Integer`| `120` | `10 - 1000` | Maximum requests per minute per authenticated site. |

@@ -1,4 +1,4 @@
-# OptiForge Iconography Specification
+# Mimic Manager Iconography Specification
 
 **Status:** ACTIVE  
 **Owner-persona:** Visual Designer & Iconography Specialist  

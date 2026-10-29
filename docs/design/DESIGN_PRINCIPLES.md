@@ -1,4 +1,4 @@
-# OptiForge Design Principles
+# Mimic Manager Design Principles
 
 **Status:** ACTIVE  
 **Owner-persona:** Design Director & Principal UI/UX Architect  
@@ -10,7 +10,7 @@
 
 ## 1. Core Principles
 
-The design of OptiForge reflects professional craft on par with Linear, Vercel, and Raycast. Every screen, component, and interaction is governed by eight foundational principles:
+The design of Mimic Manager reflects professional craft on par with Linear, Vercel, and Raycast. Every screen, component, and interaction is governed by eight foundational principles:
 
 ### 1. Calm Confidence
 - **Rule:** Dark-first, restrained, high signal-to-noise ratio. Zero decorative gradients or distracting banner animations.

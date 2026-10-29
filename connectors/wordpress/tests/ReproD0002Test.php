@@ -1,11 +1,12 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\Tests;
+namespace Wefik\MimicManager\Tests;
 
 use PHPUnit\Framework\TestCase;
-use OptiForge\FileManager\JailGuard;
+use Wefik\MimicManager\FileManager\JailGuard;
 use RuntimeException;
 
 class ReproD0002Test extends TestCase
@@ -15,7 +16,7 @@ class ReproD0002Test extends TestCase
 
     protected function setUp(): void
     {
-        $this->tempJail = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'optiforge_repro2_' . uniqid();
+        $this->tempJail = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'mimic_manager_repro2_' . uniqid();
         mkdir($this->tempJail, 0755, true);
         $this->jailGuard = new JailGuard($this->tempJail);
     }

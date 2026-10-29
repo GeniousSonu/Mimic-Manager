@@ -12,7 +12,7 @@
 
 ```mermaid
 graph TD
-  Root[OptiForge App Root] --> CC[Command Center PWA]
+  Root[Mimic Manager App Root] --> CC[Command Center PWA]
   Root --> WP[WordPress Admin Plugin]
   Root --> Standalone[Standalone Tools Mode]
 
@@ -52,7 +52,7 @@ graph TD
 
 ```
 +-----------------------------------------------------------------------------------------+
-| [LOGO] OptiForge   [Site: Client Production (PROD)] v  [⌘K Search...]  [Queue: 3] [User]|
+| [LOGO] Mimic Manager   [Site: Client Production (PROD)] v  [⌘K Search...]  [Queue: 3] [User]|
 +---------------+---------------------------------------------------------+---------------+
 | • Overview    | Section Title                         [Action Button]   | (Optional     |
 | • Sites (42)  +---------------------------------------------------------+  Contextual   |
@@ -82,7 +82,7 @@ graph TD
 
 ## 3. PWA Mobile Layout Architecture (< 768px)
 
-On mobile and touch devices, OptiForge transforms into a focused bottom-navigation shell:
+On mobile and touch devices, Mimic Manager transforms into a focused bottom-navigation shell:
 - **Bottom Navigation Bar (5 Primary Tabs):**
   1. **Overview:** KPIs, status, next recommended action.
   2. **Sites:** Quick health check across client sites.
@@ -100,13 +100,13 @@ On mobile and touch devices, OptiForge transforms into a focused bottom-navigati
 To ensure zero style contamination with diverse WordPress themes and third-party plugins:
 1. **Isolated Shadow DOM Mounting:**
    ```html
-   <div id="optiforge-admin-root">
+   <div id="mimic-manager-admin-root">
      #shadow-root (open)
-       <style>/* Scoped OptiForge CSS Variables & Tailwind Tokens */</style>
-       <div class="optiforge-app">...</div>
+       <style>/* Scoped Mimic Manager CSS Variables & Tailwind Tokens */</style>
+       <div class="mimic-manager-app">...</div>
    </div>
    ```
-2. **Top-Level Admin Menu:** `OptiForge` top-level menu with child pages:
+2. **Top-Level Admin Menu:** `Mimic Manager` top-level menu with child pages:
    - Dashboard
    - Media Library Optimization
    - Speed & Core Web Vitals
@@ -114,7 +114,7 @@ To ensure zero style contamination with diverse WordPress themes and third-party
    - File Manager (Security Jailed)
    - Settings & Pairing
 3. **Native Media Library Extension:**
-   - Injects a native "OptiForge Status" column into the standard WordPress `upload.php` table showing format, savings percentage, and "Restore Original" trigger.
+   - Injects a native "Mimic Manager Status" column into the standard WordPress `upload.php` table showing format, savings percentage, and "Restore Original" trigger.
 4. **Kill-Switch Accessibility:** A fixed admin bar icon provides instant access to "Safe Mode" or "Pause Background Processing" if site issues arise.
 
 ---

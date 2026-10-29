@@ -1,8 +1,9 @@
 <?php
+/*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | GPL-2.0-or-later */
 
 declare(strict_types=1);
 
-namespace OptiForge\Media;
+namespace Wefik\MimicManager\Media;
 
 final class AttachmentHook {
     private const SUPPORTED_MIMES = [
@@ -32,12 +33,12 @@ final class AttachmentHook {
             }
 
             // Flag metadata indicating optimization job was registered
-            $metadata['optiforge_status'] = 'pending';
-            $metadata['optiforge_original'] = $filePath;
+            $metadata['mimic_manager_status'] = 'pending';
+            $metadata['mimic_manager_original'] = $filePath;
 
             return $metadata;
         } catch (\Throwable $e) {
-            error_log(sprintf('[OptiForge] AttachmentHook failed for ID %d: %s', $attachmentId, $e->getMessage()));
+            error_log(sprintf('[Mimic Manager] AttachmentHook failed for ID %d: %s', $attachmentId, $e->getMessage()));
             return $metadata;
         }
     }

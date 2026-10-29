@@ -1,4 +1,4 @@
-# OptiForge Requirements Traceability Matrix
+# Mimic Manager Requirements Traceability Matrix
 
 **Status:** ACTIVE  
 **Owner-persona:** Lead Compliance Architect & Test Lead  
