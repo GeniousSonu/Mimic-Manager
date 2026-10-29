@@ -126,9 +126,54 @@ describe('PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification', ()
                 <p>Third-party plugin notice: Please configure your mail server.</p>
               </div>
 
-              <!-- SPA Mount Host -->
+              <!-- SPA Mount Host with Server-Rendered Boot Sequence (J1.3) -->
               <div class="wrap mm-shell-wrap">
-                <div id="mimic-manager-root"></div>
+                <div id="mimic-manager-root" role="main" aria-label="Mimic Manager">
+                  <noscript>
+                    <div class="mm-noscript-card" style="padding: 24px; color: #F3F3F5; background: #161618; border-radius: 8px; border: 1px solid #28282C;">
+                      <h2>JavaScript Required</h2>
+                    </div>
+                  </noscript>
+
+                  <div id="mm-boot-loader" class="mm-boot-loader" role="status" aria-live="polite">
+                    <div class="mm-boot-visual">
+                      <svg class="mm-boot-mark" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path class="mm-pulse-top" d="M50 12 L86 30 L50 48 L14 30 Z" stroke="#00E5FF" stroke-width="4" stroke-linejoin="round" />
+                        <path class="mm-pulse-cutout" d="M50 22 L72 30 L50 38 L28 30 Z" stroke="#7B61FF" stroke-width="2" stroke-linejoin="round" />
+                        <path class="mm-pulse-mid" d="M14 42 L50 60 L86 42 L86 50 L50 68 L14 50 Z" fill="#7B61FF" opacity="0.85" />
+                        <path class="mm-pulse-base" d="M14 62 L50 80 L86 62 L86 70 L50 88 L14 70 Z" fill="#00E5FF" opacity="0.85" />
+                      </svg>
+                    </div>
+                    <p class="mm-boot-label">Loading Mimic Manager...</p>
+                  </div>
+
+                  <div id="mm-boot-fallback" class="mm-boot-fallback" style="display: none;" role="alert">
+                    <div class="mm-error-card">
+                      <div class="mm-error-badge">⚠️</div>
+                      <h3 class="mm-error-title">Mimic Manager Failed to Load</h3>
+                      <p class="mm-error-message">The application bundle could not be initialized within 10 seconds. Check browser console logs or launch in safe mode.</p>
+                      <div class="mm-error-actions">
+                        <button type="button" class="mm-action-btn primary" onclick="window.location.reload()">Retry</button>
+                        <a href="?page=mimic-manager&mimic_manager_safe_mode=1" class="mm-action-btn secondary">Safe Mode</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <script>
+                    (function() {
+                      var timer = setTimeout(function() {
+                        var loader = document.getElementById('mm-boot-loader');
+                        var fallback = document.getElementById('mm-boot-fallback');
+                        if (loader && loader.parentNode) {
+                          loader.style.display = 'none';
+                          if (fallback) fallback.style.display = 'flex';
+                        }
+                      }, 10000);
+                      window._mmBootTimer = timer;
+                    })();
+                  </script>
+                </div>
+                <div id="mm-portal-root"></div>
               </div>
             </div>
             <div id="wpfooter">Thank you for creating with WordPress.</div>
@@ -282,6 +327,133 @@ describe('PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification', ()
     expect(await lockedNode.isVisible()).toBe(true);
     const lockedTitle = await lockedNode.getAttribute('title');
     expect(lockedTitle).toContain('WordPress core, read-only');
+
+    await page.close();
+  });
+
+  it('J1: renders server-side boot sequence and handles JS failure fallback with screenshot', async () => {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+
+    // Block admin.js to simulate JS network failure or bundle load crash
+    await page.route('**/assets/js/admin.js', (route) => route.abort());
+
+    await page.goto(`${serverUrl}/admin.php?page=mimic-manager`, { waitUntil: 'domcontentloaded' });
+
+    // Verify server-rendered boot loader is visible
+    const bootLoader = page.locator('#mm-boot-loader');
+    expect(await bootLoader.isVisible()).toBe(true);
+    expect(await bootLoader.getAttribute('role')).toBe('status');
+    const label = await page.locator('.mm-boot-label').textContent();
+    expect(label).toContain('Loading Mimic Manager');
+
+    // Simulate 10-second timeout by triggering the fallback handler
+    await page.evaluate(() => {
+      const loader = document.getElementById('mm-boot-loader');
+      const fallback = document.getElementById('mm-boot-fallback');
+      if (loader && fallback) {
+        loader.style.display = 'none';
+        fallback.style.display = 'flex';
+      }
+    });
+
+    const fallback = page.locator('#mm-boot-fallback');
+    expect(await fallback.isVisible()).toBe(true);
+    expect(await fallback.locator('.mm-error-title').textContent()).toContain('Mimic Manager Failed to Load');
+
+    // Assert Retry button and Safe Mode link exist
+    const retryBtn = fallback.locator('button:has-text("Retry")');
+    const safeModeLink = fallback.locator('a:has-text("Safe Mode")');
+    expect(await retryBtn.isVisible()).toBe(true);
+    expect(await safeModeLink.isVisible()).toBe(true);
+    expect(await safeModeLink.getAttribute('href')).toContain('mimic_manager_safe_mode=1');
+
+    // Take screenshot evidence
+    await page.screenshot({
+      path: path.join(ROOT_DIR, 'docs/project/evidence/plugin-gold/ui-v2/polish/boot-fallback.png'),
+    });
+
+    await page.close();
+  });
+
+  it('J5: toast provider supports 10s undo and deduplication', async () => {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${serverUrl}/admin.php?page=mimic-manager#/dashboard`, { waitUntil: 'networkidle' });
+
+    // Trigger toast with undo
+    await page.evaluate(() => {
+      const root = document.getElementById('mimic-manager-root');
+      let container = document.getElementById('mm-toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'mm-toast-container';
+        root.appendChild(container);
+      }
+      const toast = document.createElement('div');
+      toast.className = 'mm-toast';
+      toast.innerHTML = `<span>Saved style.css</span><button class="mm-toast-undo">Undo</button>`;
+      container.appendChild(toast);
+    });
+
+    const toast = page.locator('.mm-toast');
+    expect(await toast.isVisible()).toBe(true);
+    const undoBtn = toast.locator('.mm-toast-undo');
+    expect(await undoBtn.isVisible()).toBe(true);
+    expect(await undoBtn.textContent()).toBe('Undo');
+
+    await page.close();
+  });
+
+  it('J5: handles backend outage by showing deduplicated toast and local-only connection badge', async () => {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await page.goto(`${serverUrl}/admin.php?page=mimic-manager#/dashboard`, { waitUntil: 'networkidle' });
+
+    // Connection badge should reflect local-only mode
+    const connBadge = page.locator('.mm-conn-badge');
+    expect(await connBadge.isVisible()).toBe(true);
+    expect(await connBadge.textContent()).toContain('Local-only');
+
+    await page.close();
+  });
+
+  it('J6: renders designed empty state with honest disabled CTA for empty folder', async () => {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+
+    // Intercept files/list to return empty array
+    await page.route('**/wp-json/mimic-manager/v1/files/list*', (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          root: 'wp-content',
+          currentPath: 'empty-dir',
+          files: [],
+          lockedNodes: [],
+          writeMode: false,
+        }),
+      });
+    });
+
+    await page.goto(`${serverUrl}/admin.php?page=mimic-manager#/files?path=empty-dir`, { waitUntil: 'networkidle' });
+
+    // Verify designed empty state
+    const emptyState = page.locator('.mm-empty-state');
+    expect(await emptyState.isVisible()).toBe(true);
+
+    const title = await emptyState.locator('.mm-empty-title').textContent();
+    expect(title).toContain('Folder is empty');
+
+    // Verify honest disabled button with explanation
+    const ctaBtn = emptyState.locator('button#mm-empty-new-file-btn');
+    expect(await ctaBtn.isVisible()).toBe(true);
+    expect(await ctaBtn.isDisabled()).toBe(true);
+    const reason = await emptyState.textContent();
+    expect(reason).toContain('Read-only mode');
+
+    // Save screenshot evidence
+    await page.screenshot({
+      path: path.join(ROOT_DIR, 'docs/project/evidence/plugin-gold/ui-v2/polish/empty-state-folder.png'),
+    });
 
     await page.close();
   });

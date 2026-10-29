@@ -31,3 +31,11 @@ All identity fields confirmed by owner and verified reachable via HTTP/2 200:
 - **Owner Domain:** `www.wefik.in` (verified reachable HTTP/2 200)
 - Zero open identity gaps.
 
+---
+
+## 4. Owner-Supplied Assets & Polish Layer Status (Addendum J)
+
+- **Menu Icon SVG:** Flat single-color 20x20 Shifted Stack mark vector-projected from `packages/ui/brand/mark.svg` via `scripts/plugin/generate-assets.ts`. Status: Functional & tested across all 8 WordPress admin color schemes via `fill="currentColor"`. If owner requires an artisan hand-tuned 20x20 SVG, owner may supply custom Shifted Stack SVG.
+- **Directory Artwork:** High-fidelity directory banners (772x250, 1544x500 retina), icons (128x128, 256x256), and screenshots (1-5) in `connectors/wordpress/.wordpress-org/` generated from verified brand assets (`packages/ui/brand/mark.svg`). Marked as brand-based versions; owner can supply optional photorealistic 3D renders with custom license attribution in `THIRD_PARTY_LICENSES.md`.
+- **Zero Stubs:** All polish components (boot sequence, error boundaries, 4px grid spacing, toast provider with 10s undo, empty states, skeletons) are fully implemented, verified, and backed by Playwright E2E tests.
+

@@ -240,3 +240,123 @@
   - WCAG 2.2 AA compliant focus rings (3:1 contrast), roving tabindex in tree and grid.
   - Initial JS bundle < 250 KB gz excluding lazy Monaco.
 
+---
+
+## 5. Tier-1 Polish Layer Pillar (Addendum J: `PLUGIN-UI-V2-POLISH`)
+
+### `UX-V2-P-001`: Flat Single-Color Menu Icon (Shifted Stack Mark)
+- **As a** WordPress administrator,
+- **I want** the wp-admin menu icon to match WordPress core conventions and recolor properly across all 8 admin color schemes,
+- **So that** the plugin feels 100% native on hover, active, and folded states.
+- **Acceptance Criteria:**
+  - Flat 20x20 SVG derived from the brand mark. Single-color (`currentColor` / monochrome), no hardcoded gradients or stroke cutoffs.
+  - Base64 data URI encoded in `add_menu_page`. Recolors seamlessly on dark, light, and custom admin schemes.
+
+### `UX-V2-P-002`: Server-Rendered Boot Sequence & Failure Fallback
+- **As a** user opening the plugin,
+- **I want** an instant server-rendered loading indicator with an accessible announcement,
+- **So that** there is zero layout flicker while the JavaScript bundle mounts.
+- **Acceptance Criteria:**
+  - Server outputs loading markup with inline SVG pulse and `role="status"` label ("Loading Mimic Manager").
+  - Honors `prefers-reduced-motion` with static mark.
+  - If bundle fails or times out (10s), displays branded error card with Retry and Safe Mode link.
+
+### `UX-V2-P-003`: WP.org Directory Assets Verification
+- **As a** plugin distributor,
+- **I want** directory assets validated against official WP.org dimensions and formats,
+- **So that** the submission passes automated directory asset linting and assets remain out of the ZIP.
+- **Acceptance Criteria:**
+  - Assets in `.wordpress-org/` (128x128, 256x256 icons, 772x250, 1544x500 banners, screenshots 1-5).
+  - Excluded from production installable ZIP (`.distignore`).
+
+### `UX-V2-P-004`: Strict 4px Spacing Grid & Shadow DOM Scope
+- **As a** design systems engineer,
+- **I want** all padding, margins, and gaps constrained to a 4px mathematical scale,
+- **So that** arbitrary spacing values are eliminated.
+- **Acceptance Criteria:**
+  - Spacing scale: 0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96 px.
+  - Styles scoped to `:host` inside Shadow DOM; host rem scale immune to external WP font-size changes.
+
+### `UX-V2-P-005`: Arbitrary Value Lint & Spacing Audit Gate
+- **As a** CI gatekeeper,
+- **I want** an automated lint rule that fails if arbitrary inline styles or unmapped pixel values are added,
+- **So that** design drift is permanently prevented.
+- **Acceptance Criteria:**
+  - Lint script flags arbitrary pixel units and un-tokenized colors.
+  - Proof test verifies violation detection.
+
+### `UX-V2-P-006`: Design System Component Primitives with In-Shadow Portals
+- **As a** UI developer,
+- **I want** pre-built accessible primitives whose portals mount inside the Shadow DOM root,
+- **So that** modals, popovers, and tooltips are isolated from host page styles.
+- **Acceptance Criteria:**
+  - 22 core primitives: Card, Button, IconButton, Input, Select, Switch, Checkbox, Tabs, Tooltip, Popover, Dialog, Sheet, StatusBadge, SkeletonLoader, EmptyState, ErrorCard, ToastProvider, Toolbar, Tree, DataGrid, Kbd, Spinner.
+  - Portals mount strictly inside `shadowRoot.getElementById('mm-portal-root')`. Focus trapping and Escape handling verified.
+
+### `UX-V2-P-007`: Primitive-Only Views Enforcement
+- **As a** code reviewer,
+- **I want** all views built exclusively from primitives,
+- **So that** raw un-styled HTML controls cannot sneak into production screens.
+- **Acceptance Criteria:**
+  - Views import from primitive components; build checks assert zero raw un-tokenized controls.
+
+### `UX-V2-P-008`: Budget-Safe GPU Motion Tokens
+- **As a** performance architect,
+- **I want** animations restricted to transform and opacity with strict timing curves,
+- **So that** frame rates remain 60 fps without long tasks.
+- **Acceptance Criteria:**
+  - Fast 90ms, base 140ms, slow 220ms. Zero layout property animations.
+  - Disabled during 10k-row virtualized scrolling and drag operations. In-app reduce motion toggle provided.
+
+### `UX-V2-P-009`: Fast Cross-Fade Route Transitions
+- **As a** user navigating the SPA,
+- **I want** instantaneous view changes without blocking UI input,
+- **So that** route switching feels instantaneous (< 100ms perceived latency).
+- **Acceptance Criteria:**
+  - New route cross-fades with subtle 10px upward offset in ≤ 140ms. No exit-blocking delay (`mode="wait"` forbidden).
+
+### `UX-V2-P-010`: Shimmer Skeleton Loaders
+- **As a** user on slow networks,
+- **I want** structured skeletons for content taking > 200ms,
+- **So that** layout shift (CLS) is zero when data resolves.
+- **Acceptance Criteria:**
+  - Skeletons carry `aria-busy="true"` and a single status announcement.
+  - Delayed by 120ms to avoid flashing on fast connections; minimum display of 250ms once shown.
+
+### `UX-V2-P-011`: Multi-Tier Error Boundaries & Diagnostics
+- **As an** administrator experiencing an unexpected error,
+- **I want** localized error boundaries that isolate crashes to individual panes,
+- **So that** a failure in one widget never crashes the entire wp-admin screen.
+- **Acceptance Criteria:**
+  - Global, route, and per-pane boundaries with branded ErrorCard, Retry button, and secrets-redacted diagnostics export.
+
+### `UX-V2-P-012`: Interactive Backend 3-Second Timeout & Connection Badge
+- **As a** site owner with intermittent connectivity,
+- **I want** cloud calls to time out cleanly in 3 seconds without blocking WordPress,
+- **So that** wp-admin remains ultra-fast in local-only fallback mode.
+- **Acceptance Criteria:**
+  - 3-second timeout on status/health checks. Displays single deduplicated toast and persistent header connection badge.
+  - PHP never throws a fatal error if backend is completely down.
+
+### `UX-V2-P-013`: Accessible Shadow-DOM Toast Provider with 10s Undo
+- **As a** user performing destructive actions,
+- **I want** an accessible toast notification with a 10-second Undo button,
+- **So that** mistakes can be reversed immediately with 1 click.
+- **Acceptance Criteria:**
+  - `aria-live` polite announcements, keyboard dismissal, 10s minimum undo timer, and deduplication of network warnings.
+
+### `UX-V2-P-014`: Designed SVG Empty States with Honest CTAs
+- **As a** user encountering an empty folder or virgin setup,
+- **I want** an informative empty state illustration with clear guidance,
+- **So that** I understand why the view is empty and how to proceed.
+- **Acceptance Criteria:**
+  - Lightweight token-based SVG illustrations (< 4 KB), one-line teaching explanation, and honest disabled-with-reason CTAs.
+
+### `UX-V2-P-015`: Comprehensive Automated Verification Gates
+- **As a** release engineer,
+- **I want** automated Playwright, PHPUnit, and packaging tests executing against the built ZIP,
+- **So that** zero regressions reach production.
+- **Acceptance Criteria:**
+  - Zero-reload, full-bleed geometry, notices tray, hostile CSS, boot sequence, and contrast gates verified green.
+
+

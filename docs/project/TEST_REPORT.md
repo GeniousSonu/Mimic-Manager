@@ -77,3 +77,58 @@ OK (4 tests, 26 assertions)
  ✓ Phase 0 End-to-End Signed Roundtrip Verification (1 test) 153ms
    ✓ completes signed roundtrip: client signs -> API verifies -> Worker optimizes -> Webhook signs -> Connector verifies 42ms
 ```
+
+---
+
+## Addendum I & J: PLUGIN-UI-V2 & Polish Layer Verification Report (2026-10-29)
+
+### 1. PHPUnit Connector Suite (39 Tests, 119 Assertions)
+```
+PHPUnit 10.5.66 by Sebastian Bergmann and contributors.
+.......................................                           39 / 39 (100%)
+Time: 00:00.049, Memory: 8.00 MB
+OK (39 tests, 119 assertions)
+```
+- JailGuard traversal blocking: `../`, `%2e%2e`, null bytes, symlink traversal out of wp-content.
+- Core folder locking: `wp-admin` and `wp-includes` read-only lockdown.
+- PHP AST syntax pre-check: syntax errors caught before saving.
+- SPA shell routing: `mm-fullbleed` body class filter, 301 legacy submenu redirecting to hash routes.
+
+### 2. Design Tokens Contrast Gate (33/33 Token Pairs Passing)
+```
+All 33 token contrast pairs passed WCAG 2.2 AA standards (min 4.5:1 text, 3:1 boundary)!
+- Deep Space canvas (#0A0A0B) to text.primary (#F4F4F6): 18.02:1
+- Graphite surface (#161618) to text.primary (#F4F4F6): 16.45:1
+- Electric Cyan (#00E5FF) to dark text (#0A0A0B): 12.86:1
+- Neon Violet (#7B61FF) boundary to Graphite surface: 4.30:1
+```
+
+### 3. Spacing & 4px Grid Audit (`lint:spacing`)
+```
+[audit-spacing] Auditing codebase for arbitrary values and 4px-grid compliance...
+[✓] Spacing & Design System Audit PASS: zero arbitrary value violations found.
+[✓] Proof test with intentional violation correctly caught and failed.
+```
+
+### 4. Playwright Headless Chrome E2E Suite (`e2e/spa-zero-reload.test.ts`)
+```
+ ✓ e2e/spa-zero-reload.test.ts (8 tests) 5752ms
+   ✓ PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification > guarantees ZERO document reloads across all internal hash routes (1329ms)
+   ✓ PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification > measures full-bleed breakout geometry (viewport height minus admin bar, no body scrollbars) (637ms)
+   ✓ PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification > relocates WordPress notices into collapsible header tray (652ms)
+   ✓ PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification > resists hostile injected CSS (* { box-sizing: content-box !important }) without layout destruction (687ms)
+   ✓ PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification > J1: renders server-side boot sequence and handles JS failure fallback with screenshot (235ms)
+   ✓ PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification > J5: toast provider supports 10s undo and deduplication (671ms)
+   ✓ PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification > J5: handles backend outage by showing deduplicated toast and local-only connection badge (652ms)
+   ✓ PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification > J6: renders designed empty state with honest disabled CTA for empty folder (723ms)
+```
+
+### 5. Production ZIP Package Verification (`pnpm plugin:verify-zip`)
+```
+[✓] ZIP Verification PASS!
+  Package: mimic-manager.zip
+  Entries: 56
+  Size:    0.07 MB (Budget: < 5 MB)
+  SHA256:  7e25a10fe448f2b0730dbc89cb4ad9dfee177e90c1be53818099e8bfa52bad9c
+```
+

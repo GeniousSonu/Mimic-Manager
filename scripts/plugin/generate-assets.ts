@@ -13,6 +13,19 @@ async function main() {
 
   const svgBuffer = fs.readFileSync(MARK_SVG_PATH);
 
+  // 0. Flat, single-color, 20x20 viewBox SVG of the "Shifted Stack" mark for WordPress admin menu
+  const icon20Svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2L17.5 5.75L10 9.5L2.5 5.75L10 2ZM10 4.1L14.3 6.25L10 8.4L5.7 6.25L10 4.1Z"/>
+  <path d="M2.5 8L10 11.75L17.5 8L17.5 9.8L10 13.55L2.5 9.8V8Z"/>
+  <path d="M2.5 12L10 15.75L17.5 12L17.5 13.8L10 17.55L2.5 13.8V12Z"/>
+</svg>
+`;
+  const wpAssetsDir = path.join(ROOT_DIR, 'connectors/wordpress/assets');
+  fs.mkdirSync(wpAssetsDir, { recursive: true });
+  fs.writeFileSync(path.join(wpAssetsDir, 'icon-20.svg'), icon20Svg, 'utf-8');
+  fs.writeFileSync(path.join(ROOT_DIR, 'packages/ui/brand/icon-20.svg'), icon20Svg, 'utf-8');
+  console.log('  [✓] Generated flat 20x20 Shifted Stack icon-20.svg');
+
   // 1. icon.svg
   fs.copyFileSync(MARK_SVG_PATH, path.join(WP_ORG_DIR, 'icon.svg'));
   console.log('  [✓] Generated icon.svg');
@@ -130,6 +143,23 @@ async function main() {
     'utf-8',
   );
   console.log('  [✓] Generated blueprints/blueprint.json');
+
+  // 7. Validate asset dimensions and formats (J1.4b gate)
+  const requiredSpecs: Record<string, { width: number; height: number }> = {
+    'icon-128x128.png': { width: 128, height: 128 },
+    'icon-256x256.png': { width: 256, height: 256 },
+    'banner-772x250.png': { width: 772, height: 250 },
+    'banner-1544x500.png': { width: 1544, height: 500 },
+  };
+
+  for (const [filename, expected] of Object.entries(requiredSpecs)) {
+    const filePath = path.join(WP_ORG_DIR, filename);
+    const meta = await sharp(filePath).metadata();
+    if (meta.width !== expected.width || meta.height !== expected.height) {
+      throw new Error(`Asset ${filename} dimension mismatch: got ${meta.width}x${meta.height}, expected ${expected.width}x${expected.height}`);
+    }
+  }
+  console.log('  [✓] Verified WP.org asset specifications');
 
   console.log('[✓] All WordPress.org assets successfully generated.');
 }

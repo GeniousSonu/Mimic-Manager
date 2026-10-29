@@ -20,6 +20,7 @@
     "brand:apply": "node scripts/brand/apply.ts",
     "brand:check": "node scripts/brand/check.ts",
     "brand:rename": "node scripts/brand/rename.ts",
+    "lint:spacing": "tsx scripts/brand/audit-spacing.ts",
     "plugin:version-sync": "tsx scripts/plugin/version-sync.ts",
     "plugin:assets": "tsx scripts/plugin/generate-assets.ts",
     "plugin:build": "tsx scripts/plugin/build.ts",

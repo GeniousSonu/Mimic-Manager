@@ -3,7 +3,7 @@
 (function () {
   'use strict';
 
-  // State Store
+  // Global State Store
   const state = {
     currentRoute: 'dashboard',
     routeParams: {},
@@ -16,6 +16,16 @@
       localEngine: { engine: 'gd', supported: true },
       consentGiven: false,
       cloudConnected: false,
+    },
+    connectionStatus: 'local-only', // 'connected' | 'local-only' | 'retrying'
+    connectionReason: '100% Local Mode (telemetry-free)',
+    lastToastMessage: '',
+    lastToastTime: 0,
+    toasts: [],
+    errorRingBuffer: [],
+    loading: {
+      files: false,
+      dashboard: false,
     },
     fileManager: {
       currentPath: '',
@@ -44,24 +54,154 @@
     brand: { name: 'Mimic Manager', version: '1.0.0-rc.1', creator: 'SK Sahinur Islam', owner: 'Wefik' },
   };
 
-  // Helper: REST API fetch
+  // Redact secrets for diagnostics logging
+  function redactDiagnostics(data) {
+    try {
+      const str = typeof data === 'string' ? data : JSON.stringify(data);
+      return str
+        .replace(/(['"]?(?:nonce|token|secret|password|api[_-]?key|auth)['"]?\s*[:=]\s*['"])([^'"]+)(['"])/gi, '$1[REDACTED]$3')
+        .replace(/([?&](?:nonce|token|secret|password|key)=)([^&#\s]+)/gi, '$1[REDACTED]');
+    } catch {
+      return '[Diagnostics Redaction Error]';
+    }
+  }
+
+  function logError(source, err) {
+    const entry = {
+      timestamp: new Date().toISOString(),
+      source,
+      message: err && err.message ? err.message : String(err),
+      route: state.currentRoute,
+    };
+    state.errorRingBuffer.unshift(entry);
+    if (state.errorRingBuffer.length > 50) {
+      state.errorRingBuffer.pop();
+    }
+    console.error(`[Mimic Manager ${source}]`, err);
+  }
+
+  // Global Unhandled Rejection & Error Handlers (J5.1)
+  window.addEventListener('error', (event) => {
+    logError('window.error', event.error || event.message);
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    logError('unhandledrejection', event.reason);
+  });
+
+  // REST API fetch with 3-second timeout for interactive calls (J5.2)
   async function apiFetch(endpoint, options = {}) {
     const url = wpData.restUrl + endpoint;
+    const timeoutMs = options.timeout || 3000;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
     const headers = {
       'Content-Type': 'application/json',
       'X-WP-Nonce': wpData.nonce,
       ...(options.headers || {}),
     };
 
-    const res = await fetch(url, { ...options, headers });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-      throw new Error(err.error || `HTTP error ${res.status}`);
+    try {
+      const res = await fetch(url, { ...options, headers, signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(err.error || `HTTP error ${res.status}`);
+      }
+      return res.json();
+    } catch (err) {
+      clearTimeout(timeoutId);
+
+      // Backend unreachable or timeout handling
+      if (err.name === 'AbortError' || err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        if (state.connectionStatus !== 'local-only') {
+          state.connectionStatus = 'local-only';
+          state.connectionReason = 'Cloud backend unreachable. Operating in local mode.';
+          showToast('Cloud backend unreachable. Operating in local mode.', { duration: 5000 });
+          renderStatusBadges();
+        }
+      }
+
+      logError(`apiFetch:${endpoint}`, err);
+      throw err;
     }
-    return res.json();
   }
 
-  // 1. Router Management
+  // Toast Provider with 10s Undo & Deduplication (J5.4)
+  function showToast(message, options = {}) {
+    const now = Date.now();
+    // Deduplication check: ignore identical toasts within 3.5 seconds
+    if (state.lastToastMessage === message && now - state.lastToastTime < 3500) {
+      return;
+    }
+    state.lastToastMessage = message;
+    state.lastToastTime = now;
+
+    let container = document.getElementById('mm-toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'mm-toast-container';
+      container.setAttribute('role', 'region');
+      container.setAttribute('aria-label', 'Notifications');
+      container.setAttribute('aria-live', 'polite');
+      const root = document.getElementById('mimic-manager-root');
+      if (root) root.appendChild(container);
+      else document.body.appendChild(container);
+    }
+
+    // Stack limit: max 3 toasts
+    while (container.children.length >= 3) {
+      container.removeChild(container.firstChild);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'mm-toast';
+    toast.setAttribute('role', 'status');
+
+    const msgSpan = document.createElement('span');
+    msgSpan.textContent = message;
+    toast.appendChild(msgSpan);
+
+    if (options.undoAction && typeof options.undoAction === 'function') {
+      const undoBtn = document.createElement('button');
+      undoBtn.className = 'mm-toast-undo';
+      undoBtn.textContent = 'Undo';
+      undoBtn.onclick = () => {
+        try {
+          options.undoAction();
+        } catch (e) {
+          logError('toast:undo', e);
+        }
+        removeToast(toast);
+      };
+      toast.appendChild(undoBtn);
+    }
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'mm-icon-btn';
+    closeBtn.style.padding = '0 4px';
+    closeBtn.style.fontSize = '12px';
+    closeBtn.setAttribute('aria-label', 'Dismiss notification');
+    closeBtn.textContent = '✕';
+    closeBtn.onclick = () => removeToast(toast);
+    toast.appendChild(closeBtn);
+
+    container.appendChild(toast);
+
+    const duration = options.undoAction ? Math.max(options.duration || 10000, 10000) : options.duration || 4000;
+    const timer = setTimeout(() => removeToast(toast), duration);
+
+    function removeToast(t) {
+      clearTimeout(timer);
+      t.classList.add('hiding');
+      setTimeout(() => {
+        if (t.parentNode) t.parentNode.removeChild(t);
+      }, 150);
+    }
+  }
+
+  // Router Management
   function parseHash() {
     const hash = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
     const [pathPart, queryPart] = hash.split('?');
@@ -75,7 +215,6 @@
   }
 
   function navigateTo(route, params = {}) {
-    // Unsaved changes guard
     if (state.fileManager.editor.isDirty) {
       confirmUnsavedChanges(() => {
         state.fileManager.editor.isDirty = false;
@@ -110,13 +249,19 @@
     renderApp();
   }
 
-  // 2. Unsaved Changes Guard
+  // Unsaved Changes Guard Dialog
   function confirmUnsavedChanges(onDiscard) {
+    const existing = document.getElementById('mm-unsaved-dialog');
+    if (existing) existing.remove();
+
     const modal = document.createElement('div');
+    modal.id = 'mm-unsaved-dialog';
     modal.className = 'mm-modal-backdrop';
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
     modal.innerHTML = `
-      <div class="mm-modal-card" role="dialog" aria-modal="true" aria-labelledby="mm-unsaved-title">
-        <h3 id="mm-unsaved-title" style="margin:0; font-size:16px;">Unsaved Changes</h3>
+      <div class="mm-modal-card">
+        <h3 style="margin:0 0 8px 0; font-size:16px; color:var(--mm-text);">Unsaved Changes</h3>
         <p style="margin:0; font-size:13px; color:var(--mm-muted);">
           You have unsaved edits in <strong>${escapeHtml(state.fileManager.editor.path)}</strong>.
           Leaving will discard your changes.
@@ -152,7 +297,7 @@
     }
   });
 
-  // 3. Relocate WordPress Notices
+  // Relocate WordPress Notices into Collapsible Tray
   function relocateNotices() {
     const noticeContainer = document.getElementById('mm-notices-container');
     if (!noticeContainer) return;
@@ -185,8 +330,11 @@
     noticeContainer.appendChild(tray);
   }
 
-  // 4. File Manager Logic
+  // File Manager Operations
   async function loadFiles(path = '') {
+    state.loading.files = true;
+    renderApp();
+
     try {
       const res = await apiFetch(`/files/list?path=${encodeURIComponent(path)}`);
       if (res.success) {
@@ -195,10 +343,12 @@
         state.fileManager.writeMode = res.writeMode || false;
         state.fileManager.selectedPaths.clear();
         state.fileManager.inspectorFile = null;
-        renderApp();
       }
     } catch (err) {
-      console.error('[Mimic Manager] loadFiles error:', err);
+      logError('loadFiles', err);
+    } finally {
+      state.loading.files = false;
+      renderApp();
     }
   }
 
@@ -223,35 +373,29 @@
         renderApp();
       }
     } catch (err) {
-      alert(`Could not open file: ${err.message}`);
+      showToast(`Unable to open file: ${err.message}`);
     }
   }
 
   async function saveCurrentEditorFile() {
     const ed = state.fileManager.editor;
-    if (!ed.open) return false;
+    if (!ed.isDirty) return true;
 
-    // Lint if PHP
-    if (ed.path.endsWith('.php')) {
-      try {
+    try {
+      if (ed.path.endsWith('.php')) {
         const lintRes = await apiFetch('/files/lint', {
           method: 'POST',
-          body: JSON.stringify({ code: ed.content }),
+          body: JSON.stringify({ content: ed.content }),
         });
 
         if (!lintRes.valid) {
-          ed.lintError = `PHP Syntax Error (line ${lintRes.line}): ${lintRes.error}`;
+          ed.lintError = `PHP Syntax Error (Line ${lintRes.line}): ${lintRes.error}`;
           renderApp();
           return false;
         }
-      } catch (err) {
-        ed.lintError = `Linter error: ${err.message}`;
-        renderApp();
-        return false;
       }
-    }
 
-    try {
+      const prevContent = ed.savedContent;
       const saveRes = await apiFetch('/files/save', {
         method: 'POST',
         body: JSON.stringify({
@@ -263,33 +407,52 @@
 
       if (saveRes.success) {
         ed.savedContent = ed.content;
-        ed.hash = saveRes.newHash;
-        ed.mtime = saveRes.newMtime;
+        ed.hash = saveRes.hash;
+        ed.mtime = saveRes.mtime;
         ed.isDirty = false;
         ed.lintError = null;
+
+        showToast(`Saved ${ed.path}`, {
+          duration: 10000,
+          undoAction: async () => {
+            await apiFetch('/files/save', {
+              method: 'POST',
+              body: JSON.stringify({
+                path: ed.path,
+                content: prevContent,
+                expectedHash: ed.hash,
+              }),
+            });
+            openEditor(ed.path);
+            showToast(`Reverted changes to ${ed.path}`);
+          },
+        });
+
         renderApp();
         return true;
       }
     } catch (err) {
-      alert(`Save failed: ${err.message}`);
+      showToast(`Save failed: ${err.message}`);
       return false;
     }
     return false;
   }
 
-  // 5. Polling Server Status & Background Tasks
+  // Polling Server Status
   async function pollStatus() {
-    if (document.hidden) return; // Pause when tab hidden
+    if (document.hidden) return;
     try {
       const data = await apiFetch('/status');
       state.serverStatus = data;
+      state.connectionStatus = data.cloudConnected ? 'connected' : 'local-only';
+      state.connectionReason = data.cloudConnected ? 'Connected to Cloud Engine' : '100% Local Mode (telemetry-free)';
       renderStatusBadges();
     } catch (e) {
-      // Offline or network error
+      state.connectionStatus = 'local-only';
+      renderStatusBadges();
     }
   }
 
-  // Utilities
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)
@@ -300,7 +463,112 @@
       .replace(/'/g, '&#39;');
   }
 
-  // 6. Template Renderers
+  // Error Boundary Wrapper (J5.1)
+  function safeRender(paneName, renderFn) {
+    try {
+      return renderFn();
+    } catch (err) {
+      logError(`render:${paneName}`, err);
+      return renderErrorCard({
+        title: `${paneName} encountered an error`,
+        message: 'A render exception occurred in this pane. Other components remain functional.',
+        diagnostics: redactDiagnostics({
+          pane: paneName,
+          error: err && err.message ? err.message : String(err),
+          time: new Date().toISOString(),
+        }),
+        onRetry: () => renderApp(),
+      });
+    }
+  }
+
+  function renderErrorCard({ title, message, diagnostics, onRetry }) {
+    const diagStr = escapeHtml(typeof diagnostics === 'string' ? diagnostics : JSON.stringify(diagnostics, null, 2));
+    return `
+      <div class="mm-error-card" role="alert">
+        <div class="mm-error-badge">⚠️</div>
+        <h3 class="mm-error-title">${escapeHtml(title)}</h3>
+        <p class="mm-error-message">${escapeHtml(message)}</p>
+        <div class="mm-error-actions">
+          <button type="button" class="mm-action-btn primary mm-retry-pane-btn">Retry</button>
+          <button type="button" class="mm-action-btn secondary mm-copy-diag-btn" data-diag="${diagStr}">Copy Diagnostics</button>
+          <a href="https://github.com/GeniousSonu/Mimic-Manager/tree/main/docs" target="_blank" rel="noopener noreferrer" class="mm-action-btn">Documentation</a>
+        </div>
+      </div>
+    `;
+  }
+
+  // Component Primitives (J2.4)
+  function renderEmptyState({ type, title, desc, ctaText, ctaDisabledReason, ctaActionId, ctaHref }) {
+    const icons = {
+      folder: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>`,
+      search: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
+      media: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`,
+      seo: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+      speed: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+      offline: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/></svg>`,
+    };
+
+    const iconSvg = icons[type] || icons.folder;
+    const isCtaDisabled = !!ctaDisabledReason;
+
+    return `
+      <div class="mm-empty-state" role="status">
+        ${iconSvg}
+        <h4 class="mm-empty-title">${escapeHtml(title)}</h4>
+        <p class="mm-empty-desc">${escapeHtml(desc)}</p>
+        ${
+          ctaText
+            ? `
+          <div class="mm-empty-cta">
+            ${
+              ctaHref
+                ? `<a href="${escapeHtml(ctaHref)}" class="mm-action-btn primary">${escapeHtml(ctaText)}</a>`
+                : `<button class="mm-action-btn primary" id="${escapeHtml(ctaActionId || 'mm-empty-cta-btn')}" ${isCtaDisabled ? `disabled title="${escapeHtml(ctaDisabledReason)}"` : ''}>${escapeHtml(ctaText)}</button>`
+            }
+            ${isCtaDisabled ? `<div style="font-size:11px; color:var(--mm-muted); margin-top:4px;">${escapeHtml(ctaDisabledReason)}</div>` : ''}
+          </div>
+        `
+            : ''
+        }
+      </div>
+    `;
+  }
+
+  function renderFileGridSkeleton() {
+    return `
+      <div class="mm-grid-container" role="status" aria-busy="true">
+        <span class="screen-reader-text" style="position:absolute; width:1px; height:1px; overflow:hidden;">Loading files...</span>
+        <table class="mm-data-table">
+          <thead>
+            <tr>
+              <th style="width:40%;">Name</th>
+              <th style="width:20%;">Modified</th>
+              <th style="width:15%;">Size</th>
+              <th style="width:15%;">Permissions</th>
+              <th style="width:10%;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${[1, 2, 3, 4, 5]
+              .map(
+                () => `
+              <tr>
+                <td><div class="mm-skeleton" style="height:16px; width:65%;"></div></td>
+                <td><div class="mm-skeleton" style="height:14px; width:80%;"></div></td>
+                <td><div class="mm-skeleton" style="height:14px; width:50%;"></div></td>
+                <td><div class="mm-skeleton" style="height:14px; width:40%;"></div></td>
+                <td><div class="mm-skeleton" style="height:14px; width:60%;"></div></td>
+              </tr>
+            `
+              )
+              .join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
   function renderHeader() {
     const brand = wpData.brand;
     const routes = [
@@ -317,11 +585,10 @@
       <header class="mm-shell-header">
         <div class="mm-header-left">
           <a href="#/dashboard" class="mm-brand-logo">
-            <svg class="mm-brand-mark" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M4 10 L16 3 L28 10 L28 22 L16 29 L4 22 Z" />
-              <path d="M16 3 L16 29" />
-              <path d="M4 10 L28 22" />
-              <path d="M28 10 L4 22" />
+            <svg class="mm-brand-mark" viewBox="0 0 20 20" width="20" height="20" fill="currentColor">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2L17.5 5.75L10 9.5L2.5 5.75L10 2ZM10 4.1L14.3 6.25L10 8.4L5.7 6.25L10 4.1Z"/>
+              <path d="M2.5 8L10 11.75L17.5 8L17.5 9.8L10 13.55L2.5 9.8V8Z"/>
+              <path d="M2.5 12L10 15.75L17.5 12L17.5 13.8L10 17.55L2.5 13.8V12Z"/>
             </svg>
             <span>${escapeHtml(brand.name)}</span>
             <span class="mm-ext-badge">v${escapeHtml(brand.version)}</span>
@@ -340,6 +607,10 @@
         </div>
         <div class="mm-header-right">
           <div id="mm-notices-container"></div>
+          <div class="mm-conn-badge ${state.connectionStatus}" title="${escapeHtml(state.connectionReason)}">
+            <span style="font-size:8px;">●</span>
+            <span>${state.connectionStatus === 'connected' ? 'Connected' : 'Local-only'}</span>
+          </div>
           <div class="mm-task-indicator ${state.activeTask ? 'active' : ''}">
             <span>●</span>
             <span>${state.activeTask ? escapeHtml(state.activeTask.name) : 'Ready'}</span>
@@ -448,35 +719,33 @@
           </div>
           <div style="padding:6px 0;">
             <div class="mm-tree-node ${currentPath === '' ? 'selected' : ''}" data-tree-path="" role="treeitem">
-              <span class="node-icon">📁</span>
-              <span>wp-content (jail root)</span>
+              <span>📁 wp-content</span>
             </div>
-            ${fm.lockedNodes
-              .map(
-                (node) => `
-              <div class="mm-tree-node locked" title="${escapeHtml(node.reason)}" role="treeitem" aria-disabled="true">
-                <span class="node-icon">🔒</span>
-                <span>${escapeHtml(node.name)}</span>
-                <span class="mm-ext-badge" style="margin-left:auto;">locked</span>
+            <div style="padding-left:16px;">
+              <div class="mm-tree-node ${currentPath === 'themes' ? 'selected' : ''}" data-tree-path="themes" role="treeitem">
+                <span>📁 themes</span>
               </div>
-            `
-              )
-              .join('')}
-            ${fm.files
-              .filter((f) => f.isDir)
-              .map(
-                (f) => `
-              <div class="mm-tree-node ${currentPath === f.path ? 'selected' : ''}" data-tree-path="${escapeHtml(f.path)}" role="treeitem" style="padding-left:22px;">
-                <span class="node-icon">📁</span>
-                <span>${escapeHtml(f.name)}</span>
+              <div class="mm-tree-node ${currentPath === 'plugins' ? 'selected' : ''}" data-tree-path="plugins" role="treeitem">
+                <span>📁 plugins</span>
               </div>
-            `
-              )
-              .join('')}
+              <div class="mm-tree-node ${currentPath === 'uploads' ? 'selected' : ''}" data-tree-path="uploads" role="treeitem">
+                <span>📁 uploads</span>
+              </div>
+            </div>
+            <div style="padding-top:12px; border-top:1px solid var(--mm-border); margin-top:12px;">
+              <div style="font-size:11px; color:var(--mm-muted); padding:0 8px 4px 8px; font-weight:600;">LOCKED CORE NODES</div>
+              ${fm.lockedNodes
+                .map(
+                  (n) => `
+                <div class="mm-tree-node locked" title="${escapeHtml(n.reason)}" role="treeitem" aria-disabled="true">
+                  <span>🔒 ${escapeHtml(n.name)}</span>
+                </div>
+              `
+                )
+                .join('')}
+            </div>
           </div>
         </aside>
-
-        <div class="mm-splitter"></div>
 
         <!-- Center Column -->
         <div class="mm-center-col">
@@ -525,49 +794,62 @@
             </div>
           </div>
 
-          <!-- Virtualized Data Grid -->
-          <div class="mm-grid-container" tabindex="0" role="grid" aria-label="Files Grid">
-            <table class="mm-data-table">
-              <thead>
-                <tr>
-                  <th style="width:40%;">Name</th>
-                  <th style="width:20%;">Modified</th>
-                  <th style="width:15%;">Size</th>
-                  <th style="width:15%;">Permissions</th>
-                  <th style="width:10%;">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${fm.files.length === 0
-                  ? `<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--mm-muted);">Folder is empty.</td></tr>`
-                  : fm.files
-                      .map((file) => {
-                        const isSelected = fm.selectedPaths.has(file.path);
-                        return `
-                    <tr class="mm-data-row ${isSelected ? 'selected' : ''}" data-file-path="${escapeHtml(file.path)}" data-is-dir="${file.isDir}">
-                      <td>
-                        <div class="mm-file-name-cell">
-                          <span>${file.isDir ? '📁' : '📄'}</span>
-                          <span>${escapeHtml(file.name)}</span>
-                          <span class="mm-ext-badge">${escapeHtml(file.ext)}</span>
-                        </div>
-                      </td>
-                      <td>${escapeHtml(file.modifiedFormatted)}</td>
-                      <td>${escapeHtml(file.sizeFormatted)}</td>
-                      <td>
-                        <code>${escapeHtml(file.permissions)}</code>
-                        ${file.isWorldWritable ? '<span title="World writable warning" style="color:var(--mm-danger);"> ⚠</span>' : ''}
-                      </td>
-                      <td>
-                        ${file.isDir ? '<span style="color:var(--mm-muted);">Folder</span>' : '<span style="color:var(--mm-success);">Active</span>'}
-                      </td>
-                    </tr>
-                  `;
-                      })
-                      .join('')}
-              </tbody>
-            </table>
-          </div>
+          <!-- Data Grid or Skeletons -->
+          ${
+            state.loading.files
+              ? renderFileGridSkeleton()
+              : fm.files.length === 0
+                ? renderEmptyState({
+                    type: 'folder',
+                    title: 'Folder is empty',
+                    desc: 'This directory has no files or subfolders. Create a file or upload media to populate it.',
+                    ctaText: '+ New File',
+                    ctaActionId: 'mm-empty-new-file-btn',
+                    ctaDisabledReason: !fm.writeMode ? 'Read-only mode. Enable write mode in Settings to create files.' : '',
+                  })
+                : `
+            <div class="mm-grid-container" tabindex="0" role="grid" aria-label="Files Grid">
+              <table class="mm-data-table">
+                <thead>
+                  <tr>
+                    <th style="width:40%;">Name</th>
+                    <th style="width:20%;">Modified</th>
+                    <th style="width:15%;">Size</th>
+                    <th style="width:15%;">Permissions</th>
+                    <th style="width:10%;">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${fm.files
+                    .map((file) => {
+                      const isSelected = fm.selectedPaths.has(file.path);
+                      return `
+                      <tr class="mm-data-row ${isSelected ? 'selected' : ''}" data-file-path="${escapeHtml(file.path)}" data-is-dir="${file.isDir}">
+                        <td>
+                          <div class="mm-file-name-cell">
+                            <span>${file.isDir ? '📁' : '📄'}</span>
+                            <span>${escapeHtml(file.name)}</span>
+                            <span class="mm-ext-badge">${escapeHtml(file.ext)}</span>
+                          </div>
+                        </td>
+                        <td>${escapeHtml(file.modifiedFormatted)}</td>
+                        <td>${escapeHtml(file.sizeFormatted)}</td>
+                        <td>
+                          <code>${escapeHtml(file.permissions)}</code>
+                          ${file.isWorldWritable ? '<span title="World writable warning" style="color:var(--mm-danger);"> ⚠</span>' : ''}
+                        </td>
+                        <td>
+                          ${file.isDir ? '<span style="color:var(--mm-muted);">Folder</span>' : '<span style="color:var(--mm-success);">Active</span>'}
+                        </td>
+                      </tr>
+                    `;
+                    })
+                    .join('')}
+                </tbody>
+              </table>
+            </div>
+          `
+          }
 
           <!-- Status Bar -->
           <div class="mm-status-bar">
@@ -663,7 +945,7 @@
 
   function render404() {
     return `
-      <div class="mm-loading-shell">
+      <div class="mm-empty-state">
         <h2 style="font-size:32px; color:var(--mm-cyan); margin:0;">404</h2>
         <p style="color:var(--mm-muted);">The requested internal route does not exist.</p>
         <a href="#/dashboard" class="mm-action-btn primary">Return to Dashboard</a>
@@ -671,35 +953,59 @@
     `;
   }
 
-  // 7. Master Render Cycle
+  // Master Render Cycle with Error Boundaries (J5.1)
   function renderApp() {
     const root = document.getElementById('mimic-manager-root');
     if (!root) return;
 
+    // Dismiss boot loader immediately on first meaningful paint (J1.3)
+    if (window._mmBootTimer) {
+      clearTimeout(window._mmBootTimer);
+      window._mmBootTimer = null;
+    }
+    const bootLoader = document.getElementById('mm-boot-loader');
+    if (bootLoader) {
+      bootLoader.remove();
+    }
+    const bootFallback = document.getElementById('mm-boot-fallback');
+    if (bootFallback) {
+      bootFallback.remove();
+    }
+
     let contentHtml = '';
     switch (state.currentRoute) {
       case 'dashboard':
-        contentHtml = renderDashboardView();
+        contentHtml = safeRender('Dashboard', renderDashboardView);
         break;
       case 'media':
-        contentHtml = renderGenericView('Media Optimization', 'High-performance WebP conversion with zero paid API keys.');
+        contentHtml = safeRender('Media Optimization', () =>
+          renderGenericView('Media Optimization', 'High-performance WebP conversion with zero paid API keys.')
+        );
         break;
       case 'speed':
-        contentHtml = renderGenericView('PageSpeed Fixes', 'Safe, Moderate, and Guided fixes with auto-revert guarantees.');
+        contentHtml = safeRender('PageSpeed Fixes', () =>
+          renderGenericView('PageSpeed Fixes', 'Safe, Moderate, and Guided fixes with auto-revert guarantees.')
+        );
         break;
       case 'seo':
-        contentHtml = renderGenericView('SEO Gap Fill', 'Heuristic and AI metadata audits for images and pages.');
+        contentHtml = safeRender('SEO Gap Fill', () =>
+          renderGenericView('SEO Gap Fill', 'Heuristic and AI metadata audits for images and pages.')
+        );
         break;
       case 'files':
-        contentHtml = renderFileManagerView();
+        contentHtml = safeRender('File Manager', renderFileManagerView);
         break;
       case 'settings':
-        contentHtml = renderGenericView('Settings', 'Configure telemetry opt-in, write mode, and sudo authentication.');
+        contentHtml = safeRender('Settings', () =>
+          renderGenericView('Settings', 'Configure telemetry opt-in, write mode, and sudo authentication.')
+        );
         break;
       case 'about':
-        contentHtml = renderGenericView(
-          'About Mimic Manager',
-          `Created by ${wpData.brand.creator} · A ${wpData.brand.owner} project · Free and Open Source under AGPL-3.0 / GPL-2.0+`
+        contentHtml = safeRender('About', () =>
+          renderGenericView(
+            'About Mimic Manager',
+            `Created by ${wpData.brand.creator} · A ${wpData.brand.owner} project · Free and Open Source under AGPL-3.0 / GPL-2.0+`
+          )
         );
         break;
       default:
@@ -719,7 +1025,7 @@
     renderStatusBadges();
   }
 
-  // 8. Event Binding
+  // Event Binding
   function bindEvents() {
     // Navigation tabs
     document.querySelectorAll('.mm-nav-tab').forEach((tab) => {
@@ -793,7 +1099,6 @@
       textarea.oninput = () => {
         state.fileManager.editor.content = textarea.value;
         state.fileManager.editor.isDirty = textarea.value !== state.fileManager.editor.savedContent;
-        const dirtyDot = document.querySelector('.mm-dirty-dot');
         const saveBtn = document.getElementById('mm-editor-save-btn');
         if (saveBtn) saveBtn.disabled = !state.fileManager.editor.isDirty;
       };
@@ -846,9 +1151,22 @@
         });
       };
     }
+
+    // Error card buttons
+    document.querySelectorAll('.mm-retry-pane-btn').forEach((btn) => {
+      btn.onclick = () => renderApp();
+    });
+    document.querySelectorAll('.mm-copy-diag-btn').forEach((btn) => {
+      btn.onclick = () => {
+        const diag = btn.getAttribute('data-diag') || '';
+        navigator.clipboard.writeText(diag).then(() => {
+          showToast('Diagnostics copied to clipboard (secrets redacted)');
+        });
+      };
+    });
   }
 
-  // 9. Boot Initialization
+  // Boot Initialization
   document.addEventListener('DOMContentLoaded', function () {
     if (state.fullscreen) {
       document.body.classList.add('mm-fullbleed');

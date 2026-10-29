@@ -107,12 +107,17 @@ final class Plugin
             return;
         }
 
-        $iconSvg = 'data:image/svg+xml;base64,' . base64_encode(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">' .
-            '<path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14.5a6.5 6.5 0 110-13 6.5 6.5 0 010 13z"/>' .
-            '<path d="M10 5a5 5 0 00-5 5h1.5a3.5 3.5 0 117 0H15a5 5 0 00-5-5z"/>' .
-            '</svg>'
-        );
+        $iconPath = dirname(__FILE__, 2) . '/assets/icon-20.svg';
+        if (file_exists($iconPath)) {
+            $svgContent = (string) file_get_contents($iconPath);
+        } else {
+            $svgContent = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20" fill="currentColor">' .
+                '<path fill-rule="evenodd" clip-rule="evenodd" d="M10 2L17.5 5.75L10 9.5L2.5 5.75L10 2ZM10 4.1L14.3 6.25L10 8.4L5.7 6.25L10 4.1Z"/>' .
+                '<path d="M2.5 8L10 11.75L17.5 8L17.5 9.8L10 13.55L2.5 9.8V8Z"/>' .
+                '<path d="M2.5 12L10 15.75L17.5 12L17.5 13.8L10 17.55L2.5 13.8V12Z"/>' .
+                '</svg>';
+        }
+        $iconSvg = 'data:image/svg+xml;base64,' . base64_encode(trim($svgContent));
 
         $mainHook = add_menu_page(
             Brand::NAME,

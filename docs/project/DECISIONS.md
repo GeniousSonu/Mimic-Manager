@@ -267,6 +267,21 @@
   - Design tokens updated in `packages/ui/tokens/tokens.json`, `docs/design/TOKENS.md`, and `docs/design/BRAND.md` with Deep Space `#0A0A0B` canvas, Graphite `#161618` surfaces, Cyan `#00E5FF` and Violet `#7B61FF` accents, and self-hosted Inter / JetBrains Mono typography.
   - Programmatic WCAG 2.2 AA contrast gate passing 34/34 token pairs in `packages/ui/scripts/check-contrast.ts` and `packages/ui/test/contrast.test.ts`.
 
+---
+
+### GATE APPROVAL: Addendum J (PLUGIN-UI-V2 Tier-1 Polish Architecture & Step 1)
+- **Status:** APPROVED: 2026-10-29
+- **Decisions & Records:**
+  - `ADR-0010: Budget-Safe Motion System and Perceived Route Timing`
+  - `ADR-0011: Shadow DOM Portal Component Primitives`
+  - `ADR-0012: Accessible Shadow DOM Toast Provider with Undo Capability`
+  - `ADR-0013: Strict 4px Spacing Grid and Arbitrary Value Prohibition`
+- **Evidence:**
+  - Requirement IDs `UX-V2-P-001` through `UX-V2-P-015` recorded in `docs/product/USER_STORIES.md` and `docs/design/UX_SPEC.md`.
+  - Verified presence of Shifted Stack brand mark (`media-file/mimic-manager-icon.svg`, `packages/ui/brand/mark.svg`) and directory artwork assets in `connectors/wordpress/.wordpress-org/`.
+  - Design system tokens locked to 4px grid in `packages/ui/tokens/tokens.json`.
+
+
 
 
 

@@ -1,23 +1,28 @@
 {
   "plugin": "mimic-manager",
   "version": "1.0.0-rc.1",
-  "builtAt": "2026-10-29T15:01:15.280Z",
-  "gitCommit": "89eda6a438048c7a21c7fbb00f94b6c9f84f3754",
+  "builtAt": "2026-10-29T15:19:05.006Z",
+  "gitCommit": "f03c2a8cb31af14539f08a58701cb5f7a59b1695",
   "zipFile": "mimic-manager.zip",
-  "zipSizeBytes": 64196,
-  "zipSizeMb": "0.06",
-  "sha256": "81b3d67f14466cdaf1a610dcc8db28d617794cd653fc496159ed9dbea7579ef3",
-  "fileCount": 40,
+  "zipSizeBytes": 69892,
+  "zipSizeMb": "0.07",
+  "sha256": "c2350954b84eb7cda8451074e2876ea7cc5a0e8a7ffc588e8dc49829d2a30739",
+  "fileCount": 41,
   "files": [
     {
       "path": "assets/css/admin.css",
-      "size": 15390,
-      "sha256": "00b51bf305033e432f77f487b0e01abfe8f50896cc26e8a2d61dc779c2575801"
+      "size": 20062,
+      "sha256": "0325823d9384317f7c6ba9bc9b64c24b3edd0083c16c76f1a55091ee355f563e"
+    },
+    {
+      "path": "assets/icon-20.svg",
+      "size": 381,
+      "sha256": "22e41f8905376e95406e99b35c12720090ee2a8253f7a99d00be7824017537b1"
     },
     {
       "path": "assets/js/admin.js",
-      "size": 30834,
-      "sha256": "4319c99004a406341e1b71bb17706cd63ce10e858a5944f90677a3b955c01c89"
+      "size": 43945,
+      "sha256": "fceb94959ad74a8617a4ea85cb0173e9bc08389fb3c903d9fe07511add3d1e97"
     },
     {
       "path": "composer.json",
@@ -26,8 +31,8 @@
     },
     {
       "path": "dist-manifest.json",
-      "size": 6662,
-      "sha256": "3137e6e20d5d8b9586b941e7bf43a066829f3a51f3e41be750c8a8bd42df452e"
+      "size": 6814,
+      "sha256": "e0a26451eb86c764459db8299611d65ea810568fd88b0f33ee48e38c42aa6625"
     },
     {
       "path": "includes/Brand.php",
@@ -76,8 +81,8 @@
     },
     {
       "path": "src/Plugin.php",
-      "size": 23550,
-      "sha256": "a7104a646ebf7b8119badf41211bcb436823d1556df9be2f0dcf5bf2e9510ae5"
+      "size": 23933,
+      "sha256": "737664fff19b1093890c8d134906872501cf66daf860561209831eaa373787f5"
     },
     {
       "path": "src/Security/HmacSigner.php",
@@ -162,7 +167,7 @@
     {
       "path": "vendor/composer/installed.php",
       "size": 773,
-      "sha256": "65878c05eb3673c6c656628f989887531d42609d0c6ff3fc63a40092233116aa"
+      "sha256": "cd552a5e55061ea5511390869252de9081d444f0815a78287f932ddbea8468a6"
     },
     {
       "path": "vendor/composer/platform_check.php",
@@ -201,8 +206,8 @@
     },
     {
       "path": "views/shell.php",
-      "size": 929,
-      "sha256": "f97a20a056790d092cfa577e61d00e02a147f8ff4cd80bbbab08a96327703a8c"
+      "size": 3429,
+      "sha256": "cd279857cf753e0c0a8ea6ef467bd2029345670755c1ddec051578c4246a42f7"
     },
     {
       "path": "views/speed.php",
