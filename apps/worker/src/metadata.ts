@@ -110,11 +110,76 @@ export class OllamaVisionProvider {
   }
 }
 
+export class GoogleAiStudioProvider {
+  constructor(
+    private readonly baseUrl: string = process.env.OPENAI_BASE_URL ||
+      'https://generativelanguage.googleapis.com/v1beta/openai',
+    private readonly apiKey: string = process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_AI_KEY ||
+      '',
+    private readonly model: string = process.env.GEMINI_MODEL || 'gemini-flash-latest'
+  ) {}
+
+  public async generate(
+    imageBuffer: Buffer,
+    context: ImageMetadataContext
+  ): Promise<AltTextGenerationResult> {
+    const prompt = `Generate a concise, accessible alt-text description (1-2 sentences) for an image. Context: Filename "${context.filename}", Post "${context.postTitle || 'Blog Post'}", Surrounding text: "${context.surroundingText || 'None'}". Return ONLY the alt-text string.`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 6000); // 6s timeout
+
+    try {
+      const url = `${this.baseUrl.replace(/\/+$/, '')}/chat/completions`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model: this.model,
+          messages: [{ role: 'user', content: prompt }]
+        }),
+        signal: controller.signal
+      });
+
+      if (!res.ok) {
+        throw new Error(`Google AI Studio returned HTTP ${res.status}`);
+      }
+
+      const data = (await res.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      const text = (data.choices?.[0]?.message?.content || '').trim();
+
+      if (text) {
+        return {
+          altText: text,
+          confidence: 0.95,
+          provider: 'byok',
+          source: 'vision_model'
+        };
+      }
+      throw new Error('Empty response from Google AI Studio');
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+}
+
 export class AiMetadataService {
+  private readonly googleAi: GoogleAiStudioProvider;
   private readonly ollama: OllamaVisionProvider;
   private readonly heuristic: HeuristicMetadataProvider;
 
-  constructor(ollamaUrl?: string, ollamaModel?: string) {
+  constructor(
+    ollamaUrl?: string,
+    ollamaModel?: string,
+    googleAiUrl?: string,
+    googleAiKey?: string
+  ) {
+    this.googleAi = new GoogleAiStudioProvider(googleAiUrl, googleAiKey);
     this.ollama = new OllamaVisionProvider(ollamaUrl, ollamaModel);
     this.heuristic = new HeuristicMetadataProvider();
   }
@@ -123,12 +188,17 @@ export class AiMetadataService {
     imageBuffer: Buffer,
     context: ImageMetadataContext
   ): Promise<AltTextGenerationResult> {
+    // 1. Try Google AI Studio via OpenAI-compatible endpoint
     try {
-      // 1. Try Ollama local vision model
-      return await this.ollama.generate(imageBuffer, context);
+      return await this.googleAi.generate(imageBuffer, context);
     } catch {
-      // 2. Seamlessly fall back to rule-based heuristic provider
-      return await this.heuristic.generate(imageBuffer, context);
+      // 2. Try Ollama local vision model if available
+      try {
+        return await this.ollama.generate(imageBuffer, context);
+      } catch {
+        // 3. Seamlessly fall back to rule-based heuristic provider
+        return await this.heuristic.generate(imageBuffer, context);
+      }
     }
   }
 }

@@ -27,9 +27,14 @@ describe('AI Vision & Metadata Fallback Tests', () => {
     expect(result.confidence).toBeGreaterThan(0.5);
   });
 
-  it('AiMetadataService seamlessly falls back to heuristic when Ollama is offline', async () => {
+  it('AiMetadataService seamlessly falls back to heuristic when AI services are offline', async () => {
     // Point to non-existent port to guarantee network rejection
-    const service = new AiMetadataService('http://127.0.0.1:54321', 'nonexistent-model');
+    const service = new AiMetadataService(
+      'http://127.0.0.1:54321',
+      'nonexistent-model',
+      'http://127.0.0.1:54321',
+      'dummy-key'
+    );
     const testImage = await sharp({
       create: {
         width: 50,

@@ -58,7 +58,24 @@ export async function bootstrap(port = 3000): Promise<NestFastifyApplication> {
 // Start standalone if executed directly
 if (process.argv[1]?.endsWith('main.js') || process.argv[1]?.endsWith('main.ts')) {
   const port = parseInt(process.env['PORT'] || '3000', 10);
-  bootstrap(port).then(() => {
+  bootstrap(port).then(async () => {
     console.log(`[Mimic Manager API] Server running on http://0.0.0.0:${port}`);
+
+    // If running in in-process worker mode (e.g. Render free tier)
+    const inProcessWorker =
+      process.env['IN_PROCESS_WORKER'] === 'true' ||
+      process.env['RUN_IN_PROCESS_WORKER'] === 'true' ||
+      process.env['RENDER'] === 'true';
+
+    if (inProcessWorker) {
+      console.log('[Mimic Manager API] Starting in-process background worker for Render free tier...');
+      try {
+        const { startInProcessWorker } = await import('@mimic-manager/worker');
+        startInProcessWorker();
+        console.log('[Mimic Manager API] In-process worker successfully active.');
+      } catch (err: any) {
+        console.warn('[Mimic Manager API] Notice: in-process worker initialization skipped:', err.message);
+      }
+    }
   });
 }

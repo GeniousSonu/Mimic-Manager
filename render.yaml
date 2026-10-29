@@ -1,0 +1,43 @@
+# Render Blueprint Specification for Mimic Manager
+# Free web service deployment with in-process BullMQ worker
+services:
+  - type: web
+    name: mimic-manager-api
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: pnpm install --frozen-lockfile && pnpm build
+    startCommand: node apps/api/dist/main.js
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: API_PREFIX
+        value: /api/v1
+      - key: IN_PROCESS_WORKER
+        value: "true"
+      - key: RUN_IN_PROCESS_WORKER
+        value: "true"
+      - key: STORAGE_DRIVER
+        value: local
+      - key: STORAGE_PATH
+        value: /tmp/mimic-manager/storage
+      - key: MONGODB_URI
+        value: mongodb+srv://wefikplugin_db_user:PS7dOJI1EYpXxqLt@mimic-manager.4llnuji.mongodb.net/mimic_manager?retryWrites=true&w=majority
+      - key: REDIS_URI
+        value: redis://default:huUHbKPYM59eSIZ45Rr4N2xXIxXJKGWX@jump-textural-constructive-72143.db.redis.io:19041
+      - key: REDIS_URL
+        value: redis://default:huUHbKPYM59eSIZ45Rr4N2xXIxXJKGWX@jump-textural-constructive-72143.db.redis.io:19041
+      - key: OPENAI_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-flash-latest
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MASTER_KMS_KEY
+        generateValue: true

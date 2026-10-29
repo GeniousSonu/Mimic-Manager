@@ -215,6 +215,9 @@ importers:
       '@mimic-manager/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@mimic-manager/worker':
+        specifier: workspace:*
+        version: link:../worker
       '@nestjs/common':
         specifier: ^11.0.11
         version: 11.2.8(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)

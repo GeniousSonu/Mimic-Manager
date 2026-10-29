@@ -26,7 +26,12 @@ Every environment variable utilized by Mimic Manager is strictly typed, validate
 | `MAX_IMAGE_PIXELS`| `Integer`| `50000000` | `10000000 - 100000000`| Sharp decompression bomb pixel ceiling (50 MP). |
 | `MAX_UPLOAD_BYTES`| `Integer`| `52428800` | `1048576 - 104857600` | Maximum single file upload payload limit (50 MB). |
 | `RATE_LIMIT_MAX` | `Integer`| `120` | `10 - 1000` | Maximum requests per minute per authenticated site. |
-| `OLLAMA_BASE_URL` | `String` | `http://localhost:11434`| Valid HTTP URL | Local Ollama instance URL for vision alt-text generation. |
+| `IN_PROCESS_WORKER` | `Boolean` | `false` | `true`, `false` | Runs BullMQ task processors in-process inside web service (Render free tier). |
+| `OPENAI_BASE_URL` | `String` | `https://generativelanguage.googleapis.com/v1beta/openai` | Valid HTTP URL | Google AI Studio OpenAI-compatible base URL for AI vision & SEO descriptions. |
+| `GEMINI_API_KEY` | `String` | None | API Key string | Google AI Studio API key for multimodal model inference. |
+| `GEMINI_MODEL` | `String` | `gemini-flash-latest` | Model ID string | Primary vision model identifier. |
+| `OLLAMA_BASE_URL` | `String` | `http://localhost:11434`| Valid HTTP URL | Local Ollama instance URL for vision alt-text fallback. |
+| `RUN_MODE` | `String` | `continue-all` | Execution mode | Unattended execution policy across all pipeline gates. |
 
 ---
 
