@@ -11,7 +11,7 @@
 | Phase ID | Phase Name | Status | Exit Criteria Met | Evidence Links |
 | :--- | :--- | :--- | :--- | :--- |
 | **P-1** | **Docs & Design Foundation** | **DONE** | 4 / 4 | [`contrast-gate.log`](file:///home/dayshift/Pictures/Mimic%20Manager/docs/project/evidence/contrast-gate.log), [`DECISIONS.md`](file:///home/dayshift/Pictures/Mimic%20Manager/docs/project/DECISIONS.md) |
-| **P0** | **Foundations & Risk Spikes** | **DONE** | 5 / 5 | [`unit-tests.log`](file:///home/dayshift/Pictures/Mimic%20Manager/docs/project/evidence/unit-tests.log), [`phpunit-tests.log`](file:///home/dayshift/Pictures/Mimic%20Manager/docs/project/evidence/phpunit-tests.log) |
+| **P0** | **Foundations & Risk Spikes** | **DONE** | 7 / 7 (inc. P0.DEPLOY, P0.RENDER) | [`render.yaml`](file:///home/dayshift/Pictures/Mimic%20Manager/render.yaml), [`Dockerfile`](file:///home/dayshift/Pictures/Mimic%20Manager/apps/api/Dockerfile), [`unit-tests.log`](file:///home/dayshift/Pictures/Mimic%20Manager/docs/project/evidence/unit-tests.log) |
 | **P1** | **Media + AI Metadata + Command Center MVP** | **DONE** | 6 / 6 | [`P1 Evidence`](file:///home/dayshift/Pictures/Mimic%20Manager/docs/project/evidence/P1/) |
 | **P2** | **SEO Engine** | **DONE** | 4 / 4 | [`P2 Evidence`](file:///home/dayshift/Pictures/Mimic%20Manager/docs/project/evidence/P2/) |
 | **P3** | **PageSpeed Engine** | **DONE** | 4 / 4 | [`P3 Evidence`](file:///home/dayshift/Pictures/Mimic%20Manager/docs/project/evidence/P3/) |

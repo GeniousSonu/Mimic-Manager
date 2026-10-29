@@ -36,7 +36,9 @@ export class ApiExceptionFilter implements ExceptionFilter {
         details = obj['details'];
       }
     } else if (exception instanceof Error) {
-      message = exception.message;
+      message = process.env['NODE_ENV'] === 'production'
+        ? 'Internal server error'
+        : exception.message;
     }
 
     const errorPayload: ApiErrorEnvelope = {

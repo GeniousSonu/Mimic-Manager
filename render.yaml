@@ -1,16 +1,21 @@
-# Render Blueprint Specification for Mimic Manager
-# Free web service deployment with in-process BullMQ worker
+# ==============================================================================
+# Render Blueprint Specification: Mimic Manager API & In-Process Worker
+# Region: Singapore | Runtime: Docker | Architecture: Zero Credit-Card Free Tier
+# ==============================================================================
+
 services:
   - type: web
     name: mimic-manager-api
-    runtime: node
-    plan: free
-    region: oregon
-    buildCommand: pnpm install --frozen-lockfile && pnpm build
-    startCommand: node apps/api/dist/main.js
-    healthCheckPath: /api/v1/health
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    region: singapore
+    plan: free # Configurable: free | starter | standard
+    healthCheckPath: /health
     autoDeploy: true
+    preDeployCommand: node apps/api/dist/migrate.js
     envVars:
+      # Non-Secret Core Configurations
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -21,23 +26,47 @@ services:
         value: "true"
       - key: RUN_IN_PROCESS_WORKER
         value: "true"
+      - key: MIMIC_MANAGER_RUN_WORKER_IN_API
+        value: "true"
+      - key: MIMIC_MANGER_RUN_WORKER_IN_API
+        value: "true"
       - key: STORAGE_DRIVER
         value: local
       - key: STORAGE_PATH
         value: /tmp/mimic-manager/storage
-      - key: MONGODB_URI
-        value: mongodb+srv://wefikplugin_db_user:PS7dOJI1EYpXxqLt@mimic-manager.4llnuji.mongodb.net/mimic_manager?retryWrites=true&w=majority
-      - key: REDIS_URI
-        value: redis://default:huUHbKPYM59eSIZ45Rr4N2xXIxXJKGWX@jump-textural-constructive-72143.db.redis.io:19041
-      - key: REDIS_URL
-        value: redis://default:huUHbKPYM59eSIZ45Rr4N2xXIxXJKGWX@jump-textural-constructive-72143.db.redis.io:19041
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=450"
       - key: OPENAI_BASE_URL
         value: https://generativelanguage.googleapis.com/v1beta/openai
-      - key: GEMINI_API_KEY
-        sync: false
+      - key: MIMIC_MANAGER_AI_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai
+      - key: MIMIC_MANGER_AI_BASE_URL
+        value: https://generativelanguage.googleapis.com/v1beta/openai
       - key: GEMINI_MODEL
         value: gemini-flash-latest
+      - key: MIMIC_MANAGER_CORS_ORIGIN
+        value: https://mimic-manager.vercel.app
+      - key: CORS_ORIGIN
+        value: https://mimic-manager.vercel.app
+
+      # Secrets (Pasted by Owner in Dashboard or via CLI - sync: false)
       - key: JWT_SECRET
         generateValue: true
       - key: MASTER_KMS_KEY
         generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MIMIC_MANAGER_AI_API_KEY
+        sync: false
+      - key: MIMIC_MANGER_AI_API_KEY
+        sync: false
+      - key: QSTASH_TOKEN
+        sync: false
+      - key: UPSTASH_VECTOR_REST_TOKEN
+        sync: false

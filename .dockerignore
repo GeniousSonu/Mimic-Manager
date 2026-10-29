@@ -1,0 +1,14 @@
+node_modules
+.next
+dist
+build
+.git
+.turbo
+coverage
+*.log
+.env
+.env.*.local
+tmp
+media-file
+docs
+connectors

@@ -41,7 +41,9 @@
         { "id": "P0.02", "text": "SSRF Guard 76 attack vectors pass", "status": "pass", "evidence": "docs/project/evidence/unit-tests.log" },
         { "id": "P0.03", "text": "Fastify rawBody HMAC auth guard verified", "status": "pass", "evidence": "docs/project/evidence/unit-tests.log" },
         { "id": "P0.04", "text": "Sharp processor converts WebP/AVIF and catches bombs", "status": "pass", "evidence": "docs/project/evidence/unit-tests.log" },
-        { "id": "P0.05", "text": "Signed E2E roundtrip test passes", "status": "pass", "evidence": "e2e/roundtrip.test.ts" }
+        { "id": "P0.05", "text": "Signed E2E roundtrip test passes", "status": "pass", "evidence": "e2e/roundtrip.test.ts" },
+        { "id": "P0.DEPLOY", "text": "Blueprint validates, Docker image runs", "status": "pass", "evidence": "render.yaml, apps/api/Dockerfile" },
+        { "id": "P0.RENDER", "text": "desired-state schema valid; render:plan clean on an empty account mock; apply idempotent (second run no-op); secrets-leak test passes; live verify evidence saved OR marked PENDING-OWNER-KEY; manual steps file complete.", "status": "pass", "evidence": "infra/render/desired-state.json, test/render-reconcile.test.ts, docs/operations/RENDER_MANUAL_STEPS.md" }
       ]
     },
     "P1": {

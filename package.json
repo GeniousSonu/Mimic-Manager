@@ -20,18 +20,28 @@
     "brand:apply": "node scripts/brand/apply.ts",
     "brand:check": "node scripts/brand/check.ts",
     "brand:rename": "node scripts/brand/rename.ts",
+    "render:plan": "tsx scripts/render/reconcile.ts plan",
+    "render:apply": "tsx scripts/render/reconcile.ts apply",
+    "render:drift": "tsx scripts/render/reconcile.ts drift",
+    "render:verify": "tsx scripts/render/reconcile.ts verify",
+    "render:api": "tsx scripts/deploy/render-api.ts",
     "test:coverage": "turbo run test:coverage",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {
     "@types/node": "^22.13.9",
     "sharp": "^0.35.5",
+    "tsx": "^4.23.15",
     "turbo": "^2.4.4",
     "typescript": "^5.8.2",
-    "vitest": "^3.0.8"
+    "vitest": "^3.0.8",
+    "zod": "^4.6.7"
   },
   "dependencies": {
     "@google/genai": "^2.31.0",
+    "@upstash/qstash": "^2.12.1",
+    "@upstash/vector": "^1.2.3",
+    "@upstash/workflow": "^1.5.0",
     "mongodb": "^7.7.0",
     "redis": "^6.3.0"
   }

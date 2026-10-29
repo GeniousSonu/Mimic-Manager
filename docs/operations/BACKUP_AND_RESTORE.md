@@ -1,56 +1,93 @@
-# Mimic Manager Backup & Disaster Recovery Guide
+# Database Backup and Disaster Recovery Guide
 
-**Status:** ACTIVE  
-**Owner-persona:** Disaster Recovery Lead & Database Administrator  
-**Last-reviewed:** 2026-10-29  
-**Applies-to-version:** v1  
-**Related-docs:** [SELF_HOSTING.md](file:///home/dayshift/Pictures/Mimic%20Manager/docs/operations/SELF_HOSTING.md), [DATA_MODEL.md](file:///home/dayshift/Pictures/Mimic%20Manager/docs/architecture/DATA_MODEL.md)
+**Status:** PRODUCTION READY  
+**Component:** MongoDB Atlas (M0 Free Tier) & Redis  
+**Target:** Render Production Environment  
 
 ---
 
-## 1. Backup Strategy Overview
-Mimic Manager disaster recovery encompasses three tiers:
-1. **Metadata Store (MongoDB):** Sites registry, changelogs, audit scores.
-2. **Task State & Queues (Redis):** BullMQ job state preserved via AOF.
-3. **Artifacts & Storage:** Optimization variants, DOM snapshots, and original images.
+## 1. Overview & Rationale
+
+MongoDB Atlas M0 (Free Tier) does not include automated continuous backup or point-in-time recovery (PITR). Because Mimic Manager stores site pairings, optimization job records, and configuration in MongoDB, establishing an automated or periodic offsite backup workflow is required for production resilience.
+
+This guide details:
+1. Exporting MongoDB Atlas data using `./scripts/backup/atlas-export.sh`
+2. Restoring from a backup archive
+3. Redis persistence considerations
 
 ---
 
-## 2. Automated Daily Backup Script
+## 2. Automated / Manual Export with `atlas-export.sh`
+
+The included backup script [atlas-export.sh](file:///home/dayshift/Pictures/Mimic%20Manager/scripts/backup/atlas-export.sh) provides dual-mode execution:
+- **Primary:** Uses official `mongodump` with `--gzip` if installed.
+- **Fallback:** Uses native Node.js and the official `mongodb` driver to export all collections into JSON documents and tar-gzips them.
+
+### Running a Backup
+
+Ensure your `MONGODB_URI` is present in `.env` or passed via environment variable:
+
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
+# Export using .env configuration
+./scripts/backup/atlas-export.sh
 
-BACKUP_DIR="/var/backups/mimic-manager/$(date +%F_%H%M%S)"
-mkdir -p "$BACKUP_DIR"
+# Or specifying custom output directory
+MONGODB_URI="mongodb+srv://..." ./scripts/backup/atlas-export.sh /custom/backup/dir
+```
 
-echo "=== 1. Backing up MongoDB ==="
-docker compose exec -T mongo mongodump --archive="$BACKUP_DIR/mongo.archive" --gzip
+Output:
+```
+[*] Initializing MongoDB Atlas export into: ./backups/atlas/20261029_180633
+[+] Exporting collections: sites, jobs, audit_logs...
+[✓] Atlas backup successfully created: ./backups/atlas/20261029_180633.tar.gz
+```
 
-echo "=== 2. Backing up Redis AOF ==="
-docker compose exec -T redis redis-cli bgsave
-cp /var/lib/docker/volumes/mimic_manager_redis_data/_data/appendonly.aof "$BACKUP_DIR/redis.aof"
-
-echo "=== 3. Archiving Storage Volume ==="
-tar -czf "$BACKUP_DIR/storage.tar.gz" -C /var/mimic-manager/storage .
-
-echo "Backup completed successfully to: $BACKUP_DIR"
+### Scheduling Backups (Cron / GitHub Actions)
+You can schedule periodic exports via cron or GitHub Actions using the `MONGODB_URI` repository secret:
+```cron
+# Run daily at 02:00 UTC
+0 2 * * * cd /opt/mimic-manager && ./scripts/backup/atlas-export.sh /var/backups/mimic-manager
 ```
 
 ---
 
-## 3. Disaster Recovery Restoration Procedure
-To restore Mimic Manager on a clean replacement host:
-1. Re-deploy Docker Compose stack: `docker compose up -d`.
-2. Restore MongoDB: `docker compose exec -i mongo mongorestore --archive < "$BACKUP_DIR/mongo.archive" --gzip --drop`.
-3. Restore storage artifacts: `tar -xzf "$BACKUP_DIR/storage.tar.gz" -C /var/mimic-manager/storage`.
-4. Restart API and Worker services: `docker compose restart api worker`.
+## 3. Restoring from Backup
+
+### A. Restoring from `mongodump` Archive
+
+If the backup was created with `mongodump`:
+```bash
+# Unpack the archive
+tar -xzf 20261029_180633.tar.gz
+
+# Restore to Atlas
+mongorestore --uri="$MONGODB_URI" --drop --gzip 20261029_180633/dump
+```
+
+### B. Restoring from JSON Documents (Node.js Fallback)
+
+If the backup contains JSON collection files:
+```bash
+# Unpack
+tar -xzf 20261029_180633.tar.gz
+
+# Restore collections via mongoimport
+for file in 20261029_180633/*.json; do
+  col=$(basename "$file" .json)
+  echo "Restoring collection: $col"
+  mongoimport --uri="$MONGODB_URI" --collection="$col" --file="$file" --jsonArray --mode=upsert
+done
+```
 
 ---
 
-## 4. Review Log
+## 4. Redis Recovery
 
-| Reviewer Persona | Verdict | Findings & Mitigations |
-| :--- | :--- | :--- |
-| **Disaster Recovery Lead** | APPROVED | Confirmed non-blocking `mongodump --gzip` and atomic tar archiving guarantee zero user downtime during backups. |
-| **Database Administrator** | APPROVED | Validated restoration procedure with simulated point-in-time recovery test. |
+Mimic Manager uses Redis exclusively for:
+- BullMQ queue state (`media_optimize`)
+- Rate limiting counters
+- Short-lived lock coordination
+
+**Recovery Policy:**
+- Redis eviction policy must be `noeviction` on redis.io so BullMQ jobs are never dropped during processing.
+- If Redis restarts or is replaced, BullMQ automatically recreates queue keys on startup. Stalled jobs are cleaned up automatically by the app's stalled-job recovery logic.

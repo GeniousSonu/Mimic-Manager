@@ -1,0 +1,109 @@
+{
+  "$schema": "./schema.json",
+  "version": "1.0.0",
+  "workspace": {
+    "name": "Mimic Manager Production"
+  },
+  "service": {
+    "type": "web_service",
+    "name": "mimic-manager",
+    "runtime": "docker",
+    "dockerfilePath": "./apps/api/Dockerfile",
+    "dockerContext": ".",
+    "region": "singapore",
+    "plan": "free",
+    "branch": "main",
+    "autoDeploy": "yes",
+    "healthCheckPath": "/health",
+    "preDeployCommand": "node apps/api/dist/migrate.js",
+    "buildFilter": {
+      "paths": [
+        "apps/api/**",
+        "apps/worker/**",
+        "packages/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "render.yaml"
+      ],
+      "ignoredPaths": [
+        "docs/**",
+        "connectors/**",
+        "apps/pwa/**",
+        "apps/wp-ui/**",
+        "*.md"
+      ]
+    }
+  },
+  "envVars": {
+    "static": {
+      "NODE_ENV": "production",
+      "PORT": "10000",
+      "STORAGE_DRIVER": "local",
+      "STORAGE_PATH": "/tmp/mimic-manager/storage",
+      "IN_PROCESS_WORKER": "true",
+      "MIMIC_MANAGER_RUN_WORKER_IN_API": "true",
+      "LOG_LEVEL": "info",
+      "CORS_ORIGIN": "https://mimic-manager.vercel.app",
+      "MIMIC_MANAGER_CORS_ORIGIN": "https://mimic-manager.vercel.app",
+      "NODE_OPTIONS": "--max-old-space-size=400",
+      "MIMIC_MANAGER_AI_BASE_URL": "https://generativelanguage.googleapis.com/v1beta/openai"
+    },
+    "generatedSecrets": [
+      {
+        "key": "JWT_SECRET",
+        "byteLength": 32,
+        "description": "JWT authentication signing secret"
+      },
+      {
+        "key": "MASTER_KMS_KEY",
+        "byteLength": 32,
+        "description": "Master KMS symmetric encryption key for pairing secrets"
+      },
+      {
+        "key": "HMAC_SIGNING_SECRET",
+        "byteLength": 32,
+        "description": "HMAC signing master secret for connector communication"
+      }
+    ],
+    "ownerSecrets": [
+      {
+        "key": "MONGODB_URI",
+        "required": true,
+        "pattern": "^mongodb(\\+srv)?://",
+        "description": "MongoDB Atlas connection URI"
+      },
+      {
+        "key": "REDIS_URL",
+        "required": true,
+        "pattern": "^rediss?://",
+        "description": "Redis connection URL with noeviction policy"
+      },
+      {
+        "key": "MIMIC_MANAGER_AI_API_KEY",
+        "required": false,
+        "description": "Google AI Studio / OpenAI compatible API key"
+      },
+      {
+        "key": "QSTASH_URL",
+        "required": false,
+        "description": "Upstash QStash REST endpoint URL"
+      },
+      {
+        "key": "QSTASH_TOKEN",
+        "required": false,
+        "description": "Upstash QStash REST bearer token"
+      },
+      {
+        "key": "UPSTASH_VECTOR_REST_URL",
+        "required": false,
+        "description": "Upstash Vector database REST URL"
+      },
+      {
+        "key": "UPSTASH_VECTOR_REST_TOKEN",
+        "required": false,
+        "description": "Upstash Vector database REST token"
+      }
+    ]
+  }
+}

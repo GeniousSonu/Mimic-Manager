@@ -25,7 +25,7 @@ describe('Mimic Manager API Integration Tests', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { status: string; version: string };
     expect(body.status).toBe('ok');
-    expect(body.version).toBe('0.1.0');
+    expect(body.version).toBe('1.0.0-rc.1');
   });
 
   it('POST /api/v1/sites/pair creates a new site pairing', async () => {
