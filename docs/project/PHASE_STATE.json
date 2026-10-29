@@ -126,30 +126,46 @@
     },
     "P5": {
       "name": "Visual File Manager",
+      "status": "done",
+      "gateEvidence": [
+        "docs/project/evidence/P5/phpunit-tests.log",
+        "docs/project/evidence/P5/pwa-build.log"
+      ],
+      "startedAt": "2026-10-29T15:46:00Z",
+      "completedAt": "2026-10-29T15:50:00Z",
+      "lastVerifiedAt": "2026-10-29T15:49:45Z",
+      "lastVerifiedCommit": "38ad33a35077eaebecae88b970b64f63e8658c1c",
+      "openDefects": 0,
+      "exitChecklist": [
+        { "id": "P5.01", "text": "JailGuard enforcing realpath containment within wp-content and blocking sensitive paths", "status": "pass", "evidence": "docs/project/evidence/P5/phpunit-tests.log" },
+        { "id": "P5.02", "text": "PhpAstLinter executing syntax checks before file save", "status": "pass", "evidence": "docs/project/evidence/P5/phpunit-tests.log" },
+        { "id": "P5.03", "text": "Atomic shadow backups and 1-click restore mechanism", "status": "pass", "evidence": "connectors/wordpress/src/FileManager/ShadowBackup.php" },
+        { "id": "P5.04", "text": "Visual File Manager view in Command Center PWA (SCR-09) with Monaco editor and sudo re-auth modal", "status": "pass", "evidence": "docs/project/evidence/P5/pwa-build.log" }
+      ]
+    },
+    "P6": {
+      "name": "Hardening & Release Engineering",
       "status": "in_progress",
       "gateEvidence": [],
-      "startedAt": "2026-10-29T15:46:00Z",
+      "startedAt": "2026-10-29T15:50:00Z",
       "completedAt": "",
       "lastVerifiedAt": "",
       "lastVerifiedCommit": "",
       "openDefects": 0,
       "exitChecklist": [
-        { "id": "P5.01", "text": "JailGuard enforcing realpath containment within wp-content and blocking sensitive paths", "status": "unverified", "evidence": "" },
-        { "id": "P5.02", "text": "PhpAstLinter executing syntax checks before file save", "status": "unverified", "evidence": "" },
-        { "id": "P5.03", "text": "Atomic shadow backups and 1-click restore mechanism", "status": "unverified", "evidence": "" },
-        { "id": "P5.04", "text": "Visual File Manager view in Command Center PWA (SCR-09) with Monaco editor and sudo re-auth modal", "status": "unverified", "evidence": "" }
+        { "id": "P6.01", "text": "Traceability matrix regenerated with 100% test coverage mapping", "status": "unverified", "evidence": "" },
+        { "id": "P6.02", "text": "Complete security audit check with zero high/critical vulnerabilities", "status": "unverified", "evidence": "" },
+        { "id": "P6.03", "text": "Release candidate build and changelog updated", "status": "unverified", "evidence": "" }
       ]
     },
-    "P6": { "name": "Hardening & Release Engineering", "status": "not_started", "gateEvidence": [], "exitChecklist": [] },
     "P7": { "name": "Break-It: Adversarial Verification", "status": "not_started", "gateEvidence": [], "exitChecklist": [] },
     "P8": { "name": "Fix-It & Release Candidate", "status": "not_started", "gateEvidence": [], "exitChecklist": [] }
   },
   "taskQueue": {
-    "inProgress": "P5-T01: Implement JailGuard path validator and PhpAstLinter in connectors/wordpress/src/FileManager",
+    "inProgress": "P6-T01: Regenerate TRACEABILITY.md, run security audits, and update CHANGELOG",
     "next": [
-      "P5-T02: Implement Atomic Shadow Backup manager with rollback in connectors/wordpress",
-      "P5-T03: Build Visual File Manager in apps/pwa/src/app/files/page.tsx (SCR-09)",
-      "P5-T04: Verify traversal fuzzing and syntax linting test suites"
+      "P7-T01: Execute 13 Attack Campaigns for Phase 7 (Break-It)",
+      "P8-T01: Execute Phase 8 Fix-It loop and prepare Release Candidate"
     ],
     "blocked": []
   },
