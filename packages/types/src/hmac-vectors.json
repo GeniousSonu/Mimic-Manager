@@ -1,0 +1,38 @@
+[
+  {
+    "description": "GET request with empty body",
+    "secret": "test_secret_key_1234567890abcdef",
+    "method": "GET",
+    "path": "/api/v1/health",
+    "body": "",
+    "timestamp": 1730190000,
+    "nonce": "nonce_abc12345",
+    "expectedBodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "expectedCanonicalString": "GET\n/api/v1/health\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n1730190000\nnonce_abc12345",
+    "expectedSignature": "309d59cd7cdd2c40887423286221456685a470191fc1459161b4a0c2b95b7878"
+  },
+  {
+    "description": "POST request with JSON payload",
+    "secret": "test_secret_key_1234567890abcdef",
+    "method": "POST",
+    "path": "/api/v1/media/jobs",
+    "body": "{\"siteId\":\"site_01\",\"filename\":\"hero.jpg\"}",
+    "timestamp": 1730190120,
+    "nonce": "nonce_xyz98765",
+    "expectedBodySha256": "c7e7269ba9067c0d02cdad80279adc3234fb0bf2189b5b229cd93a7e34624227",
+    "expectedCanonicalString": "POST\n/api/v1/media/jobs\nc7e7269ba9067c0d02cdad80279adc3234fb0bf2189b5b229cd93a7e34624227\n1730190120\nnonce_xyz98765",
+    "expectedSignature": "9e6d86f72649837678529a81718453970bf95841ef58409cbbdacc5c7f11fe0b"
+  },
+  {
+    "description": "POST webhook with Unicode and symbols",
+    "secret": "super_secure_webhook_secret_9999",
+    "method": "POST",
+    "path": "/wp-json/mimic-manager/v1/webhook",
+    "body": "{\"status\":\"completed\",\"savedBytes\":1048576,\"msg\":\"Öptimized 🚀\"}",
+    "timestamp": 1730190240,
+    "nonce": "nonce_webhook_4455",
+    "expectedBodySha256": "63bda11fabc3ea2f60bdd75951d3961b1406275b50e9fd138d981af21638aa5c",
+    "expectedCanonicalString": "POST\n/wp-json/mimic-manager/v1/webhook\n63bda11fabc3ea2f60bdd75951d3961b1406275b50e9fd138d981af21638aa5c\n1730190240\nnonce_webhook_4455",
+    "expectedSignature": "29589d2488ed865322c31e1d9355a2f9564f0108a237518b4a77a3c2dd739bc1"
+  }
+]

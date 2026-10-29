@@ -1,0 +1,17 @@
+node_modules/
+.pnpm-store/
+dist/
+build/
+.next/
+out/
+.turbo/
+coverage/
+*.log
+.env
+.env.local
+.env.*.local
+vendor/
+wp-content/
+.wp-env/
+*.tsbuildinfo
+tmp/
