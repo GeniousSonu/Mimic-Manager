@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@google/genai": "^2.31.0",
-    "mongodb": "^7.7.0"
+    "mongodb": "^7.7.0",
+    "redis": "^6.3.0"
   }
 }

@@ -1,6 +1,6 @@
 /*! Mimic Manager | (c) 2026 Wefik | Created by SK Sahinur Islam | AGPL-3.0-or-later */
 
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 
 export const DEFAULT_REDIS_URI =
   'redis://default:huUHbKPYM59eSIZ45Rr4N2xXIxXJKGWX@jump-textural-constructive-72143.db.redis.io:19041';
