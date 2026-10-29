@@ -12,7 +12,7 @@ async function main() {
   const brand = JSON.parse(fs.readFileSync(BRAND_PATH, 'utf-8'));
   const version = brand.product.version;
   const slug = brand.product.slug;
-  const zipPath = path.join(DIST_DIR, `${slug}-${version}.zip`);
+  const zipPath = path.join(DIST_DIR, `${slug}.zip`);
   const manifestPath = path.join(DIST_DIR, 'dist-manifest.json');
 
   if (!fs.existsSync(zipPath)) {

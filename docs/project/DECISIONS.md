@@ -253,6 +253,21 @@
 - **Status:** APPROVED: 2026-10-29
 - **Decision:** Product name confirmed as "Mimic Manager" (NOT "Mimic Manger"). Creator website confirmed as `www.genioussonu.me` (NOT `.em`). Both endpoints verified reachable via HTTP/2 200. Database prefix `mmgr_`, constant prefix `MIMIC_MANAGER_`, and legacy placeholder/typo checks enforced.
 
+---
+
+### GATE APPROVAL: Addendum I (PLUGIN-UI-V2 Step 1)
+- **Status:** APPROVED: 2026-10-29
+- **Decisions & Records:**
+  - `ADR-0006: HashRouter SPA Navigation for WordPress Admin Shell`
+  - `ADR-0007: Full-Bleed CSS Breakout with Scoped Body Class and Notice Tray`
+  - `ADR-0008: Monaco Editor Shadow DOM Integration and Sandboxed Isolation`
+  - `ADR-0009: Jailed File Manager Tree and Locked Core Nodes`
+- **Evidence:**
+  - Requirement IDs `UX-V2-001` through `UX-V2-019` formally recorded in `docs/product/USER_STORIES.md` and `docs/design/UX_SPEC.md`.
+  - Design tokens updated in `packages/ui/tokens/tokens.json`, `docs/design/TOKENS.md`, and `docs/design/BRAND.md` with Deep Space `#0A0A0B` canvas, Graphite `#161618` surfaces, Cyan `#00E5FF` and Violet `#7B61FF` accents, and self-hosted Inter / JetBrains Mono typography.
+  - Programmatic WCAG 2.2 AA contrast gate passing 34/34 token pairs in `packages/ui/scripts/check-contrast.ts` and `packages/ui/test/contrast.test.ts`.
+
+
 
 
 

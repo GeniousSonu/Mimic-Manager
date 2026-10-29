@@ -20,35 +20,35 @@ All colors, typography, spacing, radii, elevations, and motion curves in Mimic M
 Every token is verified programmatically via our automated contrast checker to exceed **WCAG 2.2 AA standards (≥ 4.5:1 for body text, ≥ 3.0:1 for UI borders and large text)**.
 
 ### 2.1 Dark Mode (Default)
-- **Backgrounds:** Canvas `#0A0C10`, Surface `#10131A`, Raised `#161A23`, Overlay `#1C212C`, Inset `#0D1016`
-- **Borders:** Subtle `#1F2430`, Default `#2A3040`, Strong `#626D85` (3.26:1 contrast against surface)
-- **Text:** Primary `#E9ECF3` (14.6:1), Secondary `#A5AEC0` (8.4:1), Tertiary `#747E92` (4.6:1), Disabled `#4B5365`, Inverse `#0A0C10`
-- **Accent:** Default `#7C6CFF`, Hover `#8F81FF`, Pressed `#6A59F0`, Subtle `rgba(124, 108, 255, 0.12)`, onAccent `#FFFFFF` (5.1:1)
+- **Backgrounds:** Canvas `#0A0A0B` (Deep Space), Surface `#161618` (Graphite), Raised `#1F1F23`, Overlay `#28282E`, Inset `#111113`
+- **Borders:** Subtle `#27272B`, Default `#3B3B42`, Strong `#8E8E9A` (5.58:1 contrast against surface)
+- **Text:** Primary `#F4F4F6` (16.45:1), Secondary `#A1A1AA` (7.05:1), Tertiary `#71717A` (4.52:1), Disabled `#52525B`, Inverse `#0A0A0B`
+- **Accent:** Primary Cyan `#00E5FF` (dark text `#0A0A0B` on cyan: 12.86:1), Secondary Violet `#7B61FF` (selection/status rings: 4.30:1 against surface, onViolet `#FFFFFF`)
 - **Semantic:**
-  - Success: `#2FBF8F` (Text: `#2FBF8F`)
-  - Warning: `#F5A524` (Text: `#F5A524`)
+  - Success: `#28C76F` (Text: `#28C76F`)
+  - Warning: `#FF9A00` (Text: `#FF9A00`)
   - Danger: `#F2555A` (Text: `#F2555A`)
-  - Info: `#4DA3FF` (Text: `#4DA3FF`)
+  - Info: `#00E5FF` (Text: `#00E5FF`)
 
 ### 2.2 Light Mode (Parity)
-- **Backgrounds:** Canvas `#F7F8FA`, Surface `#FFFFFF`, Raised `#FFFFFF`, Overlay `#F0F2F6`, Inset `#E8EBF0`
-- **Borders:** Subtle `#E2E5EC`, Default `#D1D5E0`, Strong `#5A6275` (4.58:1 contrast against surface)
-- **Text:** Primary `#12151C` (16.2:1), Secondary `#4B5365` (7.2:1), Tertiary `#646E82` (4.56:1), Disabled `#9BA3B5`, Inverse `#FFFFFF`
-- **Accent:** Default `#6351EB` (5.42:1 on surface), Hover `#5240DC`, Pressed `#4332CD`, onAccent `#FFFFFF`
+- **Backgrounds:** Canvas `#F8F9FA`, Surface `#FFFFFF`, Raised `#F1F3F5`, Overlay `#FFFFFF`, Inset `#E9ECEF`
+- **Borders:** Subtle `#E2E8F0`, Default `#CBD5E1`, Strong `#505A69` (6.98:1 contrast against surface)
+- **Text:** Primary `#0F172A` (17.85:1), Secondary `#475569` (7.58:1), Tertiary `#64748B` (4.62:1), Disabled `#94A3B8`, Inverse `#FFFFFF`
+- **Accent:** Default `#0284C7` (5.93:1 on surface), Hover `#0369A1`, Pressed `#075985`, onAccent `#FFFFFF`, Violet `#6D28D9`
 - **Semantic (Tuned for AA on Light Backgrounds):**
-  - Success Text: `#0E6E4C` (5.14:1)
-  - Warning Text: `#7A4B00` (5.08:1)
-  - Danger Text: `#B81D24` (5.22:1)
-  - Info Text: `#0D59B0` (5.18:1)
+  - Success Text: `#146C36` (6.51:1)
+  - Warning Text: `#8C4B00` (6.22:1)
+  - Danger Text: `#B91C1C` (6.47:1)
+  - Info Text: `#0369A1` (5.93:1)
 
 ---
 
 ## 3. Typography Tokens
-- **Font Families:**
-  - UI Sans: `-apple-system`, `BlinkMacSystemFont`, `"SF Pro Display"`, `"SF Pro Text"`, `"SF Pro"`, `"San Francisco"`, system-ui, sans-serif
-  - Code / Numbers: `"SF Mono"`, `SFMono-Regular`, `ui-monospace`, `Menlo`, `Monaco`, `Consolas`, monospace
+- **Font Families (Self-hosted OFL fonts, no CDN):**
+  - UI Text: `Inter`, `-apple-system`, `BlinkMacSystemFont`, `"Segoe UI"`, `Roboto`, sans-serif
+  - Code / Paths / Hashes: `"JetBrains Mono"`, `"SF Mono"`, `Consolas`, `Menlo`, monospace
 - **Type Scale:** 12px (16lh), 13px (18lh), 14px (20lh), 16px (24lh), 18px (26lh), 20px (28lh), 24px (32lh), 30px (38lh), 36px (44lh), 48px (56lh)
-- **Tabular Numerals:** Enforced on all metrics and scores via `font-variant-numeric: tabular-nums`.
+- **Tabular Numerals:** Enforced on all metrics, file sizes, and counts via `font-variant-numeric: tabular-nums`.
 
 ---
 

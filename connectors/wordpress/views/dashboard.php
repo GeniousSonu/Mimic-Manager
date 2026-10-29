@@ -6,7 +6,8 @@ defined('ABSPATH') || exit;
 use Wefik\MimicManager\Brand;
 use Wefik\MimicManager\Media\LocalOptimizer;
 
-$engine = LocalOptimizer::getEngineStatus();
+require __DIR__ . '/shell.php';
+return;
 ?>
 <div class="wrap mm-wrap">
   <div class="mm-header">

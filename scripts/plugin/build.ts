@@ -91,28 +91,27 @@ async function main() {
     });
   }
 
-  // 5. Build ZIP artifact
-  console.log('[5/6] Creating production installable ZIP packages...');
+  // 5. Build ZIP artifact (Single canonical package)
+  console.log('[5/6] Creating production installable ZIP package...');
   fs.mkdirSync(DIST_DIR, { recursive: true });
 
-  const zipName = `${slug}-${version}.zip`;
-  const latestZipName = `${slug}-latest.zip`;
-  const zipPath = path.join(DIST_DIR, zipName);
-  const latestZipPath = path.join(DIST_DIR, latestZipName);
+  // Clean existing zip files in dist/
+  const existingZips = fs.readdirSync(DIST_DIR).filter(f => f.endsWith('.zip') || f.endsWith('.zip.sha256'));
+  for (const f of existingZips) {
+    fs.rmSync(path.join(DIST_DIR, f), { force: true });
+  }
 
-  fs.rmSync(zipPath, { force: true });
-  fs.rmSync(latestZipPath, { force: true });
+  const zipName = `${slug}.zip`;
+  const zipPath = path.join(DIST_DIR, zipName);
 
   // Use system zip tool for standard POSIX zip with forward slashes
   execSync(`zip -r -q "${zipPath}" "${slug}"`, { cwd: stagingDir });
-  fs.copyFileSync(zipPath, latestZipPath);
 
   const zipSize = fs.statSync(zipPath).size;
   const zipHash = computeFileHash(zipPath);
 
   // Write SHA256 checksum file
   fs.writeFileSync(`${zipPath}.sha256`, `${zipHash}  ${zipName}\n`, 'utf-8');
-  fs.writeFileSync(`${latestZipPath}.sha256`, `${zipHash}  ${latestZipName}\n`, 'utf-8');
 
   // 6. Generate Manifest
   console.log('[6/6] Generating build manifest JSON...');
@@ -141,10 +140,13 @@ async function main() {
   // Clean staging directory
   fs.rmSync(stagingDir, { recursive: true, force: true });
 
+  // Restore dev dependencies in connectors/wordpress so local phpunit remains available
+  try {
+    execSync('composer install --quiet --no-interaction', { cwd: WP_DIR });
+  } catch {}
+
   console.log(`\n======================================================`);
-  console.log(`[✓] Plugin Build Complete!`);
   console.log(`  Artifact: dist/${zipName}`);
-  console.log(`  Latest:   dist/${latestZipName}`);
   console.log(`  Size:     ${(zipSize / 1024).toFixed(1)} KB`);
   console.log(`  Files:    ${packagedFiles.length}`);
   console.log(`  SHA256:   ${zipHash}`);

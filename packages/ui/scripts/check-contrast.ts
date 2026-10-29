@@ -85,6 +85,11 @@ export function runContrastAudit(): ContrastAuditResult[] {
     check('dark', 'border.strong', dark.border.strong, bgName, bgHex, 3.0);
   }
 
+  // Accent and boundary checks per Addendum I U3
+  check('dark', 'accent.onAccent (dark text)', dark.accent.onAccent, 'accent.default (cyan fill)', dark.accent.default, 4.5);
+  check('dark', 'accent.violet (UI boundary)', dark.accent.violet, 'bg.surface', dark.bg.surface, 3.0);
+  check('dark', 'accent.violet (UI boundary)', dark.accent.violet, 'bg.canvas', dark.bg.canvas, 3.0);
+
   // 2. Audit Light Theme
   const light = tokens.color.light;
   const lightBgs = [

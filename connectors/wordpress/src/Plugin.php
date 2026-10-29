@@ -43,9 +43,15 @@ final class Plugin
 
     private function registerHooks(): void
     {
+        if (!function_exists('add_action')) {
+            return;
+        }
+
         // Admin presentation
         add_action('admin_menu', [$this, 'registerAdminMenus']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
+        add_filter('admin_body_class', [$this, 'filterAdminBodyClass']);
+        add_action('admin_init', [$this, 'handleLegacyMenuRedirects']);
 
         // Media library integration
         add_filter('manage_media_columns', [$this, 'addMediaColumns']);
@@ -62,6 +68,37 @@ final class Plugin
 
         // REST API
         add_action('rest_api_init', [$this, 'registerRestRoutes']);
+    }
+
+    public function filterAdminBodyClass(string $classes): string
+    {
+        $screen = function_exists('get_current_screen') ? get_current_screen() : ($GLOBALS['current_screen'] ?? null);
+        if ($screen && isset($screen->id) && (strpos($screen->id, 'mimic-manager') !== false)) {
+            $classes .= ' mm-fullbleed';
+        }
+        return $classes;
+    }
+
+    public function handleLegacyMenuRedirects(): void
+    {
+        if (!isset($_GET['page']) || !is_string($_GET['page'])) {
+            return;
+        }
+
+        $page = sanitize_key($_GET['page']);
+        $legacyRoutes = [
+            'mimic-manager-media' => '#/media',
+            'mimic-manager-speed' => '#/speed',
+            'mimic-manager-seo' => '#/seo',
+            'mimic-manager-files' => '#/files',
+            'mimic-manager-settings' => '#/settings',
+            'mimic-manager-about' => '#/about',
+        ];
+
+        if (isset($legacyRoutes[$page]) && function_exists('wp_safe_redirect') && function_exists('admin_url')) {
+            wp_safe_redirect(admin_url('admin.php?page=mimic-manager' . $legacyRoutes[$page]), 301);
+            exit;
+        }
     }
 
     public function registerAdminMenus(): void
@@ -82,18 +119,10 @@ final class Plugin
             Brand::NAME,
             'manage_options',
             'mimic-manager',
-            [$this, 'renderDashboardPage'],
+            [$this, 'renderSpaShellPage'],
             $iconSvg,
             58
         );
-
-        add_submenu_page('mimic-manager', __('Dashboard', 'mimic-manager'), __('Dashboard', 'mimic-manager'), 'manage_options', 'mimic-manager', [$this, 'renderDashboardPage']);
-        add_submenu_page('mimic-manager', __('Media Optimization', 'mimic-manager'), __('Media', 'mimic-manager'), 'manage_options', 'mimic-manager-media', [$this, 'renderMediaPage']);
-        add_submenu_page('mimic-manager', __('PageSpeed Fixes', 'mimic-manager'), __('Speed', 'mimic-manager'), 'manage_options', 'mimic-manager-speed', [$this, 'renderSpeedPage']);
-        add_submenu_page('mimic-manager', __('SEO Gap Fill', 'mimic-manager'), __('SEO', 'mimic-manager'), 'manage_options', 'mimic-manager-seo', [$this, 'renderSeoPage']);
-        add_submenu_page('mimic-manager', __('File Manager', 'mimic-manager'), __('Files', 'mimic-manager'), 'manage_options', 'mimic-manager-files', [$this, 'renderFilesPage']);
-        add_submenu_page('mimic-manager', __('Settings', 'mimic-manager'), __('Settings', 'mimic-manager'), 'manage_options', 'mimic-manager-settings', [$this, 'renderSettingsPage']);
-        add_submenu_page('mimic-manager', __('About & Help', 'mimic-manager'), __('About', 'mimic-manager'), 'manage_options', 'mimic-manager-about', [$this, 'renderAboutPage']);
 
         add_action("load-{$mainHook}", [$this, 'addHelpTabs']);
     }
@@ -217,6 +246,30 @@ final class Plugin
             'callback' => [$this, 'restSaveSettings'],
             'permission_callback' => fn() => current_user_can('manage_options'),
         ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/list', [
+            'methods' => 'GET',
+            'callback' => [$this, 'restListFiles'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/lint', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restLintFile'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/read', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restReadFile'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/save', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restSaveFile'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
     }
 
     public function restGetStatus(): \WP_REST_Response
@@ -323,7 +376,202 @@ final class Plugin
              '</p></div>';
     }
 
-    // Page view renderers
+    public function renderSpaShellPage(): void
+    {
+        require dirname(__DIR__) . '/views/shell.php';
+    }
+
+    public function restListFiles(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $relPath = (string) ($request->get_param('path') ?? '');
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $resolved = $guard->resolveSecurePath($relPath);
+            if (!is_dir($resolved)) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Not a directory'], 400);
+            }
+
+            $entries = array_diff(scandir($resolved) ?: [], ['.', '..']);
+            $files = [];
+            foreach ($entries as $entry) {
+                $full = $resolved . DIRECTORY_SEPARATOR . $entry;
+                $isDir = is_dir($full);
+                $relItem = ltrim(($relPath ? $relPath . '/' : '') . $entry, '/');
+                $size = $isDir ? 0 : (int) @filesize($full);
+                $mtime = (int) @filemtime($full);
+                $perms = (int) @fileperms($full);
+                $permsOctal = sprintf('%o', $perms & 0777);
+                $ext = $isDir ? 'folder' : strtolower(pathinfo($entry, PATHINFO_EXTENSION));
+
+                $files[] = [
+                    'name' => $entry,
+                    'path' => $relItem,
+                    'isDir' => $isDir,
+                    'size' => $size,
+                    'sizeFormatted' => $isDir ? '-' : $this->formatBytes($size),
+                    'modified' => $mtime,
+                    'modifiedFormatted' => date('Y-m-d H:i', $mtime),
+                    'permissions' => $permsOctal,
+                    'ext' => $ext,
+                    'isWorldWritable' => ($perms & 0002) !== 0,
+                    'isExecutable' => !$isDir && ($perms & 0111) !== 0,
+                ];
+            }
+
+            // Locked core nodes to show at root
+            $lockedNodes = [];
+            if ($relPath === '' || $relPath === '.') {
+                $lockedNodes = [
+                    [
+                        'name' => 'wp-admin',
+                        'path' => 'wp-admin',
+                        'isDir' => true,
+                        'locked' => true,
+                        'reason' => __('WordPress core, read-only. Enable advanced mode in Settings to browse.', 'mimic-manager'),
+                    ],
+                    [
+                        'name' => 'wp-includes',
+                        'path' => 'wp-includes',
+                        'isDir' => true,
+                        'locked' => true,
+                        'reason' => __('WordPress core, read-only. Enable advanced mode in Settings to browse.', 'mimic-manager'),
+                    ],
+                ];
+            }
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'root' => 'wp-content',
+                'currentPath' => $relPath,
+                'files' => $files,
+                'lockedNodes' => $lockedNodes,
+                'writeMode' => (bool) get_option('mimic_manager_file_write_mode', false) && !defined('DISALLOW_FILE_EDIT'),
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restLintFile(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $code = (string) $request->get_param('code');
+        $linter = new \Wefik\MimicManager\FileManager\PhpAstLinter();
+        $result = $linter->lintSource($code);
+        return new \WP_REST_Response($result);
+    }
+
+    public function restReadFile(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $relPath = (string) $request->get_param('path');
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $resolved = $guard->resolveSecurePath($relPath);
+            if (!is_file($resolved)) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'File not found'], 404);
+            }
+
+            $ext = strtolower(pathinfo($resolved, PATHINFO_EXTENSION));
+            $allowedTextExts = ['php', 'js', 'css', 'json', 'html', 'txt', 'md', 'xml', 'yml', 'yaml', 'ini', 'svg'];
+            if (!in_array($ext, $allowedTextExts, true)) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Binary or non-editable file'], 400);
+            }
+
+            $content = file_get_contents($resolved);
+            $hash = hash_file('sha256', $resolved);
+            $mtime = filemtime($resolved);
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'path' => $relPath,
+                'content' => $content,
+                'hash' => $hash,
+                'mtime' => $mtime,
+                'ext' => $ext,
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restSaveFile(\WP_REST_Request $request): \WP_REST_Response
+    {
+        if (defined('DISALLOW_FILE_EDIT') && constant('DISALLOW_FILE_EDIT')) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'DISALLOW_FILE_EDIT is enabled'], 403);
+        }
+
+        $writeMode = (bool) get_option('mimic_manager_file_write_mode', false);
+        if (!$writeMode) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'File write mode is disabled in Settings'], 403);
+        }
+
+        $relPath = (string) $request->get_param('path');
+        $content = (string) $request->get_param('content');
+        $expectedHash = (string) ($request->get_param('expectedHash') ?? '');
+
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $resolved = $guard->resolveSecurePath($relPath);
+            if (!is_file($resolved)) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Target file not found'], 404);
+            }
+
+            // Optimistic conflict detection
+            if ($expectedHash !== '') {
+                $currentHash = hash_file('sha256', $resolved);
+                if ($currentHash !== $expectedHash) {
+                    return new \WP_REST_Response(['success' => false, 'error' => 'Conflict: file was modified on disk'], 409);
+                }
+            }
+
+            // Pre-save PHP AST syntax lint
+            $ext = strtolower(pathinfo($resolved, PATHINFO_EXTENSION));
+            if ($ext === 'php') {
+                $linter = new \Wefik\MimicManager\FileManager\PhpAstLinter();
+                $lint = $linter->lintSource($content);
+                if (!$lint['valid']) {
+                    return new \WP_REST_Response([
+                        'success' => false,
+                        'error' => 'PHP Syntax Error: ' . ($lint['error'] ?? 'invalid tokens'),
+                        'line' => $lint['line'],
+                    ], 422);
+                }
+            }
+
+            // Create pre-save shadow backup
+            $backupMgr = new \Wefik\MimicManager\FileManager\ShadowBackup($contentDir . '/.mimic-backups');
+            $backupId = $backupMgr->createBackup($resolved);
+
+            // Atomic write
+            $tempFile = $resolved . '.tmp.' . bin2hex(random_bytes(6));
+            file_put_contents($tempFile, $content);
+            rename($tempFile, $resolved);
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'path' => $relPath,
+                'newHash' => hash_file('sha256', $resolved),
+                'newMtime' => filemtime($resolved),
+                'backupId' => $backupId,
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes < 1024) return $bytes . ' B';
+        if ($bytes < 1048576) return round($bytes / 1024, 1) . ' KB';
+        return round($bytes / 1048576, 2) . ' MB';
+    }
+
+    // Legacy fallback page view renderers
     public function renderDashboardPage(): void { require dirname(__DIR__) . '/views/dashboard.php'; }
     public function renderMediaPage(): void { require dirname(__DIR__) . '/views/media.php'; }
     public function renderSpeedPage(): void { require dirname(__DIR__) . '/views/speed.php'; }

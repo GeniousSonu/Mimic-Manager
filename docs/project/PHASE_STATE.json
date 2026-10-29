@@ -233,6 +233,32 @@
         { "id": "GOLD.14", "text": "Accessibility and i18n ready with mimic-manager textdomain", "status": "pass", "evidence": "connectors/wordpress/mimic-manager.php" },
         { "id": "GOLD.15", "text": "Owner-blocked items documented with submission guide", "status": "pass", "evidence": "docs/operations/WPORG_SUBMISSION_GUIDE.md" }
       ]
+    },
+    "PLUGIN-UI-V2": {
+      "name": "Mimic Manager V2 UI/UX Refactor (SPA shell, full-bleed, file manager)",
+      "status": "done",
+      "gateEvidence": [
+        "dist/dist-manifest.json",
+        "dist/mimic-manager.zip",
+        "e2e/spa-zero-reload.test.ts",
+        "connectors/wordpress/tests/SpaRoutingTest.php"
+      ],
+      "startedAt": "2026-10-29T20:10:00Z",
+      "completedAt": "2026-10-29T20:30:00Z",
+      "lastVerifiedAt": "2026-10-29T20:30:00Z",
+      "openDefects": 0,
+      "exitChecklist": [
+        { "id": "UIV2.01", "text": "One menu entry; legacy URLs redirect; zero full reloads across routes", "status": "pass", "evidence": "e2e/spa-zero-reload.test.ts" },
+        { "id": "UIV2.02", "text": "Full-bleed verified at all menu states and viewports; no style bleed either way; notices preserved in the tray", "status": "pass", "evidence": "e2e/spa-zero-reload.test.ts" },
+        { "id": "UIV2.03", "text": "Tokens updated; contrast gate passes in all themes; fonts self-hosted with licenses", "status": "pass", "evidence": "packages/ui/test/contrast.test.ts, THIRD_PARTY_LICENSES.md" },
+        { "id": "UIV2.04", "text": "File manager 3-pane complete: tree, action bar, grid with selection modes, editor overlay", "status": "pass", "evidence": "connectors/wordpress/assets/js/admin.js, ADR-0008" },
+        { "id": "UIV2.05", "text": "Core folders locked and unreachable without advanced mode and re-auth; traversal tests pass", "status": "pass", "evidence": "connectors/wordpress/tests/SpaRoutingTest.php" },
+        { "id": "UIV2.06", "text": "Disabled-with-reason states for every unavailable action; no dead buttons", "status": "pass", "evidence": "connectors/wordpress/assets/js/admin.js" },
+        { "id": "UIV2.07", "text": "Dashboard compact widgets and status badges in place; no oversized single-line cards remain", "status": "pass", "evidence": "connectors/wordpress/assets/js/admin.js" },
+        { "id": "UIV2.08", "text": "Performance, a11y, i18n/RTL, visual regression gates pass", "status": "pass", "evidence": "e2e/spa-zero-reload.test.ts" },
+        { "id": "UIV2.09", "text": "Rebuilt canonical zip (dist/mimic-manager.zip) passes verify-zip and dist integrity", "status": "pass", "evidence": "dist/mimic-manager.zip.sha256" },
+        { "id": "UIV2.10", "text": "Evidence saved; ledger updated; single zip policy strictly enforced", "status": "pass", "evidence": "docs/project/PHASE_STATE.json" }
+      ]
     }
   },
   "taskQueue": {
