@@ -1,0 +1,37 @@
+services:
+  wp_db:
+    image: mariadb:10.11
+    container_name: mimic_wp_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpresspassword
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  wp:
+    image: wordpress:6.7-apache
+    container_name: mimic_wp
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8888:80"
+    environment:
+      WORDPRESS_DB_HOST: wp_db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpresspassword
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_CONFIG_EXTRA: |
+        define( 'WP_DEBUG_LOG', true );
+        define( 'WP_DEBUG_DISPLAY', false );
+        define( 'SCRIPT_DEBUG', true );
+    volumes:
+      - ../../connectors/wordpress:/var/www/html/wp-content/plugins/mimic-manager
+    depends_on:
+      wp_db:
+        condition: service_healthy

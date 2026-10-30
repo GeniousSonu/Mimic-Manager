@@ -1,0 +1,11 @@
+{
+  "consoleLogs": [
+    "[log] JQMIGRATE: Migrate is installed with logging active, version 3.4.1",
+    "[log] JQMIGRATE: Migrate is installed with logging active, version 3.4.1",
+    "[log] JQMIGRATE: Migrate is installed with logging active, version 3.4.1",
+    "[info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold"
+  ],
+  "networkErrors": [],
+  "menuExists": true,
+  "submenuCount": 9
+}

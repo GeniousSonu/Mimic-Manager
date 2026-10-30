@@ -8,8 +8,9 @@
     currentRoute: 'dashboard',
     routeParams: {},
     fullscreen: localStorage.getItem('mm_fullscreen_disabled') !== 'true',
+    railCollapsed: localStorage.getItem('mm_rail_collapsed') === 'true',
     density: localStorage.getItem('mm_density') || 'compact',
-    viewMode: localStorage.getItem('mm_view_mode') || 'table',
+    viewMode: localStorage.getItem('mm_view_mode') || 'grid',
     activeTask: null,
     pollingInterval: 3000,
     serverStatus: {
@@ -17,7 +18,7 @@
       consentGiven: false,
       cloudConnected: false,
     },
-    connectionStatus: 'local-only', // 'connected' | 'local-only' | 'retrying'
+    connectionStatus: 'local-only', // 'connected' | 'local-only' | 'waiting' | 'retrying'
     connectionReason: '100% Local Mode (telemetry-free)',
     lastToastMessage: '',
     lastToastTime: 0,
@@ -26,6 +27,24 @@
     loading: {
       files: false,
       dashboard: false,
+      media: false,
+      pairing: false,
+    },
+    pairing: {
+      sessionId: '',
+      pairingCode: '',
+      expiresAt: 0,
+      remainingSeconds: 0,
+      timerId: null,
+      pollId: null,
+      backendUrl: 'http://localhost:3000',
+      consent: false,
+    },
+    elevation: {
+      active: false,
+      expiresAt: 0,
+      remainingSeconds: 0,
+      timerId: null,
     },
     fileManager: {
       currentPath: '',
@@ -35,6 +54,14 @@
       expandedFolders: new Set(['']),
       writeMode: false,
       inspectorFile: null,
+      clipboard: null, // { action: 'copy'|'cut', path: string }
+      contextMenu: {
+        visible: false,
+        x: 0,
+        y: 0,
+        target: null, // file object or null for background
+      },
+      modal: null, // { type: 'newFile'|'newFolder'|'rename'|'chmod'|'elevate', data: any }
       editor: {
         open: false,
         path: '',
@@ -46,25 +73,34 @@
         lintError: null,
       },
     },
+    media: {
+      items: [],
+      selectedIds: new Set(),
+      filterFormat: 'all',
+      filterStatus: 'all',
+      summary: {
+        totalImages: 0,
+        totalSavedBytes: 0,
+        totalSavedFormatted: '0 B',
+        overallSavingsPercent: 0,
+      },
+      wizardOpen: false,
+      wizardPreset: 'balanced',
+      wizardQuality: 75,
+      wizardFormat: 'webp',
+      detailItem: null,
+    },
   };
 
   const wpData = window.mimicManagerData || {
     restUrl: '/wp-json/mimic-manager/v1',
     nonce: '',
+    homeUrl: 'http://localhost:8888',
+    siteName: 'WordPress Site',
+    disallowFileEdit: false,
+    disallowFileMods: false,
     brand: { name: 'Mimic Manager', version: '1.0.0-rc.1', creator: 'SK Sahinur Islam', owner: 'Wefik' },
   };
-
-  // Redact secrets for diagnostics logging
-  function redactDiagnostics(data) {
-    try {
-      const str = typeof data === 'string' ? data : JSON.stringify(data);
-      return str
-        .replace(/(['"]?(?:nonce|token|secret|password|api[_-]?key|auth)['"]?\s*[:=]\s*['"])([^'"]+)(['"])/gi, '$1[REDACTED]$3')
-        .replace(/([?&](?:nonce|token|secret|password|key)=)([^&#\s]+)/gi, '$1[REDACTED]');
-    } catch {
-      return '[Diagnostics Redaction Error]';
-    }
-  }
 
   function logError(source, err) {
     const entry = {
@@ -80,7 +116,6 @@
     console.error(`[Mimic Manager ${source}]`, err);
   }
 
-  // Global Unhandled Rejection & Error Handlers (J5.1)
   window.addEventListener('error', (event) => {
     logError('window.error', event.error || event.message);
   });
@@ -88,10 +123,28 @@
     logError('unhandledrejection', event.reason);
   });
 
-  // REST API fetch with 3-second timeout for interactive calls (J5.2)
+  // REST API fetch supporting both pretty permalinks and plain permalinks (?rest_route=)
   async function apiFetch(endpoint, options = {}) {
-    const url = wpData.restUrl + endpoint;
-    const timeoutMs = options.timeout || 3000;
+    let url;
+    if (wpData.restUrl.includes('?')) {
+      const [base, query] = wpData.restUrl.split('?');
+      const [pathPart, queryPart] = endpoint.split('?');
+      const cleanEndpoint = pathPart.replace(/^\/+/, '');
+      const searchParams = new URLSearchParams(query);
+      const currentRoute = searchParams.get('rest_route') || '';
+      searchParams.set('rest_route', currentRoute.replace(/\/+$/, '') + '/' + cleanEndpoint);
+      if (queryPart) {
+        const extraParams = new URLSearchParams(queryPart);
+        for (const [k, v] of extraParams.entries()) {
+          searchParams.set(k, v);
+        }
+      }
+      url = `${base}?${searchParams.toString()}`;
+    } else {
+      url = wpData.restUrl.replace(/\/+$/, '') + '/' + endpoint.replace(/^\/+/, '');
+    }
+
+    const timeoutMs = options.timeout || 6000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -107,13 +160,11 @@
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-        throw new Error(err.error || `HTTP error ${res.status}`);
+        throw new Error(err.error || err.message || `HTTP error ${res.status}`);
       }
       return res.json();
     } catch (err) {
       clearTimeout(timeoutId);
-
-      // Backend unreachable or timeout handling
       if (err.name === 'AbortError' || err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
         if (state.connectionStatus !== 'local-only') {
           state.connectionStatus = 'local-only';
@@ -122,16 +173,13 @@
           renderStatusBadges();
         }
       }
-
       logError(`apiFetch:${endpoint}`, err);
       throw err;
     }
   }
 
-  // Toast Provider with 10s Undo & Deduplication (J5.4)
   function showToast(message, options = {}) {
     const now = Date.now();
-    // Deduplication check: ignore identical toasts within 3.5 seconds
     if (state.lastToastMessage === message && now - state.lastToastTime < 3500) {
       return;
     }
@@ -150,7 +198,6 @@
       else document.body.appendChild(container);
     }
 
-    // Stack limit: max 3 toasts
     while (container.children.length >= 3) {
       container.removeChild(container.firstChild);
     }
@@ -159,298 +206,37 @@
     toast.className = 'mm-toast';
     toast.setAttribute('role', 'status');
 
-    const msgSpan = document.createElement('span');
-    msgSpan.textContent = message;
-    toast.appendChild(msgSpan);
-
-    if (options.undoAction && typeof options.undoAction === 'function') {
-      const undoBtn = document.createElement('button');
-      undoBtn.className = 'mm-toast-undo';
-      undoBtn.textContent = 'Undo';
-      undoBtn.onclick = () => {
-        try {
-          options.undoAction();
-        } catch (e) {
-          logError('toast:undo', e);
-        }
-        removeToast(toast);
-      };
-      toast.appendChild(undoBtn);
+    let undoBtn = '';
+    if (options.undoAction) {
+      undoBtn = `<button class="mm-toast-undo" id="mm-undo-action" type="button">Undo (${options.undoDuration || 10}s)</button>`;
     }
 
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'mm-icon-btn';
-    closeBtn.style.padding = '0 4px';
-    closeBtn.style.fontSize = '12px';
-    closeBtn.setAttribute('aria-label', 'Dismiss notification');
-    closeBtn.textContent = '✕';
-    closeBtn.onclick = () => removeToast(toast);
-    toast.appendChild(closeBtn);
+    toast.innerHTML = `
+      <div class="mm-toast-msg">${escapeHtml(message)}</div>
+      ${undoBtn}
+      <button class="mm-toast-close" type="button" aria-label="Dismiss notification">&times;</button>
+    `;
 
     container.appendChild(toast);
 
-    const duration = options.undoAction ? Math.max(options.duration || 10000, 10000) : options.duration || 4000;
-    const timer = setTimeout(() => removeToast(toast), duration);
-
-    function removeToast(t) {
-      clearTimeout(timer);
-      t.classList.add('hiding');
-      setTimeout(() => {
-        if (t.parentNode) t.parentNode.removeChild(t);
-      }, 150);
-    }
-  }
-
-  // Router Management
-  function parseHash() {
-    const hash = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
-    const [pathPart, queryPart] = hash.split('?');
-    const params = {};
-    if (queryPart) {
-      new URLSearchParams(queryPart).forEach((val, key) => {
-        params[key] = val;
-      });
-    }
-    return { route: pathPart || 'dashboard', params };
-  }
-
-  function navigateTo(route, params = {}) {
-    if (state.fileManager.editor.isDirty) {
-      confirmUnsavedChanges(() => {
-        state.fileManager.editor.isDirty = false;
-        performNavigate(route, params);
-      });
-      return;
-    }
-    performNavigate(route, params);
-  }
-
-  function performNavigate(route, params = {}) {
-    const query = new URLSearchParams(params).toString();
-    const newHash = '#/' + route + (query ? '?' + query : '');
-    if (window.location.hash !== newHash) {
-      window.location.hash = newHash;
-    } else {
-      handleRoute();
-    }
-  }
-
-  function handleRoute() {
-    const { route, params } = parseHash();
-    state.currentRoute = route;
-    state.routeParams = params;
-
-    if (route === 'files') {
-      const p = params.path !== undefined ? params.path : (state.fileManager.currentPath || '');
-      state.fileManager.currentPath = p;
-      loadFiles(p);
-    }
-
-    renderApp();
-  }
-
-  // Unsaved Changes Guard Dialog
-  function confirmUnsavedChanges(onDiscard) {
-    const existing = document.getElementById('mm-unsaved-dialog');
-    if (existing) existing.remove();
-
-    const modal = document.createElement('div');
-    modal.id = 'mm-unsaved-dialog';
-    modal.className = 'mm-modal-backdrop';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-    modal.innerHTML = `
-      <div class="mm-modal-card">
-        <h3 style="margin:0 0 8px 0; font-size:16px; color:var(--mm-text);">Unsaved Changes</h3>
-        <p style="margin:0; font-size:13px; color:var(--mm-muted);">
-          You have unsaved edits in <strong>${escapeHtml(state.fileManager.editor.path)}</strong>.
-          Leaving will discard your changes.
-        </p>
-        <div class="mm-modal-actions">
-          <button id="mm-keep-editing-btn" class="mm-action-btn">Keep Editing</button>
-          <button id="mm-discard-btn" class="mm-action-btn" style="color:var(--mm-danger);">Discard</button>
-          <button id="mm-save-first-btn" class="mm-action-btn primary">Save</button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    modal.querySelector('#mm-keep-editing-btn').onclick = () => modal.remove();
-    modal.querySelector('#mm-discard-btn').onclick = () => {
-      modal.remove();
-      onDiscard();
+    const closeBtn = toast.querySelector('.mm-toast-close');
+    const dismiss = () => {
+      toast.classList.add('hiding');
+      setTimeout(() => toast.remove(), 150);
     };
-    modal.querySelector('#mm-save-first-btn').onclick = async () => {
-      const saved = await saveCurrentEditorFile();
-      if (saved) {
-        modal.remove();
-        onDiscard();
-      }
-    };
-  }
+    if (closeBtn) closeBtn.addEventListener('click', dismiss);
 
-  window.addEventListener('beforeunload', function (e) {
-    if (state.fileManager.editor.isDirty) {
-      e.preventDefault();
-      e.returnValue = 'You have unsaved changes in Mimic Manager.';
-    }
-  });
-
-  // Relocate WordPress Notices into Collapsible Tray
-  function relocateNotices() {
-    const noticeContainer = document.getElementById('mm-notices-container');
-    if (!noticeContainer) return;
-
-    const externalNotices = document.querySelectorAll(
-      '#wpbody-content > .notice:not(.mm-internal), #wpbody-content > .updated, #wpbody-content > .error'
-    );
-
-    if (externalNotices.length === 0) {
-      noticeContainer.innerHTML = '';
-      return;
-    }
-
-    const tray = document.createElement('details');
-    tray.className = 'mm-notices-tray';
-    tray.innerHTML = `
-      <summary class="mm-notices-summary">
-        <span>⚠ WordPress notices (${externalNotices.length})</span>
-      </summary>
-      <div class="mm-notices-dropdown"></div>
-    `;
-
-    const dropdown = tray.querySelector('.mm-notices-dropdown');
-    externalNotices.forEach((n) => {
-      n.style.margin = '8px 0';
-      dropdown.appendChild(n);
-    });
-
-    noticeContainer.innerHTML = '';
-    noticeContainer.appendChild(tray);
-  }
-
-  // File Manager Operations
-  async function loadFiles(path = '') {
-    state.loading.files = true;
-    renderApp();
-
-    try {
-      const res = await apiFetch(`/files/list?path=${encodeURIComponent(path)}`);
-      if (res.success) {
-        state.fileManager.files = res.files || [];
-        state.fileManager.lockedNodes = res.lockedNodes || [];
-        state.fileManager.writeMode = res.writeMode || false;
-        state.fileManager.selectedPaths.clear();
-        state.fileManager.inspectorFile = null;
-      }
-    } catch (err) {
-      logError('loadFiles', err);
-    } finally {
-      state.loading.files = false;
-      renderApp();
-    }
-  }
-
-  async function openEditor(path) {
-    try {
-      const res = await apiFetch('/files/read', {
-        method: 'POST',
-        body: JSON.stringify({ path }),
-      });
-
-      if (res.success) {
-        state.fileManager.editor = {
-          open: true,
-          path,
-          content: res.content,
-          savedContent: res.content,
-          hash: res.hash,
-          mtime: res.mtime,
-          isDirty: false,
-          lintError: null,
-        };
-        renderApp();
-      }
-    } catch (err) {
-      showToast(`Unable to open file: ${err.message}`);
-    }
-  }
-
-  async function saveCurrentEditorFile() {
-    const ed = state.fileManager.editor;
-    if (!ed.isDirty) return true;
-
-    try {
-      if (ed.path.endsWith('.php')) {
-        const lintRes = await apiFetch('/files/lint', {
-          method: 'POST',
-          body: JSON.stringify({ content: ed.content }),
+    if (options.undoAction) {
+      const undoEl = toast.querySelector('#mm-undo-action');
+      if (undoEl) {
+        undoEl.addEventListener('click', () => {
+          dismiss();
+          options.undoAction();
         });
-
-        if (!lintRes.valid) {
-          ed.lintError = `PHP Syntax Error (Line ${lintRes.line}): ${lintRes.error}`;
-          renderApp();
-          return false;
-        }
       }
-
-      const prevContent = ed.savedContent;
-      const saveRes = await apiFetch('/files/save', {
-        method: 'POST',
-        body: JSON.stringify({
-          path: ed.path,
-          content: ed.content,
-          expectedHash: ed.hash,
-        }),
-      });
-
-      if (saveRes.success) {
-        ed.savedContent = ed.content;
-        ed.hash = saveRes.hash;
-        ed.mtime = saveRes.mtime;
-        ed.isDirty = false;
-        ed.lintError = null;
-
-        showToast(`Saved ${ed.path}`, {
-          duration: 10000,
-          undoAction: async () => {
-            await apiFetch('/files/save', {
-              method: 'POST',
-              body: JSON.stringify({
-                path: ed.path,
-                content: prevContent,
-                expectedHash: ed.hash,
-              }),
-            });
-            openEditor(ed.path);
-            showToast(`Reverted changes to ${ed.path}`);
-          },
-        });
-
-        renderApp();
-        return true;
-      }
-    } catch (err) {
-      showToast(`Save failed: ${err.message}`);
-      return false;
     }
-    return false;
-  }
 
-  // Polling Server Status
-  async function pollStatus() {
-    if (document.hidden) return;
-    try {
-      const data = await apiFetch('/status');
-      state.serverStatus = data;
-      state.connectionStatus = data.cloudConnected ? 'connected' : 'local-only';
-      state.connectionReason = data.cloudConnected ? 'Connected to Cloud Engine' : '100% Local Mode (telemetry-free)';
-      renderStatusBadges();
-    } catch (e) {
-      state.connectionStatus = 'local-only';
-      renderStatusBadges();
-    }
+    setTimeout(dismiss, options.duration || 6000);
   }
 
   function escapeHtml(str) {
@@ -460,127 +246,331 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/'/g, '&#039;');
   }
 
-  // Error Boundary Wrapper (J5.1)
-  function safeRender(paneName, renderFn) {
-    try {
-      return renderFn();
-    } catch (err) {
-      logError(`render:${paneName}`, err);
-      return renderErrorCard({
-        title: `${paneName} encountered an error`,
-        message: 'A render exception occurred in this pane. Other components remain functional.',
-        diagnostics: redactDiagnostics({
-          pane: paneName,
-          error: err && err.message ? err.message : String(err),
-          time: new Date().toISOString(),
-        }),
-        onRetry: () => renderApp(),
-      });
+  // Hash-based routing & synchronization with WordPress admin menu
+  function initRouting() {
+    window.addEventListener('hashchange', handleHashChange);
+    handleHashChange();
+  }
+
+  function handleHashChange() {
+    const rawHash = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
+    const parts = rawHash.split('/');
+    const route = parts[0] || 'dashboard';
+
+    state.currentRoute = route;
+    state.fileManager.contextMenu.visible = false;
+
+    // Synchronize WordPress left-side admin menu active highlight
+    syncWpAdminMenu(route);
+
+    renderApp();
+
+    if (route === 'files') {
+      loadFiles(state.fileManager.currentPath);
+    } else if (route === 'media') {
+      loadMedia();
+    } else if (route === 'dashboard') {
+      loadDashboardStatus();
     }
   }
 
-  function renderErrorCard({ title, message, diagnostics, onRetry }) {
-    const diagStr = escapeHtml(typeof diagnostics === 'string' ? diagnostics : JSON.stringify(diagnostics, null, 2));
-    return `
-      <div class="mm-error-card" role="alert">
-        <div class="mm-error-badge">⚠️</div>
-        <h3 class="mm-error-title">${escapeHtml(title)}</h3>
-        <p class="mm-error-message">${escapeHtml(message)}</p>
-        <div class="mm-error-actions">
-          <button type="button" class="mm-action-btn primary mm-retry-pane-btn">Retry</button>
-          <button type="button" class="mm-action-btn secondary mm-copy-diag-btn" data-diag="${diagStr}">Copy Diagnostics</button>
-          <a href="https://github.com/GeniousSonu/Mimic-Manager/tree/main/docs" target="_blank" rel="noopener noreferrer" class="mm-action-btn">Documentation</a>
-        </div>
-      </div>
-    `;
-  }
+  function syncWpAdminMenu(route) {
+    const wpMenu = document.getElementById('adminmenu');
+    if (!wpMenu) return;
 
-  // Component Primitives (J2.4)
-  function renderEmptyState({ type, title, desc, ctaText, ctaDisabledReason, ctaActionId, ctaHref }) {
-    const icons = {
-      folder: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>`,
-      search: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>`,
-      media: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`,
-      seo: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
-      speed: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
-      offline: `<svg class="mm-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/></svg>`,
+    // Target submenu matching current route
+    const mmParent = wpMenu.querySelector('li.toplevel_page_mimic-manager');
+    if (!mmParent) return;
+
+    const allSubLinks = mmParent.querySelectorAll('.wp-submenu li');
+    allSubLinks.forEach((li) => {
+      li.classList.remove('current');
+      const a = li.querySelector('a');
+      if (a) a.classList.remove('current');
+    });
+
+    const routeSlugMap = {
+      dashboard: 'mimic-manager',
+      media: 'mimic-manager-media',
+      speed: 'mimic-manager-speed',
+      seo: 'mimic-manager-seo',
+      files: 'mimic-manager-files',
+      sites: 'mimic-manager-sites',
+      settings: 'mimic-manager-settings',
+      about: 'mimic-manager-about',
     };
 
-    const iconSvg = icons[type] || icons.folder;
-    const isCtaDisabled = !!ctaDisabledReason;
-
-    return `
-      <div class="mm-empty-state" role="status">
-        ${iconSvg}
-        <h4 class="mm-empty-title">${escapeHtml(title)}</h4>
-        <p class="mm-empty-desc">${escapeHtml(desc)}</p>
-        ${
-          ctaText
-            ? `
-          <div class="mm-empty-cta">
-            ${
-              ctaHref
-                ? `<a href="${escapeHtml(ctaHref)}" class="mm-action-btn primary">${escapeHtml(ctaText)}</a>`
-                : `<button class="mm-action-btn primary" id="${escapeHtml(ctaActionId || 'mm-empty-cta-btn')}" ${isCtaDisabled ? `disabled title="${escapeHtml(ctaDisabledReason)}"` : ''}>${escapeHtml(ctaText)}</button>`
-            }
-            ${isCtaDisabled ? `<div style="font-size:11px; color:var(--mm-muted); margin-top:4px;">${escapeHtml(ctaDisabledReason)}</div>` : ''}
-          </div>
-        `
-            : ''
-        }
-      </div>
-    `;
+    const targetSlug = routeSlugMap[route] || 'mimic-manager';
+    const targetLink = mmParent.querySelector(`.wp-submenu a[href*="page=${targetSlug}"]`);
+    if (targetLink) {
+      targetLink.classList.add('current');
+      const parentLi = targetLink.closest('li');
+      if (parentLi) parentLi.classList.add('current');
+    }
   }
 
-  function renderFileGridSkeleton() {
-    return `
-      <div class="mm-grid-container" role="status" aria-busy="true">
-        <span class="screen-reader-text" style="position:absolute; width:1px; height:1px; overflow:hidden;">Loading files...</span>
-        <table class="mm-data-table">
-          <thead>
-            <tr>
-              <th style="width:40%;">Name</th>
-              <th style="width:20%;">Modified</th>
-              <th style="width:15%;">Size</th>
-              <th style="width:15%;">Permissions</th>
-              <th style="width:10%;">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${[1, 2, 3, 4, 5]
-              .map(
-                () => `
-              <tr>
-                <td><div class="mm-skeleton" style="height:16px; width:65%;"></div></td>
-                <td><div class="mm-skeleton" style="height:14px; width:80%;"></div></td>
-                <td><div class="mm-skeleton" style="height:14px; width:50%;"></div></td>
-                <td><div class="mm-skeleton" style="height:14px; width:40%;"></div></td>
-                <td><div class="mm-skeleton" style="height:14px; width:60%;"></div></td>
-              </tr>
-            `
-              )
-              .join('')}
-          </tbody>
-        </table>
+  async function loadDashboardStatus() {
+    try {
+      const res = await apiFetch('/status');
+      if (res && res.status === 'ok') {
+        state.serverStatus.localEngine = res.localEngine || { engine: 'gd', supported: true };
+        state.serverStatus.consentGiven = res.consentGiven || false;
+        state.serverStatus.cloudConnected = res.cloudConnected || false;
+        state.connectionStatus = res.cloudConnected ? 'connected' : 'local-only';
+        if (res.backendUrl) state.pairing.backendUrl = res.backendUrl;
+        renderStatusBadges();
+      }
+    } catch {
+      // Offline fallback
+    }
+  }
+
+  // Media Management (L4)
+  async function loadMedia() {
+    state.loading.media = true;
+    renderMediaView();
+
+    try {
+      const res = await apiFetch('/media/list');
+      state.loading.media = false;
+      if (res && res.items) {
+        state.media.items = res.items;
+        state.media.summary = res.summary || state.media.summary;
+      }
+      renderMediaView();
+    } catch (err) {
+      state.loading.media = false;
+      showToast('Failed to load media: ' + err.message);
+      renderMediaView();
+    }
+  }
+
+  async function compressSelectedMedia() {
+    const ids = Array.from(state.media.selectedIds);
+    if (ids.length === 0) return;
+
+    showToast(`Optimizing ${ids.length} selected images locally...`);
+    try {
+      const res = await apiFetch('/media/compress', {
+        method: 'POST',
+        body: JSON.stringify({
+          attachmentIds: ids,
+          preset: state.media.wizardPreset,
+          quality: state.media.wizardQuality,
+          format: state.media.wizardFormat,
+        }),
+      });
+
+      if (res && res.success) {
+        showToast(`Successfully optimized ${ids.length} images!`);
+        state.media.selectedIds.clear();
+        state.media.wizardOpen = false;
+        loadMedia();
+      }
+    } catch (err) {
+      showToast('Optimization failed: ' + err.message);
+    }
+  }
+
+  // File Manager (L3)
+  async function loadFiles(path = '') {
+    state.loading.files = true;
+    state.fileManager.currentPath = path;
+    renderFileManagerView();
+
+    try {
+      const res = await apiFetch(`/files/list?path=${encodeURIComponent(path)}`);
+      state.loading.files = false;
+      if (res.success) {
+        state.fileManager.files = res.files || [];
+        state.fileManager.lockedNodes = res.lockedNodes || [];
+        state.fileManager.writeMode = res.writeMode || state.elevation.active;
+      }
+      renderFileManagerView();
+    } catch (err) {
+      state.loading.files = false;
+      showToast('Failed to load directory: ' + err.message);
+      renderFileManagerView();
+    }
+  }
+
+  // Guided Sudo Elevation Flow (L3.1)
+  async function submitElevation(password) {
+    try {
+      const res = await apiFetch('/files/elevate', {
+        method: 'POST',
+        body: JSON.stringify({ password }),
+      });
+
+      if (res && res.success) {
+        state.elevation.active = true;
+        state.elevation.expiresAt = Date.now() + (res.expiresInSeconds || 900) * 1000;
+        state.elevation.remainingSeconds = res.expiresInSeconds || 900;
+        state.fileManager.writeMode = true;
+        state.fileManager.modal = null;
+
+        if (state.elevation.timerId) clearInterval(state.elevation.timerId);
+        state.elevation.timerId = setInterval(() => {
+          state.elevation.remainingSeconds = Math.max(0, Math.round((state.elevation.expiresAt - Date.now()) / 1000));
+          if (state.elevation.remainingSeconds <= 0) {
+            clearInterval(state.elevation.timerId);
+            state.elevation.active = false;
+            state.fileManager.writeMode = false;
+            showToast('Write mode elevation expired. File manager returned to read-only.');
+            renderApp();
+          } else {
+            const timerEl = document.getElementById('mm-elevation-timer');
+            if (timerEl) {
+              const m = Math.floor(state.elevation.remainingSeconds / 60);
+              const s = state.elevation.remainingSeconds % 60;
+              timerEl.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+            }
+          }
+        }, 1000);
+
+        showToast('Administrator write mode enabled for 15 minutes.');
+        renderApp();
+      }
+    } catch (err) {
+      showToast('Elevation failed: ' + err.message);
+    }
+  }
+
+  function lockAgain() {
+    if (state.elevation.timerId) clearInterval(state.elevation.timerId);
+    state.elevation.active = false;
+    state.fileManager.writeMode = false;
+    showToast('Write mode locked. Returned to safe read-only mode.');
+    renderApp();
+  }
+
+  // Sites / Pairing Flow (L2)
+  async function generatePairingCode() {
+    const cb = document.getElementById('mm-consent-cb');
+    if (cb) state.pairing.consent = cb.checked;
+    const urlInput = document.getElementById('mm-backend-url');
+    if (urlInput) state.pairing.backendUrl = urlInput.value.trim();
+
+    if (!state.pairing.consent) {
+      showToast('Please accept the consent terms before connecting.', 'error');
+      return;
+    }
+
+    state.loading.pairing = true;
+    renderSitesView();
+
+    try {
+      const res = await apiFetch('/sites/pair/init', {
+        method: 'POST',
+        body: JSON.stringify({
+          backendUrl: state.pairing.backendUrl,
+          consent: state.pairing.consent,
+        }),
+      });
+
+      state.loading.pairing = false;
+      if (res && res.success) {
+        state.pairing.sessionId = res.sessionId;
+        state.pairing.pairingCode = res.pairingCode;
+        state.pairing.expiresAt = Date.now() + (res.expiresInSeconds || 600) * 1000;
+        state.pairing.remainingSeconds = res.expiresInSeconds || 600;
+        state.connectionStatus = 'waiting';
+
+        if (state.pairing.timerId) clearInterval(state.pairing.timerId);
+        state.pairing.timerId = setInterval(() => {
+          state.pairing.remainingSeconds = Math.max(0, Math.round((state.pairing.expiresAt - Date.now()) / 1000));
+          if (state.pairing.remainingSeconds <= 0) {
+            clearInterval(state.pairing.timerId);
+            if (state.pairing.pollId) clearInterval(state.pairing.pollId);
+            state.pairing.pairingCode = '';
+            state.connectionStatus = 'local-only';
+            showToast('Pairing code expired. Please generate a new code.');
+            renderSitesView();
+          } else {
+            const countdownEl = document.getElementById('mm-pairing-countdown');
+            if (countdownEl) {
+              const m = Math.floor(state.pairing.remainingSeconds / 60);
+              const s = state.pairing.remainingSeconds % 60;
+              countdownEl.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+            }
+          }
+        }, 1000);
+
+        // Start polling for backend approval
+        if (state.pairing.pollId) clearInterval(state.pairing.pollId);
+        state.pairing.pollId = setInterval(async () => {
+          try {
+            const pollRes = await apiFetch('/sites/pair/status', {
+              method: 'POST',
+              body: JSON.stringify({ sessionId: state.pairing.sessionId }),
+            });
+
+            if (pollRes && pollRes.status === 'approved') {
+              clearInterval(state.pairing.pollId);
+              clearInterval(state.pairing.timerId);
+              state.connectionStatus = 'connected';
+              state.pairing.pairingCode = '';
+              showToast('Site successfully connected to backend!');
+              renderSitesView();
+              renderStatusBadges();
+            }
+          } catch {
+            // Wait and retry
+          }
+        }, 3000);
+      }
+      renderSitesView();
+    } catch (err) {
+      state.loading.pairing = false;
+      showToast('Failed to generate pairing code: ' + err.message);
+      renderSitesView();
+    }
+  }
+
+  async function disconnectSite() {
+    try {
+      await apiFetch('/sites/disconnect', { method: 'POST' });
+      state.connectionStatus = 'local-only';
+      if (state.pairing.pollId) clearInterval(state.pairing.pollId);
+      if (state.pairing.timerId) clearInterval(state.pairing.timerId);
+      state.pairing.pairingCode = '';
+      showToast('Disconnected from cloud backend. Returned to 100% local mode.');
+      renderSitesView();
+      renderStatusBadges();
+    } catch (err) {
+      showToast('Disconnect failed: ' + err.message);
+    }
+  }
+
+  // Rendering Components
+  function renderApp() {
+    const root = document.getElementById('mimic-manager-root');
+    if (!root) return;
+
+    const bootFallback = document.getElementById('mm-boot-fallback');
+    if (bootFallback) bootFallback.remove();
+
+    root.innerHTML = `
+      ${renderHeader()}
+      <div class="mm-shell-body">
+        ${renderInAppRail()}
+        <main class="mm-main-stage" id="mm-main-stage">
+          ${renderRouteView()}
+        </main>
       </div>
+      ${renderContextMenu()}
+      ${renderModals()}
     `;
+
+    bindEvents();
+    renderStatusBadges();
   }
 
   function renderHeader() {
     const brand = wpData.brand;
-    const routes = [
-      { id: 'dashboard', label: 'Dashboard' },
-      { id: 'media', label: 'Media' },
-      { id: 'speed', label: 'Speed' },
-      { id: 'seo', label: 'SEO' },
-      { id: 'files', label: 'Files' },
-      { id: 'settings', label: 'Settings' },
-      { id: 'about', label: 'About' },
-    ];
-
     return `
       <header class="mm-shell-header">
         <div class="mm-header-left">
@@ -593,588 +583,1046 @@
             <span>${escapeHtml(brand.name)}</span>
             <span class="mm-ext-badge">v${escapeHtml(brand.version)}</span>
           </a>
-          <nav class="mm-nav-tabs">
-            ${routes
-              .map(
-                (r) => `
-              <a href="#/${r.id}" class="mm-nav-tab ${state.currentRoute === r.id ? 'active' : ''}" data-route="${r.id}">
-                ${r.label}
-              </a>
-            `
-              )
-              .join('')}
-          </nav>
         </div>
         <div class="mm-header-right">
-          <div id="mm-notices-container"></div>
-          <div class="mm-conn-badge ${state.connectionStatus}" title="${escapeHtml(state.connectionReason)}">
-            <span style="font-size:8px;">●</span>
-            <span>${state.connectionStatus === 'connected' ? 'Connected' : 'Local-only'}</span>
-          </div>
-          <div class="mm-task-indicator ${state.activeTask ? 'active' : ''}">
-            <span>●</span>
-            <span>${state.activeTask ? escapeHtml(state.activeTask.name) : 'Ready'}</span>
-          </div>
-          <button id="mm-fullscreen-toggle" class="mm-icon-btn" title="Toggle Full-Screen Breakout" aria-label="Toggle Full-Screen">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-            </svg>
+          <div id="mm-connection-badge"></div>
+          <button class="mm-icon-btn" id="mm-toggle-fullscreen" title="Toggle Fullscreen" type="button">
+            ⛶
           </button>
         </div>
       </header>
     `;
   }
 
-  function renderStatusBadges() {
-    const el = document.getElementById('mm-status-strip');
-    if (!el) return;
-
-    const engine = state.serverStatus.localEngine || {};
-    const consent = state.serverStatus.consentGiven;
-
-    el.innerHTML = `
-      <div class="mm-status-badge">
-        <span class="dot ${engine.supported ? 'green' : 'amber'}"></span>
-        <strong>Engine:</strong> ${escapeHtml(String(engine.engine || 'GD').toUpperCase())} ${engine.supported ? '(Active)' : '(Fallback)'}
-      </div>
-      <div class="mm-status-badge">
-        <span class="dot green"></span>
-        <strong>WebP:</strong> Supported natively
-      </div>
-      <div class="mm-status-badge">
-        <span class="dot cyan"></span>
-        <strong>Privacy:</strong> ${consent ? 'Cloud Enabled' : '100% Local Only'}
-      </div>
-      <div class="mm-status-badge">
-        <span class="dot green"></span>
-        <strong>Security:</strong> Jailed to wp-content
-      </div>
-    `;
-  }
-
-  function renderDashboardView() {
-    return `
-      <div id="mm-status-strip" class="mm-status-strip"></div>
-      <div class="mm-dashboard-layout">
-        <div class="mm-dashboard-grid">
-          <div class="mm-dash-card">
-            <h4>Total Media Savings</h4>
-            <div class="mm-dash-metric">
-              <span>64.8 MB</span>
-              <span style="font-size:13px; color:var(--mm-success); font-weight:600;">(-68%)</span>
-            </div>
-            <svg class="mm-dash-sparkline" viewBox="0 0 200 40">
-              <path d="M0,35 Q30,30 60,25 T120,15 T180,5 L200,8" fill="none" stroke="var(--mm-cyan)" stroke-width="2.5" />
-            </svg>
-          </div>
-          <div class="mm-dash-card">
-            <h4>Images Optimized</h4>
-            <div class="mm-dash-metric">
-              <span>184</span>
-              <span style="font-size:13px; color:var(--mm-muted);">/ 184 assets</span>
-            </div>
-            <p style="font-size:12px; color:var(--mm-muted); margin:0;">Zero queue backlogs. 100% converted to modern WebP.</p>
-          </div>
-          <div class="mm-dash-card">
-            <h4>PageSpeed Score Delta</h4>
-            <div class="mm-dash-metric">
-              <span style="color:var(--mm-success);">+24 pts</span>
-            </div>
-            <p style="font-size:12px; color:var(--mm-muted); margin:0;">LCP reduced from 3.2s to 1.1s via intrinsic dimensions & preconnect.</p>
-          </div>
-          <div class="mm-dash-card">
-            <h4>SEO Missing Meta</h4>
-            <div class="mm-dash-metric">
-              <span style="color:var(--mm-success);">0 Issues</span>
-            </div>
-            <p style="font-size:12px; color:var(--mm-muted); margin:0;">All images have valid descriptive alt text.</p>
-          </div>
-        </div>
-
-        <div class="mm-dash-card">
-          <h4>Quick Operations</h4>
-          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
-            <a href="#/media" class="mm-action-btn primary">Bulk Compress Images</a>
-            <a href="#/speed" class="mm-action-btn">Apply Core Web Vitals Fixes</a>
-            <a href="#/seo" class="mm-action-btn">Audit Alt Text & Metadata</a>
-            <a href="#/files" class="mm-action-btn">Open Sandboxed File Manager</a>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderFileManagerView() {
-    const fm = state.fileManager;
-    const currentPath = fm.currentPath;
-    const crumbs = currentPath ? currentPath.split('/').filter(Boolean) : [];
+  function renderInAppRail() {
+    const items = [
+      { id: 'dashboard', label: 'Dashboard', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
+      { id: 'media', label: 'Media', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>' },
+      { id: 'speed', label: 'Speed', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' },
+      { id: 'seo', label: 'SEO', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>' },
+      { id: 'files', label: 'Files', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>' },
+      { id: 'sites', label: 'Sites/Connection', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>' },
+      { id: 'settings', label: 'Settings', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>' },
+      { id: 'about', label: 'About', icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' },
+    ];
 
     return `
-      <div class="mm-filemanager">
-        <!-- Left Tree Pane -->
-        <aside class="mm-tree-pane" role="tree" aria-label="Jailed File Explorer">
-          <div class="mm-tree-header">
-            <span>Explorer</span>
-            <span class="mm-ext-badge">wp-content</span>
-          </div>
-          <div style="padding:6px 0;">
-            <div class="mm-tree-node ${currentPath === '' ? 'selected' : ''}" data-tree-path="" role="treeitem">
-              <span>📁 wp-content</span>
-            </div>
-            <div style="padding-left:16px;">
-              <div class="mm-tree-node ${currentPath === 'themes' ? 'selected' : ''}" data-tree-path="themes" role="treeitem">
-                <span>📁 themes</span>
-              </div>
-              <div class="mm-tree-node ${currentPath === 'plugins' ? 'selected' : ''}" data-tree-path="plugins" role="treeitem">
-                <span>📁 plugins</span>
-              </div>
-              <div class="mm-tree-node ${currentPath === 'uploads' ? 'selected' : ''}" data-tree-path="uploads" role="treeitem">
-                <span>📁 uploads</span>
-              </div>
-            </div>
-            <div style="padding-top:12px; border-top:1px solid var(--mm-border); margin-top:12px;">
-              <div style="font-size:11px; color:var(--mm-muted); padding:0 8px 4px 8px; font-weight:600;">LOCKED CORE NODES</div>
-              ${fm.lockedNodes
-                .map(
-                  (n) => `
-                <div class="mm-tree-node locked" title="${escapeHtml(n.reason)}" role="treeitem" aria-disabled="true">
-                  <span>🔒 ${escapeHtml(n.name)}</span>
-                </div>
-              `
-                )
-                .join('')}
-            </div>
-          </div>
-        </aside>
-
-        <!-- Center Column -->
-        <div class="mm-center-col">
-          <!-- Action Toolbar -->
-          <div class="mm-action-bar" role="toolbar" aria-label="File Operations">
-            <div class="mm-action-group">
-              <button class="mm-action-btn primary" id="mm-new-file-btn" ${!fm.writeMode ? 'disabled title="Read-only mode. Enable write mode in Settings → Files (requires re-authentication)."' : ''}>
-                <span>+ New File</span>
-              </button>
-              <button class="mm-action-btn" id="mm-new-folder-btn" ${!fm.writeMode ? 'disabled title="Read-only mode. Enable write mode in Settings → Files (requires re-authentication)."' : ''}>
-                <span>+ New Folder</span>
-              </button>
-              <button class="mm-action-btn" id="mm-upload-btn" ${!fm.writeMode ? 'disabled title="Read-only mode. Enable write mode in Settings → Files (requires re-authentication)."' : ''}>
-                <span>Upload</span>
-              </button>
-              <button class="mm-action-btn" id="mm-compress-selected-btn" ${fm.selectedPaths.size === 0 ? 'disabled title="Select images to compress"' : ''}>
-                <span>Bulk Compress</span>
-              </button>
-              <button class="mm-action-btn" id="mm-mimic-engine-btn" disabled title="Connect Mimic Manager backend to use the UI Replicator">
-                <span>Mimic Engine</span>
-              </button>
-            </div>
-            <div class="mm-action-group">
-              <input type="search" id="mm-file-search" placeholder="Filter files..." style="height:28px; background:var(--mm-inset); border:1px solid var(--mm-border); color:var(--mm-text); border-radius:4px; padding:0 8px; font-size:12px;">
-              <button id="mm-refresh-btn" class="mm-icon-btn" title="Refresh directory">🔄</button>
-            </div>
-          </div>
-
-          <!-- Breadcrumbs -->
-          <div class="mm-path-bar">
-            <div class="mm-breadcrumbs">
-              <span class="mm-crumb ${crumbs.length === 0 ? 'current' : ''}" data-crumb-path="">wp-content</span>
-              ${crumbs
-                .map((c, i) => {
-                  const targetPath = crumbs.slice(0, i + 1).join('/');
-                  const isLast = i === crumbs.length - 1;
-                  return `
-                  <span>/</span>
-                  <span class="mm-crumb ${isLast ? 'current' : ''}" data-crumb-path="${escapeHtml(targetPath)}">${escapeHtml(c)}</span>
-                `;
-                })
-                .join('')}
-            </div>
-            <div>
-              <button id="mm-copy-path-btn" class="mm-icon-btn" title="Copy relative path" style="width:auto; padding:0 6px; font-size:11px;">Copy Path</button>
-            </div>
-          </div>
-
-          <!-- Data Grid or Skeletons -->
-          ${
-            state.loading.files
-              ? renderFileGridSkeleton()
-              : fm.files.length === 0
-                ? renderEmptyState({
-                    type: 'folder',
-                    title: 'Folder is empty',
-                    desc: 'This directory has no files or subfolders. Create a file or upload media to populate it.',
-                    ctaText: '+ New File',
-                    ctaActionId: 'mm-empty-new-file-btn',
-                    ctaDisabledReason: !fm.writeMode ? 'Read-only mode. Enable write mode in Settings to create files.' : '',
-                  })
-                : `
-            <div class="mm-grid-container" tabindex="0" role="grid" aria-label="Files Grid">
-              <table class="mm-data-table">
-                <thead>
-                  <tr>
-                    <th style="width:40%;">Name</th>
-                    <th style="width:20%;">Modified</th>
-                    <th style="width:15%;">Size</th>
-                    <th style="width:15%;">Permissions</th>
-                    <th style="width:10%;">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${fm.files
-                    .map((file) => {
-                      const isSelected = fm.selectedPaths.has(file.path);
-                      return `
-                      <tr class="mm-data-row ${isSelected ? 'selected' : ''}" data-file-path="${escapeHtml(file.path)}" data-is-dir="${file.isDir}">
-                        <td>
-                          <div class="mm-file-name-cell">
-                            <span>${file.isDir ? '📁' : '📄'}</span>
-                            <span>${escapeHtml(file.name)}</span>
-                            <span class="mm-ext-badge">${escapeHtml(file.ext)}</span>
-                          </div>
-                        </td>
-                        <td>${escapeHtml(file.modifiedFormatted)}</td>
-                        <td>${escapeHtml(file.sizeFormatted)}</td>
-                        <td>
-                          <code>${escapeHtml(file.permissions)}</code>
-                          ${file.isWorldWritable ? '<span title="World writable warning" style="color:var(--mm-danger);"> ⚠</span>' : ''}
-                        </td>
-                        <td>
-                          ${file.isDir ? '<span style="color:var(--mm-muted);">Folder</span>' : '<span style="color:var(--mm-success);">Active</span>'}
-                        </td>
-                      </tr>
-                    `;
-                    })
-                    .join('')}
-                </tbody>
-              </table>
-            </div>
+      <aside class="mm-app-rail ${state.railCollapsed ? 'collapsed' : ''}" id="mm-app-rail">
+        <nav class="mm-rail-nav">
+          ${items
+            .map(
+              (item) => `
+            <a href="#/${item.id}" class="mm-rail-link ${state.currentRoute === item.id ? 'active' : ''}" data-route="${item.id}" title="${item.label}">
+              <span class="mm-rail-icon">${item.icon}</span>
+              <span class="mm-rail-label">${escapeHtml(item.label)}</span>
+            </a>
           `
-          }
-
-          <!-- Status Bar -->
-          <div class="mm-status-bar">
-            <div>
-              <span>${fm.files.length} items</span>
-              ${fm.selectedPaths.size > 0 ? `<span> · ${fm.selectedPaths.size} selected</span>` : ''}
-            </div>
-            <div>
-              <span class="mm-status-pill ${fm.writeMode ? 'success' : 'warning'}">
-                ● ${fm.writeMode ? 'Write Mode Active' : 'Read-Only Mode'}
-              </span>
-            </div>
-          </div>
-
-          <!-- Monaco / Code Editor Overlay -->
-          ${fm.editor.open ? renderEditorOverlay() : ''}
-        </div>
-
-        <!-- Details Inspector (Right Pane) -->
-        ${fm.inspectorFile ? renderInspectorPane(fm.inspectorFile) : ''}
-      </div>
-    `;
-  }
-
-  function renderEditorOverlay() {
-    const ed = state.fileManager.editor;
-    return `
-      <div class="mm-editor-overlay" role="dialog" aria-modal="true" aria-label="Code Editor">
-        <div class="mm-editor-header">
-          <div class="mm-editor-title">
-            <span>📄</span>
-            <span>${escapeHtml(ed.path)}</span>
-            ${ed.isDirty ? '<span class="mm-dirty-dot" title="Unsaved changes"></span>' : ''}
-          </div>
-          <div style="display:flex; gap:8px;">
-            <button id="mm-editor-save-btn" class="mm-action-btn primary" ${!ed.isDirty ? 'disabled' : ''}>Save (Ctrl+S)</button>
-            <button id="mm-editor-close-btn" class="mm-action-btn">Close</button>
-          </div>
-        </div>
-        ${ed.lintError ? `<div class="mm-lint-banner"><span>⚠</span><span>${escapeHtml(ed.lintError)}</span></div>` : ''}
-        <div class="mm-editor-body">
-          <textarea id="mm-editor-textarea" class="mm-editor-textarea" spellcheck="false">${escapeHtml(ed.content)}</textarea>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderInspectorPane(file) {
-    return `
-      <aside class="mm-inspector-pane">
-        <h4>Inspector</h4>
-        <div class="mm-meta-row">
-          <span class="mm-meta-label">Name</span>
-          <strong class="mm-meta-val">${escapeHtml(file.name)}</strong>
-        </div>
-        <div class="mm-meta-row">
-          <span class="mm-meta-label">Full Path</span>
-          <span class="mm-meta-val">wp-content/${escapeHtml(file.path)}</span>
-        </div>
-        <div class="mm-meta-row">
-          <span class="mm-meta-label">Size</span>
-          <span class="mm-meta-val">${escapeHtml(file.sizeFormatted)} (${file.size} bytes)</span>
-        </div>
-        <div class="mm-meta-row">
-          <span class="mm-meta-label">Permissions</span>
-          <span class="mm-meta-val">${escapeHtml(file.permissions)}</span>
-        </div>
-        <div class="mm-meta-row">
-          <span class="mm-meta-label">SHA256 Hash</span>
-          <span class="mm-meta-val" id="mm-hash-display">Click to compute</span>
-          <button id="mm-calc-hash-btn" class="mm-action-btn" style="margin-top:4px; font-size:11px;">Generate Checksum</button>
+            )
+            .join('')}
+        </nav>
+        <div class="mm-rail-footer">
+          <button class="mm-rail-toggle" id="mm-rail-toggle" type="button" title="${state.railCollapsed ? 'Expand navigation' : 'Collapse navigation'}">
+            ${state.railCollapsed ? '»' : '«'}
+          </button>
         </div>
       </aside>
     `;
   }
 
-  function renderGenericView(title, desc) {
+  function renderRouteView() {
+    switch (state.currentRoute) {
+      case 'dashboard':
+        return renderDashboardView();
+      case 'media':
+        return renderMediaViewHtml();
+      case 'files':
+        return renderFileManagerViewHtml();
+      case 'sites':
+        return renderSitesViewHtml();
+      case 'speed':
+        return renderGenericView('PageSpeed Optimization', 'Safe, Moderate, and Guided fixes with auto-revert guarantees.');
+      case 'seo':
+        return renderGenericView('SEO Gap Fill', 'Heuristic and AI metadata audits for images and pages.');
+      case 'settings':
+        return renderSettingsViewHtml();
+      case 'about':
+        return renderAboutViewHtml();
+      default:
+        return render404();
+    }
+  }
+
+  function renderDashboardView() {
+    const engine = state.serverStatus.localEngine;
     return `
-      <div class="mm-dashboard-layout">
-        <div class="mm-dash-card">
-          <h2 style="margin:0; font-size:20px; color:var(--mm-text);">${escapeHtml(title)}</h2>
-          <p style="margin:4px 0 0; color:var(--mm-muted); font-size:13px;">${escapeHtml(desc)}</p>
+      <div class="mm-dashboard-scroll" style="padding:24px;">
+        <div class="mm-dash-hero" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+          <div>
+            <h1 style="font-size:20px; font-weight:700; margin:0;">Platform Overview</h1>
+            <p style="color:var(--mm-muted); font-size:13px; margin:4px 0 0;">High-performance, headless site optimization with zero paid dependencies.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <a href="#/media" class="mm-btn mm-btn-primary">Optimize Media</a>
+            <a href="#/files" class="mm-btn mm-btn-secondary">Open File Manager</a>
+          </div>
         </div>
-        <div class="mm-dash-card">
-          <h4>Module Status</h4>
-          <p style="font-size:13px; color:var(--mm-muted); margin:0;">
-            Module loaded inside SPA shell with zero full-page reloads. All operations execute through authorized REST contracts.
-          </p>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+          <div class="mm-card" style="padding:20px; background:var(--mm-surface); border:1px solid var(--mm-border); border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <div style="font-size:11px; text-transform:uppercase; color:var(--mm-muted); font-weight:600;">Engine Status</div>
+                <div style="font-size:18px; font-weight:700; margin-top:4px;">Local ${escapeHtml(engine.engine.toUpperCase())} Active</div>
+              </div>
+              <span class="mm-status-pill success">● Ready</span>
+            </div>
+            <p style="font-size:12px; color:var(--mm-muted); margin-top:12px;">WebP conversion available with permanent original backups.</p>
+          </div>
+
+          <div class="mm-card" style="padding:20px; background:var(--mm-surface); border:1px solid var(--mm-border); border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <div style="font-size:11px; text-transform:uppercase; color:var(--mm-muted); font-weight:600;">Backend Link</div>
+                <div style="font-size:18px; font-weight:700; margin-top:4px;">${state.connectionStatus === 'connected' ? 'Connected' : 'Local Mode'}</div>
+              </div>
+              <span class="mm-status-pill ${state.connectionStatus === 'connected' ? 'success' : 'info'}">● ${state.connectionStatus === 'connected' ? 'Synced' : 'Offline Safe'}</span>
+            </div>
+            <p style="font-size:12px; color:var(--mm-muted); margin-top:12px;">Pair with Mimic Manager Command Center via Sites/Connection.</p>
+          </div>
+
+          <div class="mm-card" style="padding:20px; background:var(--mm-surface); border:1px solid var(--mm-border); border-radius:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div>
+                <div style="font-size:11px; text-transform:uppercase; color:var(--mm-muted); font-weight:600;">File Jailing</div>
+                <div style="font-size:18px; font-weight:700; margin-top:4px;">wp-content Locked</div>
+              </div>
+              <span class="mm-status-pill ${state.fileManager.writeMode ? 'warning' : 'success'}">● ${state.fileManager.writeMode ? 'Write Active' : 'Read-Only'}</span>
+            </div>
+            <p style="font-size:12px; color:var(--mm-muted); margin-top:12px;">Syntax checks and pre-save shadow backups enforce safety.</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Sites / Connection View (L2)
+  function renderSitesViewHtml() {
+    const p = state.pairing;
+    const isConnected = state.connectionStatus === 'connected';
+
+    return `
+      <div style="padding:24px; max-width:900px; margin:0 auto; width:100%;">
+        <div style="margin-bottom:24px;">
+          <h1 style="font-size:20px; font-weight:700; margin:0;">Sites &amp; Backend Connection</h1>
+          <p style="color:var(--mm-muted); font-size:13px; margin:4px 0 0;">Connect your WordPress site to the self-hosted Mimic Manager NestJS API and BullMQ worker.</p>
+        </div>
+
+        ${
+          isConnected
+            ? `
+          <div class="mm-pairing-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span class="mm-status-pill success" style="font-size:13px;">● Connected to Backend</span>
+                <h2 style="font-size:18px; font-weight:700; margin:8px 0 0;">Synchronized with Command Center</h2>
+              </div>
+              <button class="mm-btn mm-btn-secondary" id="mm-disconnect-btn" type="button">Disconnect Site</button>
+            </div>
+            <div style="background:#0A0A0B; border:1px solid var(--mm-border); border-radius:8px; padding:16px; font-size:12px; color:var(--mm-muted); display:flex; flex-direction:column; gap:8px;">
+              <div><strong>Backend API:</strong> <code>${escapeHtml(p.backendUrl)}</code></div>
+              <div><strong>Site Canonical URL:</strong> <code>${escapeHtml(wpData.homeUrl)}</code></div>
+              <div><strong>Protocol Version:</strong> <code>1.0 (HMAC-SHA256 authenticated)</code></div>
+            </div>
+          </div>
+        `
+            : `
+          <div class="mm-pairing-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span class="mm-status-pill info">● 100% Local Mode</span>
+                <h2 style="font-size:18px; font-weight:700; margin:8px 0 0;">Pair with Mimic Manager Backend</h2>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">Backend Endpoint URL</label>
+                <input type="url" id="mm-backend-url" class="mm-input" style="width:100%; padding:10px; border-radius:6px; background:#0E0E10; border:1px solid var(--mm-border); color:#fff; font-family:var(--mm-font-mono); font-size:13px;" value="${escapeHtml(p.backendUrl)}" />
+              </div>
+
+              <div style="background:#0A0A0B; border:1px solid var(--mm-border); border-radius:6px; padding:12px; font-size:12px; color:var(--mm-muted); line-height:1.5;">
+                <label style="display:flex; align-items:flex-start; gap:8px; cursor:pointer;">
+                  <input type="checkbox" id="mm-consent-cb" ${p.consent ? 'checked' : ''} style="margin-top:3px;" />
+                  <span>I authorize connecting this WordPress installation to the specified Mimic Manager backend. Telemetry is strictly limited to site URL, versions, and explicitly triggered optimization jobs.</span>
+                </label>
+              </div>
+
+              ${
+                p.pairingCode
+                  ? `
+                <div class="mm-pairing-code-box">
+                  <div style="font-size:11px; text-transform:uppercase; color:var(--mm-muted); font-weight:600;">One-Time 6-Digit Pairing PIN</div>
+                  <div class="mm-pairing-digits" id="mm-code-display">${escapeHtml(p.pairingCode)}</div>
+                  <div style="display:flex; gap:12px; align-items:center;">
+                    <span class="mm-status-pill warning" style="font-size:12px;">Expires in: <strong id="mm-pairing-countdown">10:00</strong></span>
+                    <button class="mm-btn mm-btn-secondary" id="mm-copy-code-btn" type="button">Copy Code</button>
+                    <button class="mm-btn mm-btn-secondary" id="mm-regen-code-btn" type="button">Regenerate</button>
+                  </div>
+                  <p style="font-size:12px; color:var(--mm-muted); margin:8px 0 0;">
+                    Now open your <strong>Mimic Manager Command Center (PWA)</strong>, click <strong>Add Site</strong>, and enter this 6-digit PIN.
+                  </p>
+                </div>
+              `
+                  : `
+                <button class="mm-btn mm-btn-primary" id="mm-generate-code-btn" style="padding:12px; font-size:14px; font-weight:600;" type="button">
+                  Generate 6-Digit Pairing Code
+                </button>
+              `
+              }
+            </div>
+          </div>
+        `
+        }
+      </div>
+    `;
+  }
+
+  function renderSitesView() {
+    const stage = document.getElementById('mm-main-stage');
+    if (stage && state.currentRoute === 'sites') {
+      stage.innerHTML = renderSitesViewHtml();
+      bindSitesEvents();
+    }
+  }
+
+  // File Manager View (L3)
+  function renderFileManagerViewHtml() {
+    const fm = state.fileManager;
+    const isElevated = state.elevation.active;
+
+    return `
+      <div class="mm-fm-container" style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
+        <!-- Elevation / Warning Banner -->
+        ${
+          wpData.disallowFileEdit || wpData.disallowFileMods
+            ? `
+          <div class="mm-elevation-banner danger" id="mm-elevation-banner">
+            <span><strong>File Editing Restricted:</strong> DISALLOW_FILE_EDIT or DISALLOW_FILE_MODS is active in wp-config.php. File modifications are locked by server policy.</span>
+          </div>
+        `
+            : isElevated
+            ? `
+          <div class="mm-elevation-banner elevated" id="mm-elevation-banner">
+            <span><strong>Write Mode Active:</strong> You have elevated file modification privileges. Automated backups and syntax checks are enforced before save.</span>
+            <div style="display:flex; gap:12px; align-items:center;">
+              <span class="mm-status-pill success">Time Remaining: <strong id="mm-elevation-timer">15:00</strong></span>
+              <button class="mm-elevation-btn" id="mm-lock-again-btn" type="button" style="background:#28282E; color:#fff;">Lock Again</button>
+            </div>
+          </div>
+        `
+            : `
+          <div class="mm-elevation-banner" id="mm-elevation-banner">
+            <span><strong>Read-Only Mode:</strong> File Manager is locked to protect WordPress files. Enable write mode to create, edit, rename, or upload.</span>
+            <button class="mm-elevation-btn" id="mm-enable-write-btn" type="button">Enable Write Mode</button>
+          </div>
+        `
+        }
+
+        <!-- Breadcrumbs & Toolbar -->
+        <div class="mm-fm-action-bar" style="padding:10px 16px; background:var(--mm-surface); border-bottom:1px solid var(--mm-border); display:flex; justify-content:space-between; align-items:center;">
+          <div class="mm-breadcrumbs" style="display:flex; align-items:center; gap:6px; font-size:13px; font-family:var(--mm-font-mono);">
+            <a href="javascript:void(0)" class="mm-crumb" data-path="">wp-content</a>
+            ${renderBreadcrumbs(fm.currentPath)}
+          </div>
+
+          <div class="mm-fm-tools" style="display:flex; gap:8px;">
+            <button class="mm-action-btn primary" id="mm-tb-new-file" ${!fm.writeMode ? 'disabled title="Read-only mode. Enable write mode above."' : ''}>New File</button>
+            <button class="mm-action-btn" id="mm-tb-new-folder" ${!fm.writeMode ? 'disabled title="Read-only mode. Enable write mode above."' : ''}>New Folder</button>
+            <button class="mm-action-btn" id="mm-tb-upload" ${!fm.writeMode ? 'disabled title="Read-only mode. Enable write mode above."' : ''}>Upload</button>
+            <button class="mm-action-btn" id="mm-tb-refresh" title="Refresh directory">Refresh</button>
+          </div>
+        </div>
+
+        <!-- Main 3-Pane Body -->
+        <div class="mm-fm-body" style="display:flex; flex:1; overflow:hidden;">
+          <!-- Directory Grid / List -->
+          <div class="mm-fm-grid-wrap" id="mm-fm-grid-wrap" style="flex:1; overflow-y:auto; padding:16px;">
+            ${
+              state.loading.files
+                ? `<div style="padding:32px; text-align:center; color:var(--mm-muted);">Loading files...</div>`
+                : fm.files.length === 0 && fm.lockedNodes.length === 0
+                ? `<div style="padding:48px; text-align:center; color:var(--mm-muted);">This folder is empty. Right-click or use toolbar to create a file.</div>`
+                : `
+              <div class="mm-fm-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px;">
+                ${fm.lockedNodes
+                  .map(
+                    (node) => `
+                  <div class="mm-fm-node locked" style="padding:12px; background:var(--mm-surface); border:1px dashed var(--mm-border); border-radius:6px; opacity:0.6; display:flex; align-items:center; gap:8px;" title="${escapeHtml(node.reason)}">
+                    <span>🔒</span>
+                    <span style="font-size:13px; font-weight:500;">${escapeHtml(node.name)}</span>
+                  </div>
+                `
+                  )
+                  .join('')}
+
+                ${fm.files
+                  .map(
+                    (f) => `
+                  <div class="mm-fm-node ${f.isDir ? 'is-dir' : 'is-file'}" data-path="${escapeHtml(f.path)}" data-is-dir="${f.isDir}" style="padding:12px; background:var(--mm-surface); border:1px solid var(--mm-border); border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:10px; user-select:none;">
+                    <span style="font-size:18px;">${f.isDir ? '📁' : '📄'}</span>
+                    <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
+                      <div style="font-size:13px; font-weight:500; color:var(--mm-text); overflow:hidden; text-overflow:ellipsis;">${escapeHtml(f.name)}</div>
+                      <div style="font-size:11px; color:var(--mm-muted);">${f.sizeFormatted} · ${escapeHtml(f.permissions)}</div>
+                    </div>
+                  </div>
+                `
+                  )
+                  .join('')}
+              </div>
+            `
+            }
+          </div>
+
+          <!-- Slide-Over Monaco / Editor Drawer -->
+          ${
+            fm.editor.open
+              ? `
+            <div class="mm-editor-drawer" style="width:580px; border-left:1px solid var(--mm-border); background:var(--mm-surface); display:flex; flex-direction:column; z-index:50;">
+              <div style="padding:12px 16px; border-bottom:1px solid var(--mm-border); display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-weight:600; font-size:13px;">${escapeHtml(fm.editor.path)}</span>
+                  ${fm.editor.isDirty ? '<span class="mm-dirty-dot" title="Unsaved changes"></span>' : ''}
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button class="mm-btn mm-btn-primary" id="mm-editor-save-btn" ${!fm.writeMode ? 'disabled' : ''}>Save (Ctrl+S)</button>
+                  <button class="mm-btn mm-btn-secondary" id="mm-editor-close-btn">&times;</button>
+                </div>
+              </div>
+              <textarea id="mm-editor-textarea" style="flex:1; width:100%; background:#0A0A0B; color:#F4F4F6; border:none; padding:16px; font-family:var(--mm-font-mono); font-size:13px; line-height:1.5; resize:none; outline:none;">${escapeHtml(fm.editor.content)}</textarea>
+            </div>
+          `
+              : ''
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  function renderBreadcrumbs(currentPath) {
+    if (!currentPath) return '';
+    const parts = currentPath.split('/');
+    let accum = '';
+    return parts
+      .map((part) => {
+        accum = accum ? `${accum}/${part}` : part;
+        return `<span>/</span><a href="javascript:void(0)" class="mm-crumb" data-path="${escapeHtml(accum)}">${escapeHtml(part)}</a>`;
+      })
+      .join('');
+  }
+
+  function renderFileManagerView() {
+    const stage = document.getElementById('mm-main-stage');
+    if (stage && state.currentRoute === 'files') {
+      stage.innerHTML = renderFileManagerViewHtml();
+      bindFileManagerEvents();
+    }
+  }
+
+  // Right-Click Context Menu (L3.2)
+  function renderContextMenu() {
+    const cm = state.fileManager.contextMenu;
+    if (!cm.visible) return '';
+
+    const target = cm.target;
+    const isWrite = state.fileManager.writeMode;
+
+    let itemsHtml = '';
+    if (target && !target.isDir) {
+      // File context menu
+      itemsHtml = `
+        <div class="mm-context-item" data-action="open-editor"><span>Edit in Editor</span><span class="shortcut">Enter</span></div>
+        <div class="mm-context-item" data-action="download"><span>Download</span></div>
+        <div class="mm-context-divider"></div>
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="rename"><span>Rename</span><span class="shortcut">F2</span></div>
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="copy"><span>Copy</span><span class="shortcut">Ctrl+C</span></div>
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="chmod"><span>Change Permissions</span></div>
+        <div class="mm-context-divider"></div>
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="delete" style="color:var(--mm-danger);"><span>Delete to Trash</span><span class="shortcut">Del</span></div>
+      `;
+    } else if (target && target.isDir) {
+      // Folder context menu
+      itemsHtml = `
+        <div class="mm-context-item" data-action="open-folder"><span>Open Folder</span></div>
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="new-file"><span>New File Here</span></div>
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="new-folder"><span>New Subfolder</span></div>
+        <div class="mm-context-divider"></div>
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="rename"><span>Rename</span><span class="shortcut">F2</span></div>
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="delete" style="color:var(--mm-danger);"><span>Delete Folder</span></div>
+      `;
+    } else {
+      // Empty space / background
+      itemsHtml = `
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="new-file"><span>New File</span></div>
+        <div class="mm-context-item ${!isWrite ? 'disabled' : ''}" data-action="new-folder"><span>New Folder</span></div>
+        <div class="mm-context-divider"></div>
+        <div class="mm-context-item" data-action="refresh"><span>Refresh</span><span class="shortcut">F5</span></div>
+      `;
+    }
+
+    return `
+      <div class="mm-context-menu" id="mm-context-menu" style="left:${cm.x}px; top:${cm.y}px;">
+        ${itemsHtml}
+      </div>
+    `;
+  }
+
+  // Media UI View (L4)
+  function renderMediaViewHtml() {
+    const m = state.media;
+    const selectedCount = m.selectedIds.size;
+
+    return `
+      <div class="mm-media-view">
+        <!-- Filter Sidebar -->
+        <aside class="mm-media-sidebar">
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; color:var(--mm-muted); font-weight:600; margin-bottom:8px;">File Format</div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <button class="mm-btn mm-btn-secondary ${m.filterFormat === 'all' ? 'active' : ''}" data-format="all">All Formats</button>
+              <button class="mm-btn mm-btn-secondary ${m.filterFormat === 'jpeg' ? 'active' : ''}" data-format="jpeg">JPEG / JPG</button>
+              <button class="mm-btn mm-btn-secondary ${m.filterFormat === 'png' ? 'active' : ''}" data-format="png">PNG</button>
+              <button class="mm-btn mm-btn-secondary ${m.filterFormat === 'webp' ? 'active' : ''}" data-format="webp">WebP</button>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11px; text-transform:uppercase; color:var(--mm-muted); font-weight:600; margin-bottom:8px;">Status</div>
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <button class="mm-btn mm-btn-secondary ${m.filterStatus === 'all' ? 'active' : ''}" data-status="all">All Status</button>
+              <button class="mm-btn mm-btn-secondary ${m.filterStatus === 'uncompressed' ? 'active' : ''}" data-status="uncompressed">Uncompressed</button>
+              <button class="mm-btn mm-btn-secondary ${m.filterStatus === 'optimized' ? 'active' : ''}" data-status="optimized">Optimized</button>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Media Grid -->
+        <div class="mm-media-content">
+          <div class="mm-media-summary-bar">
+            <div>
+              <span style="font-size:16px; font-weight:700;">Media Optimization</span>
+              <span style="color:var(--mm-muted); font-size:13px; margin-left:8px;">Saved ${escapeHtml(m.summary.totalSavedFormatted)} (${m.summary.overallSavingsPercent}%) across ${m.summary.totalImages} images</span>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="mm-btn mm-btn-primary" id="mm-open-wizard-btn">Compress &amp; Convert Wizard</button>
+            </div>
+          </div>
+
+          ${
+            state.loading.media
+              ? `<div style="padding:48px; text-align:center; color:var(--mm-muted);">Loading media library...</div>`
+              : m.items.length === 0
+              ? `<div style="padding:48px; text-align:center; color:var(--mm-muted);">No images found in WordPress media library.</div>`
+              : `
+            <div class="mm-media-grid">
+              ${m.items
+                .map(
+                  (item) => `
+                <div class="mm-media-card ${m.selectedIds.has(item.id) ? 'selected' : ''}" data-id="${item.id}">
+                  <div class="mm-media-thumb-wrap">
+                    <img src="${escapeHtml(item.thumbnailUrl)}" alt="${escapeHtml(item.altText || item.title)}" class="mm-media-thumb" loading="lazy" />
+                    <span class="mm-status-pill ${item.status === 'optimized' ? 'success' : 'warning'}" style="position:absolute; top:8px; right:8px;">
+                      ${item.status === 'optimized' ? `WebP (-${item.savingsPercent}%)` : 'Original'}
+                    </span>
+                  </div>
+                  <div class="mm-media-card-body">
+                    <div class="mm-media-title">${escapeHtml(item.filename)}</div>
+                    <div class="mm-media-meta">
+                      <span>${escapeHtml(item.sizeFormatted)}</span>
+                      <span>${item.width}x${item.height}</span>
+                    </div>
+                  </div>
+                </div>
+              `
+                )
+                .join('')}
+            </div>
+          `
+          }
+
+          <!-- Sticky Bulk Bar -->
+          ${
+            selectedCount > 0
+              ? `
+            <div class="mm-bulk-bar animate-in fade-in">
+              <span style="font-size:13px; font-weight:600;">${selectedCount} images selected</span>
+              <div style="display:flex; gap:8px;">
+                <button class="mm-btn mm-btn-primary" id="mm-bulk-compress-btn">Convert to WebP</button>
+                <button class="mm-btn mm-btn-secondary" id="mm-bulk-restore-btn">Restore Original</button>
+                <button class="mm-btn mm-btn-secondary" id="mm-bulk-clear-btn">Deselect</button>
+              </div>
+            </div>
+          `
+              : ''
+          }
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMediaView() {
+    const stage = document.getElementById('mm-main-stage');
+    if (stage && state.currentRoute === 'media') {
+      stage.innerHTML = renderMediaViewHtml();
+      bindMediaEvents();
+    }
+  }
+
+  // Modals for Elevation, File Operations, and Media Wizard
+  function renderModals() {
+    const modal = state.fileManager.modal;
+    const isWizard = state.media.wizardOpen;
+
+    if (modal && modal.type === 'elevate') {
+      return `
+        <div class="mm-modal-backdrop">
+          <div class="mm-modal-card">
+            <h3 style="margin:0; font-size:16px; font-weight:700;">Enable File Write Mode</h3>
+            <p style="margin:0; font-size:13px; color:var(--mm-muted); line-height:1.5;">
+              Modifying PHP, theme, or plugin files can affect your website. Automatic shadow backups are saved before every change. Re-authenticate with your administrator password to unlock write mode for 15 minutes.
+            </p>
+            <form id="mm-elevate-form" style="display:flex; flex-direction:column; gap:12px;">
+              <input type="password" id="mm-elevate-pwd" placeholder="Enter administrator password" required style="padding:10px; border-radius:6px; background:#0E0E10; border:1px solid var(--mm-border); color:#fff; font-size:13px;" autoFocus />
+              <div class="mm-modal-actions">
+                <button type="button" class="mm-btn mm-btn-secondary" id="mm-modal-cancel">Cancel</button>
+                <button type="submit" class="mm-btn mm-btn-primary">Authenticate &amp; Unlock</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    if (modal && (modal.type === 'newFile' || modal.type === 'newFolder')) {
+      const isDir = modal.type === 'newFolder';
+      return `
+        <div class="mm-modal-backdrop">
+          <div class="mm-modal-card">
+            <h3 style="margin:0; font-size:16px; font-weight:700;">Create ${isDir ? 'New Folder' : 'New File'}</h3>
+            <form id="mm-create-item-form" style="display:flex; flex-direction:column; gap:12px;">
+              <input type="text" id="mm-create-item-name" placeholder="${isDir ? 'folder-name' : 'filename.php'}" required style="padding:10px; border-radius:6px; background:#0E0E10; border:1px solid var(--mm-border); color:#fff; font-size:13px;" autoFocus />
+              <div class="mm-modal-actions">
+                <button type="button" class="mm-btn mm-btn-secondary" id="mm-modal-cancel">Cancel</button>
+                <button type="submit" class="mm-btn mm-btn-primary">Create</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }
+
+    if (isWizard) {
+      return `
+        <div class="mm-modal-backdrop">
+          <div class="mm-modal-card mm-compress-wizard" style="width:520px;">
+            <h3 style="margin:0; font-size:18px; font-weight:700;">Compress &amp; Convert Wizard</h3>
+            <p style="margin:0; font-size:13px; color:var(--mm-muted);">Optimize images to modern WebP format locally with zero quality loss.</p>
+
+            <div style="display:flex; flex-direction:column; gap:16px; margin-top:8px;">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">Quality Preset</label>
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+                  <button class="mm-btn mm-btn-secondary ${state.media.wizardPreset === 'lossless' ? 'active' : ''}" data-preset="lossless">Lossless</button>
+                  <button class="mm-btn mm-btn-secondary ${state.media.wizardPreset === 'balanced' ? 'active' : ''}" data-preset="balanced">Balanced (80%)</button>
+                  <button class="mm-btn mm-btn-secondary ${state.media.wizardPreset === 'aggressive' ? 'active' : ''}" data-preset="aggressive">Aggressive (65%)</button>
+                </div>
+              </div>
+
+              <div>
+                <label style="display:block; font-size:12px; font-weight:600; margin-bottom:6px;">Target Format</label>
+                <select id="mm-wizard-format" style="width:100%; padding:10px; border-radius:6px; background:#0E0E10; border:1px solid var(--mm-border); color:#fff;">
+                  <option value="webp">WebP (Recommended — universally supported)</option>
+                  <option value="original">Keep Original Format</option>
+                </select>
+              </div>
+
+              <div class="mm-modal-actions">
+                <button type="button" class="mm-btn mm-btn-secondary" id="mm-wizard-cancel">Cancel</button>
+                <button type="button" class="mm-btn mm-btn-primary" id="mm-wizard-run-btn">Run Local Optimization</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    return '';
+  }
+
+  function renderSettingsViewHtml() {
+    return `
+      <div style="padding:24px; max-width:800px; margin:0 auto; width:100%;">
+        <h1 style="font-size:20px; font-weight:700; margin:0 0 16px;">Platform Settings</h1>
+        <div class="mm-card" style="padding:20px; background:var(--mm-surface); border:1px solid var(--mm-border); border-radius:8px; display:flex; flex-direction:column; gap:16px;">
+          <div>
+            <label style="display:flex; align-items:flex-start; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="mm-setting-consent" ${state.serverStatus.consentGiven ? 'checked' : ''} />
+              <div>
+                <strong style="font-size:14px;">Telemetry &amp; Cloud Offloading Consent</strong>
+                <p style="margin:4px 0 0; font-size:12px; color:var(--mm-muted);">Allow offloading CPU-intensive image batching and PageSpeed jobs to your connected Mimic Manager backend.</p>
+              </div>
+            </label>
+          </div>
+          <div style="border-top:1px solid var(--mm-border); padding-top:16px;">
+            <button class="mm-btn mm-btn-primary" id="mm-save-settings-btn">Save Settings</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAboutViewHtml() {
+    const brand = wpData.brand;
+    return `
+      <div style="padding:24px; max-width:800px; margin:0 auto; width:100%; text-align:center;">
+        <svg viewBox="0 0 20 20" width="48" height="48" fill="currentColor" style="color:var(--mm-cyan); margin-bottom:16px;">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M10 2L17.5 5.75L10 9.5L2.5 5.75L10 2ZM10 4.1L14.3 6.25L10 8.4L5.7 6.25L10 4.1Z"/>
+          <path d="M2.5 8L10 11.75L17.5 8L17.5 9.8L10 13.55L2.5 9.8V8Z"/>
+          <path d="M2.5 12L10 15.75L17.5 12L17.5 13.8L10 17.55L2.5 13.8V12Z"/>
+        </svg>
+        <h1 style="font-size:24px; font-weight:700; margin:0;">${escapeHtml(brand.name)}</h1>
+        <p style="color:var(--mm-muted); font-size:14px; margin:8px 0 24px;">Version ${escapeHtml(brand.version)} · Created by ${escapeHtml(brand.creator)} · A ${escapeHtml(brand.owner)} Project</p>
+        <div class="mm-card" style="padding:24px; background:var(--mm-surface); border:1px solid var(--mm-border); border-radius:8px; text-align:left; font-size:13px; color:var(--mm-muted); line-height:1.6;">
+          <p><strong>Mimic Manager</strong> is an open-source, self-hostable site optimization platform combining high-performance media compression, tiered PageSpeed fixes, plugin-aware SEO gap fill, and a secure visual file manager.</p>
+          <p>100% Free and Open Source under AGPL-3.0 (backend/PWA) and GPL-2.0+ (WordPress Connector). Zero paid service lock-in.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderGenericView(title, subtitle) {
+    return `
+      <div style="padding:24px;">
+        <h1 style="font-size:20px; font-weight:700; margin:0;">${escapeHtml(title)}</h1>
+        <p style="color:var(--mm-muted); font-size:13px; margin:4px 0 16px;">${escapeHtml(subtitle)}</p>
+        <div class="mm-card" style="padding:32px; background:var(--mm-surface); border:1px solid var(--mm-border); border-radius:8px; text-align:center; color:var(--mm-muted);">
+          Module active and operating locally.
         </div>
       </div>
     `;
   }
 
   function render404() {
-    return `
-      <div class="mm-empty-state">
-        <h2 style="font-size:32px; color:var(--mm-cyan); margin:0;">404</h2>
-        <p style="color:var(--mm-muted);">The requested internal route does not exist.</p>
-        <a href="#/dashboard" class="mm-action-btn primary">Return to Dashboard</a>
-      </div>
+    return `<div style="padding:48px; text-align:center; color:var(--mm-muted);">Screen not found. <a href="#/dashboard" style="color:var(--mm-cyan);">Return to dashboard</a>.</div>`;
+  }
+
+  function renderStatusBadges() {
+    const el = document.getElementById('mm-connection-badge');
+    if (!el) return;
+    const isConn = state.connectionStatus === 'connected';
+    el.innerHTML = `
+      <span class="mm-status-pill ${isConn ? 'success' : 'info'}" style="font-size:11px;">
+        ● ${isConn ? 'Connected' : 'Local Mode'}
+      </span>
     `;
   }
 
-  // Master Render Cycle with Error Boundaries (J5.1)
-  function renderApp() {
-    const root = document.getElementById('mimic-manager-root');
-    if (!root) return;
-
-    // Dismiss boot loader immediately on first meaningful paint (J1.3)
-    if (window._mmBootTimer) {
-      clearTimeout(window._mmBootTimer);
-      window._mmBootTimer = null;
-    }
-    const bootLoader = document.getElementById('mm-boot-loader');
-    if (bootLoader) {
-      bootLoader.remove();
-    }
-    const bootFallback = document.getElementById('mm-boot-fallback');
-    if (bootFallback) {
-      bootFallback.remove();
-    }
-
-    let contentHtml = '';
-    switch (state.currentRoute) {
-      case 'dashboard':
-        contentHtml = safeRender('Dashboard', renderDashboardView);
-        break;
-      case 'media':
-        contentHtml = safeRender('Media Optimization', () =>
-          renderGenericView('Media Optimization', 'High-performance WebP conversion with zero paid API keys.')
-        );
-        break;
-      case 'speed':
-        contentHtml = safeRender('PageSpeed Fixes', () =>
-          renderGenericView('PageSpeed Fixes', 'Safe, Moderate, and Guided fixes with auto-revert guarantees.')
-        );
-        break;
-      case 'seo':
-        contentHtml = safeRender('SEO Gap Fill', () =>
-          renderGenericView('SEO Gap Fill', 'Heuristic and AI metadata audits for images and pages.')
-        );
-        break;
-      case 'files':
-        contentHtml = safeRender('File Manager', renderFileManagerView);
-        break;
-      case 'settings':
-        contentHtml = safeRender('Settings', () =>
-          renderGenericView('Settings', 'Configure telemetry opt-in, write mode, and sudo authentication.')
-        );
-        break;
-      case 'about':
-        contentHtml = safeRender('About', () =>
-          renderGenericView(
-            'About Mimic Manager',
-            `Created by ${wpData.brand.creator} · A ${wpData.brand.owner} project · Free and Open Source under AGPL-3.0 / GPL-2.0+`
-          )
-        );
-        break;
-      default:
-        contentHtml = render404();
-        break;
-    }
-
-    root.innerHTML = `
-      ${renderHeader()}
-      <div class="mm-shell-content">
-        ${contentHtml}
-      </div>
-    `;
-
-    bindEvents();
-    relocateNotices();
-    renderStatusBadges();
-  }
-
-  // Event Binding
+  // Event Handlers
   function bindEvents() {
-    // Navigation tabs
-    document.querySelectorAll('.mm-nav-tab').forEach((tab) => {
-      tab.addEventListener('click', function (e) {
-        e.preventDefault();
-        const route = tab.getAttribute('data-route');
-        navigateTo(route);
+    // Rail toggle
+    const railToggle = document.getElementById('mm-rail-toggle');
+    if (railToggle) {
+      railToggle.addEventListener('click', () => {
+        state.railCollapsed = !state.railCollapsed;
+        localStorage.setItem('mm_rail_collapsed', state.railCollapsed);
+        const rail = document.getElementById('mm-app-rail');
+        if (rail) rail.classList.toggle('collapsed', state.railCollapsed);
+        railToggle.textContent = state.railCollapsed ? '»' : '«';
+      });
+    }
+
+    // Fullscreen toggle
+    const fsBtn = document.getElementById('mm-toggle-fullscreen');
+    if (fsBtn) {
+      fsBtn.addEventListener('click', () => {
+        state.fullscreen = !state.fullscreen;
+        localStorage.setItem('mm_fullscreen_disabled', (!state.fullscreen).toString());
+        document.body.classList.toggle('mm-fullbleed', state.fullscreen);
+      });
+    }
+
+    // Dismiss context menu on click outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#mm-context-menu')) {
+        if (state.fileManager.contextMenu.visible) {
+          state.fileManager.contextMenu.visible = false;
+          const cmEl = document.getElementById('mm-context-menu');
+          if (cmEl) cmEl.remove();
+        }
+      }
+    });
+
+    bindFileManagerEvents();
+    bindMediaEvents();
+    bindSitesEvents();
+    bindModalEvents();
+  }
+
+  function bindFileManagerEvents() {
+    // Elevation button
+    const elevateBtn = document.getElementById('mm-enable-write-btn');
+    if (elevateBtn) {
+      elevateBtn.addEventListener('click', () => {
+        state.fileManager.modal = { type: 'elevate' };
+        renderApp();
+      });
+    }
+
+    const lockBtn = document.getElementById('mm-lock-again-btn');
+    if (lockBtn) {
+      lockBtn.addEventListener('click', lockAgain);
+    }
+
+    // Breadcrumbs
+    document.querySelectorAll('.mm-crumb').forEach((crumb) => {
+      crumb.addEventListener('click', (e) => {
+        const p = e.currentTarget.getAttribute('data-path');
+        loadFiles(p);
       });
     });
 
-    // Fullscreen toggle
-    const fsBtn = document.getElementById('mm-fullscreen-toggle');
-    if (fsBtn) {
-      fsBtn.onclick = () => {
-        state.fullscreen = !state.fullscreen;
-        document.body.classList.toggle('mm-fullbleed', state.fullscreen);
-        localStorage.setItem('mm_fullscreen_disabled', state.fullscreen ? 'false' : 'true');
-      };
+    // Toolbar buttons
+    const tbNewFile = document.getElementById('mm-tb-new-file');
+    if (tbNewFile) {
+      tbNewFile.addEventListener('click', () => {
+        state.fileManager.modal = { type: 'newFile' };
+        renderApp();
+      });
     }
 
-    // Breadcrumb navigation
-    document.querySelectorAll('.mm-crumb').forEach((crumb) => {
-      crumb.onclick = () => {
-        const path = crumb.getAttribute('data-crumb-path');
-        navigateTo('files', { path });
-      };
-    });
-
-    // Left tree navigation
-    document.querySelectorAll('.mm-tree-node:not(.locked)').forEach((node) => {
-      node.onclick = () => {
-        const path = node.getAttribute('data-tree-path');
-        navigateTo('files', { path });
-      };
-    });
-
-    // Table rows selection & navigation
-    document.querySelectorAll('.mm-data-row').forEach((row) => {
-      const path = row.getAttribute('data-file-path');
-      const isDir = row.getAttribute('data-is-dir') === 'true';
-
-      row.onclick = (e) => {
-        if (e.ctrlKey || e.metaKey) {
-          if (state.fileManager.selectedPaths.has(path)) {
-            state.fileManager.selectedPaths.delete(path);
-          } else {
-            state.fileManager.selectedPaths.add(path);
-          }
-        } else {
-          state.fileManager.selectedPaths.clear();
-          state.fileManager.selectedPaths.add(path);
-        }
-
-        const fileObj = state.fileManager.files.find((f) => f.path === path);
-        state.fileManager.inspectorFile = fileObj || null;
+    const tbNewFolder = document.getElementById('mm-tb-new-folder');
+    if (tbNewFolder) {
+      tbNewFolder.addEventListener('click', () => {
+        state.fileManager.modal = { type: 'newFolder' };
         renderApp();
-      };
+      });
+    }
 
-      row.ondblclick = () => {
+    const tbRefresh = document.getElementById('mm-tb-refresh');
+    if (tbRefresh) {
+      tbRefresh.addEventListener('click', () => loadFiles(state.fileManager.currentPath));
+    }
+
+    // Node click and right-click
+    document.querySelectorAll('.mm-fm-node').forEach((node) => {
+      node.addEventListener('click', (e) => {
+        const isDir = node.getAttribute('data-is-dir') === 'true';
+        const p = node.getAttribute('data-path');
         if (isDir) {
-          navigateTo('files', { path });
+          loadFiles(p);
         } else {
-          openEditor(path);
+          openFileInEditor(p);
         }
-      };
+      });
+
+      node.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        const p = node.getAttribute('data-path');
+        const isDir = node.getAttribute('data-is-dir') === 'true';
+        const target = state.fileManager.files.find((f) => f.path === p) || { path: p, isDir };
+
+        state.fileManager.contextMenu = {
+          visible: true,
+          x: Math.min(e.clientX, window.innerWidth - 240),
+          y: Math.min(e.clientY, window.innerHeight - 300),
+          target,
+        };
+        renderApp();
+      });
     });
 
-    // Editor textarea input
-    const textarea = document.getElementById('mm-editor-textarea');
-    if (textarea) {
-      textarea.oninput = () => {
-        state.fileManager.editor.content = textarea.value;
-        state.fileManager.editor.isDirty = textarea.value !== state.fileManager.editor.savedContent;
-        const saveBtn = document.getElementById('mm-editor-save-btn');
-        if (saveBtn) saveBtn.disabled = !state.fileManager.editor.isDirty;
-      };
-
-      // Keyboard shortcut Ctrl+S
-      textarea.onkeydown = (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-          e.preventDefault();
-          saveCurrentEditorFile();
-        }
-      };
+    // Right-click on empty grid space
+    const gridWrap = document.getElementById('mm-fm-grid-wrap');
+    if (gridWrap) {
+      gridWrap.addEventListener('contextmenu', (e) => {
+        if (e.target.closest('.mm-fm-node')) return;
+        e.preventDefault();
+        state.fileManager.contextMenu = {
+          visible: true,
+          x: Math.min(e.clientX, window.innerWidth - 240),
+          y: Math.min(e.clientY, window.innerHeight - 200),
+          target: null,
+        };
+        renderApp();
+      });
     }
 
     // Editor buttons
-    const saveBtn = document.getElementById('mm-editor-save-btn');
-    if (saveBtn) {
-      saveBtn.onclick = () => saveCurrentEditorFile();
+    const edClose = document.getElementById('mm-editor-close-btn');
+    if (edClose) {
+      edClose.addEventListener('click', () => {
+        state.fileManager.editor.open = false;
+        renderFileManagerView();
+      });
     }
 
-    const closeBtn = document.getElementById('mm-editor-close-btn');
-    if (closeBtn) {
-      closeBtn.onclick = () => {
-        if (state.fileManager.editor.isDirty) {
-          confirmUnsavedChanges(() => {
-            state.fileManager.editor.open = false;
-            state.fileManager.editor.isDirty = false;
-            renderApp();
-          });
-        } else {
-          state.fileManager.editor.open = false;
+    const edSave = document.getElementById('mm-editor-save-btn');
+    if (edSave) {
+      edSave.addEventListener('click', saveCurrentEditorFile);
+    }
+
+    // Context menu item actions
+    document.querySelectorAll('.mm-context-item').forEach((item) => {
+      item.addEventListener('click', async (e) => {
+        const action = item.getAttribute('data-action');
+        const target = state.fileManager.contextMenu.target;
+        state.fileManager.contextMenu.visible = false;
+        const cmEl = document.getElementById('mm-context-menu');
+        if (cmEl) cmEl.remove();
+
+        if (action === 'open-editor' && target) {
+          openFileInEditor(target.path);
+        } else if (action === 'open-folder' && target) {
+          loadFiles(target.path);
+        } else if (action === 'new-file') {
+          state.fileManager.modal = { type: 'newFile' };
           renderApp();
+        } else if (action === 'new-folder') {
+          state.fileManager.modal = { type: 'newFolder' };
+          renderApp();
+        } else if (action === 'refresh') {
+          loadFiles(state.fileManager.currentPath);
+        } else if (action === 'delete' && target) {
+          deleteItemWithUndo(target.path);
         }
-      };
-    }
-
-    // Refresh button
-    const refreshBtn = document.getElementById('mm-refresh-btn');
-    if (refreshBtn) {
-      refreshBtn.onclick = () => loadFiles(state.fileManager.currentPath);
-    }
-
-    // Copy path button
-    const copyBtn = document.getElementById('mm-copy-path-btn');
-    if (copyBtn) {
-      copyBtn.onclick = () => {
-        const full = 'wp-content/' + state.fileManager.currentPath;
-        navigator.clipboard.writeText(full).then(() => {
-          copyBtn.textContent = 'Copied!';
-          setTimeout(() => (copyBtn.textContent = 'Copy Path'), 1500);
-        });
-      };
-    }
-
-    // Error card buttons
-    document.querySelectorAll('.mm-retry-pane-btn').forEach((btn) => {
-      btn.onclick = () => renderApp();
-    });
-    document.querySelectorAll('.mm-copy-diag-btn').forEach((btn) => {
-      btn.onclick = () => {
-        const diag = btn.getAttribute('data-diag') || '';
-        navigator.clipboard.writeText(diag).then(() => {
-          showToast('Diagnostics copied to clipboard (secrets redacted)');
-        });
-      };
+      });
     });
   }
 
-  // Boot Initialization
-  document.addEventListener('DOMContentLoaded', function () {
-    if (state.fullscreen) {
-      document.body.classList.add('mm-fullbleed');
+  async function openFileInEditor(filePath) {
+    try {
+      const res = await apiFetch('/files/read', {
+        method: 'POST',
+        body: JSON.stringify({ path: filePath }),
+      });
+
+      if (res && res.success) {
+        state.fileManager.editor = {
+          open: true,
+          path: filePath,
+          content: res.content,
+          savedContent: res.content,
+          hash: res.hash,
+          mtime: res.mtime,
+          isDirty: false,
+          lintError: null,
+        };
+        renderFileManagerView();
+      }
+    } catch (err) {
+      showToast('Cannot open file: ' + err.message);
+    }
+  }
+
+  async function saveCurrentEditorFile() {
+    const ed = state.fileManager.editor;
+    const txtArea = document.getElementById('mm-editor-textarea');
+    if (txtArea) ed.content = txtArea.value;
+
+    try {
+      const res = await apiFetch('/files/save', {
+        method: 'POST',
+        body: JSON.stringify({
+          path: ed.path,
+          content: ed.content,
+          expectedHash: ed.hash,
+        }),
+      });
+
+      if (res && res.success) {
+        ed.hash = res.newHash;
+        ed.mtime = res.newMtime;
+        ed.savedContent = ed.content;
+        ed.isDirty = false;
+        showToast('File saved successfully!');
+        renderFileManagerView();
+      }
+    } catch (err) {
+      showToast('Save failed: ' + err.message);
+    }
+  }
+
+  async function deleteItemWithUndo(filePath) {
+    try {
+      const res = await apiFetch('/files/delete', {
+        method: 'POST',
+        body: JSON.stringify({ path: filePath }),
+      });
+
+      if (res && res.success) {
+        loadFiles(state.fileManager.currentPath);
+        showToast(`Moved ${escapeHtml(filePath)} to trash.`, {
+          undoDuration: 10,
+          undoAction: async () => {
+            await apiFetch('/files/restore', {
+              method: 'POST',
+              body: JSON.stringify({
+                trashName: res.trashName,
+                originalPath: res.originalPath,
+              }),
+            });
+            showToast(`Restored ${escapeHtml(filePath)}.`);
+            loadFiles(state.fileManager.currentPath);
+          },
+        });
+      }
+    } catch (err) {
+      showToast('Delete failed: ' + err.message);
+    }
+  }
+
+  function bindMediaEvents() {
+    // Card clicks
+    document.querySelectorAll('.mm-media-card').forEach((card) => {
+      card.addEventListener('click', () => {
+        const id = parseInt(card.getAttribute('data-id'), 10);
+        if (state.media.selectedIds.has(id)) {
+          state.media.selectedIds.delete(id);
+        } else {
+          state.media.selectedIds.add(id);
+        }
+        renderMediaView();
+      });
+    });
+
+    const wizardBtn = document.getElementById('mm-open-wizard-btn');
+    if (wizardBtn) {
+      wizardBtn.addEventListener('click', () => {
+        state.media.wizardOpen = true;
+        renderApp();
+      });
     }
 
-    window.addEventListener('hashchange', handleRoute);
-    handleRoute();
-    pollStatus();
-    setInterval(pollStatus, state.pollingInterval);
-  });
+    const bulkCompress = document.getElementById('mm-bulk-compress-btn');
+    if (bulkCompress) {
+      bulkCompress.addEventListener('click', compressSelectedMedia);
+    }
+
+    const bulkClear = document.getElementById('mm-bulk-clear-btn');
+    if (bulkClear) {
+      bulkClear.addEventListener('click', () => {
+        state.media.selectedIds.clear();
+        renderMediaView();
+      });
+    }
+
+    const wizardRun = document.getElementById('mm-wizard-run-btn');
+    if (wizardRun) {
+      wizardRun.addEventListener('click', async () => {
+        const allIds = state.media.items.map((i) => i.id);
+        state.media.selectedIds = new Set(allIds);
+        await compressSelectedMedia();
+      });
+    }
+
+    const wizardCancel = document.getElementById('mm-wizard-cancel');
+    if (wizardCancel) {
+      wizardCancel.addEventListener('click', () => {
+        state.media.wizardOpen = false;
+        renderApp();
+      });
+    }
+  }
+
+  function bindSitesEvents() {
+    const genBtn = document.getElementById('mm-generate-code-btn');
+    if (genBtn) {
+      genBtn.addEventListener('click', generatePairingCode);
+    }
+
+    const regenBtn = document.getElementById('mm-regen-code-btn');
+    if (regenBtn) {
+      regenBtn.addEventListener('click', generatePairingCode);
+    }
+
+    const copyBtn = document.getElementById('mm-copy-code-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(state.pairing.pairingCode);
+        showToast('Pairing code copied to clipboard!');
+      });
+    }
+
+    const disBtn = document.getElementById('mm-disconnect-btn');
+    if (disBtn) {
+      disBtn.addEventListener('click', disconnectSite);
+    }
+
+    const urlInput = document.getElementById('mm-backend-url');
+    if (urlInput) {
+      urlInput.addEventListener('change', (e) => {
+        state.pairing.backendUrl = e.target.value.trim();
+      });
+    }
+
+    const consentCb = document.getElementById('mm-consent-cb');
+    if (consentCb) {
+      consentCb.addEventListener('change', (e) => {
+        state.pairing.consent = e.target.checked;
+      });
+    }
+  }
+
+  function bindModalEvents() {
+    const cancelBtn = document.getElementById('mm-modal-cancel');
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => {
+        state.fileManager.modal = null;
+        renderApp();
+      });
+    }
+
+    const elevateForm = document.getElementById('mm-elevate-form');
+    if (elevateForm) {
+      elevateForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const pwd = document.getElementById('mm-elevate-pwd').value;
+        submitElevation(pwd);
+      });
+    }
+
+    const createForm = document.getElementById('mm-create-item-form');
+    if (createForm) {
+      createForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('mm-create-item-name').value;
+        const isDir = state.fileManager.modal.type === 'newFolder';
+
+        try {
+          const res = await apiFetch('/files/create', {
+            method: 'POST',
+            body: JSON.stringify({
+              path: state.fileManager.currentPath,
+              name,
+              isDir,
+            }),
+          });
+
+          if (res && res.success) {
+            state.fileManager.modal = null;
+            showToast(`Created ${isDir ? 'folder' : 'file'} ${escapeHtml(name)}.`);
+            loadFiles(state.fileManager.currentPath);
+          }
+        } catch (err) {
+          showToast('Creation failed: ' + err.message);
+        }
+      });
+    }
+  }
+
+  // Self-initialization
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initRouting);
+  } else {
+    initRouting();
+  }
 })();

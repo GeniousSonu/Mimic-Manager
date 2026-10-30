@@ -1,0 +1,9 @@
+{
+  "consoleLogs": [
+    "[log] JQMIGRATE: Migrate is installed with logging active, version 3.4.1",
+    "[log] JQMIGRATE: Migrate is installed with logging active, version 3.4.1",
+    "[log] JQMIGRATE: Migrate is installed with logging active, version 3.4.1",
+    "[info] %cDownload the React DevTools for a better development experience: https://reactjs.org/link/react-devtools font-weight:bold",
+    "[verbose] [DOM] Input elements should have autocomplete attributes (suggested: \"new-password\"): (More info: https://goo.gl/9p2vKq) %o"
+  ]
+}

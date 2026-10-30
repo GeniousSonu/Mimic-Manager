@@ -6,7 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.0.0-rc.1] - 2026-10-29
+## [1.0.0-rc.1] - 2026-10-30
+
+### Fixed & Enhanced (Addendum L - PLUGIN-REPAIR Pass)
+- **WordPress Admin Sidebar & Rail:**
+  - Registered persistent top-level menu with brand SVG icon and 8 native submenus (Dashboard, Media, Speed, SEO, Files, Sites/Connection, Settings, About).
+  - Added collapsible in-app left rail synchronized via hashchange without page reload.
+  - Added plugin row action links (Settings, Docs, Support) and admin-bar quick menu.
+- **File Manager Guided Elevation & Context Menu:**
+  - Added "Enable Write Mode" flow with administrator password re-authentication (`wp_authenticate`), 15-minute countdown session, and manual lock.
+  - Built comprehensive right-click context menu and toolbar for file creation, Monaco editor editing, safe saving, downloading, renaming, permissions, and trash restore.
+- **Pairing & Site Connection Handshake:**
+  - Implemented 6-digit CSPRNG pairing protocol in API and WordPress connector with 10-minute expiry, hashed storage, and rate-limit lockout.
+  - Built 2-step pairing wizard in PWA with site identity confirmation ("Is this your site?") before binding HMAC credentials.
+- **Media UI & Compression Wizard:**
+  - Dynamic permalink client supporting both plain (`?rest_route=`) and pretty permalinks.
+  - Built responsive media gallery grid with format, status, and savings pills.
+  - Added multi-tier Compress & Convert Wizard supporting WebP conversion via local GD / Imagick.
 
 ### Added
 - **Phase 1 Media Optimization & AI Metadata (MVP):**

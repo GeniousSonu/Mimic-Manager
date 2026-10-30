@@ -623,6 +623,7 @@ body:not(.mm-fullbleed) #mimic-manager-root {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -811,6 +812,7 @@ body:not(.mm-fullbleed) #mimic-manager-root {
   font-size: 12px;
   z-index: 5;
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -829,6 +831,7 @@ body:not(.mm-fullbleed) #mimic-manager-root {
 
 .mm-data-row {
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
   transition: background 0.1s ease;
 }
@@ -995,6 +998,7 @@ body:not(.mm-fullbleed) #mimic-manager-root {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -1021,3 +1025,365 @@ body:not(.mm-fullbleed) #mimic-manager-root {
   gap: 10px;
   margin-top: 8px;
 }
+
+/* ==========================================================================
+   Addendum L: In-App Left Rail, Context Menu, Media UI & Elevation Styles
+   ========================================================================== */
+
+/* In-App Persistent Left Rail */
+.mm-shell-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.mm-app-rail {
+  width: 220px;
+  background-color: var(--mm-surface);
+  border-right: 1px solid var(--mm-border);
+  display: flex;
+  flex-direction: column;
+  transition: width 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  z-index: 20;
+}
+
+.mm-app-rail.collapsed {
+  width: 60px;
+}
+
+.mm-rail-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 8px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.mm-rail-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: var(--mm-muted);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 120ms ease, color 120ms ease;
+  white-space: nowrap;
+}
+
+.mm-rail-link:hover {
+  background-color: var(--mm-raised);
+  color: var(--mm-text);
+}
+
+.mm-rail-link.active {
+  background-color: var(--mm-raised);
+  color: #FFFFFF;
+  border-left: 3px solid var(--mm-cyan);
+}
+
+.mm-rail-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mm-app-rail.collapsed .mm-rail-label {
+  display: none;
+}
+
+.mm-rail-footer {
+  padding: 12px 8px;
+  border-top: 1px solid var(--mm-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mm-app-rail.collapsed .mm-rail-footer {
+  justify-content: center;
+}
+
+.mm-rail-toggle {
+  background: none;
+  border: 1px solid var(--mm-border);
+  color: var(--mm-muted);
+  border-radius: 4px;
+  padding: 6px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mm-rail-toggle:hover {
+  background-color: var(--mm-raised);
+  color: var(--mm-text);
+}
+
+/* Main Content Stage */
+.mm-main-stage {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--mm-bg);
+}
+
+/* Sudo Elevation & Warning Banners */
+.mm-elevation-banner {
+  background-color: rgba(255, 154, 0, 0.1);
+  border-bottom: 1px solid var(--mm-warning);
+  color: #FFD280;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.mm-elevation-banner.danger {
+  background-color: rgba(242, 85, 90, 0.12);
+  border-bottom-color: var(--mm-danger);
+  color: #FFA4A8;
+}
+
+.mm-elevation-banner.elevated {
+  background-color: rgba(40, 199, 111, 0.1);
+  border-bottom-color: var(--mm-success);
+  color: #85E8A9;
+}
+
+.mm-elevation-btn {
+  background-color: var(--mm-warning);
+  color: #0A0A0B;
+  border: none;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.mm-elevation-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* Right-Click Context Menu */
+.mm-context-menu {
+  position: fixed;
+  background-color: var(--mm-overlay);
+  border: 1px solid var(--mm-border-strong);
+  border-radius: 8px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65);
+  padding: 6px 0;
+  min-width: 220px;
+  z-index: 10000;
+  font-size: 13px;
+  color: var(--mm-text);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.mm-context-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  cursor: pointer;
+  gap: 12px;
+  transition: background-color 100ms ease;
+}
+
+.mm-context-item:hover:not(.disabled) {
+  background-color: var(--mm-cyan);
+  color: #0A0A0B;
+}
+
+.mm-context-item.disabled {
+  color: var(--mm-muted);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mm-context-item .shortcut {
+  font-size: 11px;
+  opacity: 0.7;
+  font-family: var(--mm-font-mono);
+}
+
+.mm-context-divider {
+  height: 1px;
+  background-color: var(--mm-border);
+  margin: 4px 0;
+}
+
+/* Media View Layout */
+.mm-media-view {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.mm-media-sidebar {
+  width: 240px;
+  background-color: var(--mm-surface);
+  border-right: 1px solid var(--mm-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.mm-media-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 20px;
+  gap: 16px;
+}
+
+.mm-media-summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--mm-surface);
+  border: 1px solid var(--mm-border);
+  border-radius: 8px;
+  padding: 14px 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.mm-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.mm-media-card {
+  background-color: var(--mm-surface);
+  border: 1px solid var(--mm-border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 140ms ease, transform 140ms ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.mm-media-card:hover {
+  border-color: var(--mm-border-strong);
+  transform: translateY(-2px);
+}
+
+.mm-media-card.selected {
+  border-color: var(--mm-cyan);
+  box-shadow: 0 0 0 1px var(--mm-cyan);
+}
+
+.mm-media-thumb-wrap {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background-color: #0E0E10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.mm-media-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mm-media-card-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mm-media-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--mm-text);
+}
+
+.mm-media-meta {
+  font-size: 11px;
+  color: var(--mm-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Bulk Action Bar */
+.mm-bulk-bar {
+  position: sticky;
+  bottom: 16px;
+  margin: 0 auto;
+  max-width: 600px;
+  width: 100%;
+  background-color: var(--mm-raised);
+  border: 1px solid var(--mm-border-strong);
+  border-radius: 8px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+}
+
+/* Sites Pairing Card */
+.mm-pairing-card {
+  background-color: var(--mm-surface);
+  border: 1px solid var(--mm-border);
+  border-radius: 12px;
+  padding: 28px;
+  max-width: 580px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.mm-pairing-code-box {
+  background-color: #0A0A0B;
+  border: 2px dashed var(--mm-border-strong);
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.mm-pairing-digits {
+  font-family: var(--mm-font-mono);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: var(--mm-cyan);
+}
+
