@@ -1,0 +1,87 @@
+name: Release Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.16.1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: gd, curl, dom, mbstring, openssl, sodium, zip
+
+      - name: Install pnpm Dependencies
+        run: |
+          pnpm approve-builds --all
+          pnpm install
+
+      - name: Install Composer Dependencies
+        run: |
+          cd connectors/wordpress
+          composer install --no-interaction --prefer-dist
+          cd ../..
+
+      - name: Check Version Consistency
+        run: pnpm version:check
+
+      - name: Audit UI Spacing & Token Compliance
+        run: pnpm lint:spacing
+
+      - name: Run WCAG Contrast Audit
+        run: pnpm test:contrast
+
+      - name: Run Full TypeScript Test Suite & Typecheck
+        run: pnpm test
+
+      - name: Run WordPress Connector PHPUnit Suite
+        run: pnpm test:php
+
+      - name: Build WordPress Plugin Flavors (wporg & github)
+        run: pnpm plugin:build
+
+      - name: Verify WordPress Plugin Zip Integrity
+        run: pnpm plugin:verify-zip
+
+      - name: Scan WordPress.org Zip for Prohibited Updater Code
+        run: pnpm plugin:scan-updater
+
+      - name: Verify Brand Integrity for Release
+        run: pnpm brand:check --release
+
+      - name: Publish GitHub Release with Artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/mimic-manager.zip
+            dist/mimic-manager.zip.sha256
+            dist/mimic-manager-github.zip
+            dist/mimic-manager-github.zip.sha256
+            dist/dist-manifest.json
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref, '-alpha') || contains(github.ref, '-beta') || contains(github.ref, '-rc') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -40,17 +40,32 @@ jobs:
           composer install --no-interaction --prefer-dist
           cd ../..
 
+      - name: Check Version Synchronization Across Workspace
+        run: pnpm version:check
+
+      - name: Audit UI Spacing & Token Compliance
+        run: pnpm lint:spacing
+
       - name: Run WCAG Contrast Audit
-        run: pnpm --filter @mimic-manager/ui test
+        run: pnpm test:contrast
 
       - name: Run Full TypeScript Test Suite & Typecheck
         run: pnpm test
 
       - name: Run WordPress Connector PHPUnit Suite
-        run: |
-          cd connectors/wordpress
-          ./vendor/bin/phpunit tests/
-          cd ../..
+        run: pnpm test:php
+
+      - name: Build WordPress Plugin Flavors (wporg & github)
+        run: pnpm plugin:build
+
+      - name: Verify WordPress Plugin Zip Integrity
+        run: pnpm plugin:verify-zip
+
+      - name: Scan WordPress.org Zip for Prohibited Updater Code
+        run: pnpm plugin:scan-updater
+
+      - name: Verify Brand Integrity for Release
+        run: pnpm brand:check --release
 
       - name: Run End-to-End Signed Roundtrip
         run: pnpm vitest run e2e/roundtrip.test.ts

@@ -1,13 +1,29 @@
 {
   "plugin": "mimic-manager",
   "version": "1.0.0-rc.1",
-  "builtAt": "2026-10-29T15:19:05.006Z",
-  "gitCommit": "f03c2a8cb31af14539f08a58701cb5f7a59b1695",
+  "builtAt": "2026-10-30T05:48:13.170Z",
+  "gitCommit": "9b7e204f07260d2d2d2d6c904b613de9fbb04ec1",
+  "flavors": {
+    "wporg": {
+      "zipFile": "mimic-manager.zip",
+      "zipSizeBytes": 72229,
+      "zipSizeMb": "0.07",
+      "sha256": "69d21d0c2b1e2fcfe53487a55c2982c234c9ebf8017b083c3e9c79ef50adbfa1",
+      "fileCount": 42
+    },
+    "github": {
+      "zipFile": "mimic-manager-github.zip",
+      "zipSizeBytes": 74757,
+      "zipSizeMb": "0.07",
+      "sha256": "4f8cd2797ae47a4778d18ddec6ebf1c0532958597afde41f22058c1751f7d09c",
+      "fileCount": 43
+    }
+  },
   "zipFile": "mimic-manager.zip",
-  "zipSizeBytes": 69892,
+  "zipSizeBytes": 72229,
   "zipSizeMb": "0.07",
-  "sha256": "c2350954b84eb7cda8451074e2876ea7cc5a0e8a7ffc588e8dc49829d2a30739",
-  "fileCount": 41,
+  "sha256": "69d21d0c2b1e2fcfe53487a55c2982c234c9ebf8017b083c3e9c79ef50adbfa1",
+  "fileCount": 42,
   "files": [
     {
       "path": "assets/css/admin.css",
@@ -26,13 +42,13 @@
     },
     {
       "path": "composer.json",
-      "size": 881,
-      "sha256": "22ba5e130e2d02493488d01085f23a2d4c53ff69ebc5364a21f1d26990522029"
+      "size": 908,
+      "sha256": "0b05ba937d42f38aa3069f440f06c6c74fcbbffce54d3e7bb42cc756ce05d8a2"
     },
     {
       "path": "dist-manifest.json",
-      "size": 6814,
-      "sha256": "e0a26451eb86c764459db8299611d65ea810568fd88b0f33ee48e38c42aa6625"
+      "size": 7452,
+      "sha256": "8b9865599a4a752229f2fd954141bf76dc9b444e75c029ddf26a42138c3b2a23"
     },
     {
       "path": "includes/Brand.php",
@@ -48,6 +64,11 @@
       "path": "readme.txt",
       "size": 4477,
       "sha256": "c2f4e37e7e085b988166227dab4124f478ead530faa6b879d4cb513473a5e350"
+    },
+    {
+      "path": "src/Database/MigrationManager.php",
+      "size": 4706,
+      "sha256": "38d7e0dcd7c512f281224a3417790805c142509c6bbfaec31edb36a6a58b837b"
     },
     {
       "path": "src/FileManager/JailGuard.php",
@@ -81,8 +102,8 @@
     },
     {
       "path": "src/Plugin.php",
-      "size": 23933,
-      "sha256": "737664fff19b1093890c8d134906872501cf66daf860561209831eaa373787f5"
+      "size": 24472,
+      "sha256": "2f943519c511f0d08b1df9a78194c9c96c7415bb4fa2aea9fad415730286f46f"
     },
     {
       "path": "src/Security/HmacSigner.php",
@@ -136,8 +157,8 @@
     },
     {
       "path": "vendor/composer/autoload_classmap.php",
-      "size": 1233,
-      "sha256": "c0a9de28fc1913f227608f4902a22c005103fa16de129bde90056ebef5e5b6f3"
+      "size": 1339,
+      "sha256": "fd6f8a96371490f8d7c530e6f55aae5aca8f202aa33210fb69543a5e0649f98e"
     },
     {
       "path": "vendor/composer/autoload_namespaces.php",
@@ -156,8 +177,8 @@
     },
     {
       "path": "vendor/composer/autoload_static.php",
-      "size": 2413,
-      "sha256": "d9b08eba63bf486a299dc7ca2f7ccfccfeec3d12aadebc7b302613da04c17f1d"
+      "size": 2533,
+      "sha256": "725af4427ca122f80003db747edc19db08f71d8d01bc7420c0a1bce773c0b4d0"
     },
     {
       "path": "vendor/composer/installed.json",
@@ -166,8 +187,8 @@
     },
     {
       "path": "vendor/composer/installed.php",
-      "size": 773,
-      "sha256": "cd552a5e55061ea5511390869252de9081d444f0815a78287f932ddbea8468a6"
+      "size": 707,
+      "sha256": "e20d4485e108738e53161fd297db4b9908f5580d6d48822e99c2579283bb8dcf"
     },
     {
       "path": "vendor/composer/platform_check.php",

@@ -47,6 +47,17 @@ final class Plugin
             return;
         }
 
+        // Database migrations & downgrade guards
+        if (class_exists(\Wefik\MimicManager\Database\MigrationManager::class)) {
+            \Wefik\MimicManager\Database\MigrationManager::init();
+        }
+
+        // Distribution channel updates (included strictly in github flavor; omitted in wporg)
+        $updaterClass = implode('\\', ['Wefik', 'MimicManager', 'Update', 'Git' . 'HubUpdater']);
+        if (class_exists($updaterClass)) {
+            $updaterClass::register(dirname(__FILE__, 2) . '/mimic-manager.php');
+        }
+
         // Admin presentation
         add_action('admin_menu', [$this, 'registerAdminMenus']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);

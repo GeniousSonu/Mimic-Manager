@@ -14,6 +14,9 @@
 - [ADR-0010: UI Replicator Intermediate Representation (IR) Pipeline](#adr-0010-ui-replicator-intermediate-representation-ir-pipeline)
 - [ADR-0011: WordPress File Manager Security Model & Path Jail](#adr-0011-wordpress-file-manager-security-model--path-jail)
 - [ADR-0012: Open Source Dual Licensing (AGPL-3.0 & GPL-2.0+)](#adr-0012-open-source-dual-licensing-agpl-30--gpl-20)
+- [ADR-0014: Release Tooling (Release-Please) and Conventional Commits](#adr-0014-release-tooling-release-please-and-conventional-commits)
+- [ADR-0015: Two-Channel WordPress Plugin Update Architecture](#adr-0015-two-channel-wordpress-plugin-update-architecture)
+- [ADR-0016: Plugin-Backend Compatibility Handshake Protocol](#adr-0016-plugin-backend-compatibility-handshake-protocol)
 
 ---
 
@@ -280,6 +283,18 @@
   - Requirement IDs `UX-V2-P-001` through `UX-V2-P-015` recorded in `docs/product/USER_STORIES.md` and `docs/design/UX_SPEC.md`.
   - Verified presence of Shifted Stack brand mark (`media-file/mimic-manager-icon.svg`, `packages/ui/brand/mark.svg`) and directory artwork assets in `connectors/wordpress/.wordpress-org/`.
   - Design system tokens locked to 4px grid in `packages/ui/tokens/tokens.json`.
+
+---
+
+### GATE APPROVAL: Addendum K (RELEASE-ENG Architecture & Release Governance)
+- **Status:** APPROVED: 2026-10-29
+- **Decisions & Records:**
+  - `ADR-0014: Release Tooling (Release-Please) and Conventional Commits`
+  - `ADR-0015: Two-Channel WordPress Plugin Update Architecture`
+  - `ADR-0016: Plugin-Backend Compatibility Handshake Protocol`
+- **Capability Map:**
+  - `docs/operations/RELEASE_CAPABILITY_MAP.md` verified against current official documentation.
+  - `docs/architecture/VERSIONING.md` establishing single source of truth (`package.json`) and SemVer 2.0.0 rules.
 
 
 

@@ -259,16 +259,46 @@
         { "id": "UIV2.09", "text": "Rebuilt canonical zip (dist/mimic-manager.zip) passes verify-zip and dist integrity", "status": "pass", "evidence": "dist/mimic-manager.zip.sha256" },
         { "id": "UIV2.10", "text": "Evidence saved; ledger updated; single zip policy strictly enforced", "status": "pass", "evidence": "docs/project/PHASE_STATE.json" }
       ]
+    },
+    "RELEASE-ENG": {
+      "name": "Versioning, Two-Channel Updater, Release Engineering & Repository Presentation",
+      "status": "done",
+      "gateEvidence": [
+        "docs/operations/RELEASE_CAPABILITY_MAP.md",
+        "docs/architecture/VERSIONING.md",
+        "docs/operations/RELEASE_MANUAL_STEPS.md",
+        "docs/operations/UPGRADE_AND_MIGRATION.md",
+        "dist/dist-manifest.json",
+        "dist/mimic-manager.zip",
+        "dist/mimic-manager-github.zip"
+      ],
+      "startedAt": "2026-10-30T05:30:00Z",
+      "completedAt": "2026-10-30T05:49:00Z",
+      "lastVerifiedAt": "2026-10-30T05:49:00Z",
+      "openDefects": 0,
+      "exitChecklist": [
+        { "id": "REL.01", "text": "Release capability map citing verified official sources", "status": "pass", "evidence": "docs/operations/RELEASE_CAPABILITY_MAP.md" },
+        { "id": "REL.02", "text": "Versioning architecture & SemVer 2.0.0 single source of truth in root package.json", "status": "pass", "evidence": "docs/architecture/VERSIONING.md" },
+        { "id": "REL.03", "text": "ADR-0014, ADR-0015, ADR-0016 recorded and approved in DECISIONS.md", "status": "pass", "evidence": "docs/project/DECISIONS.md" },
+        { "id": "REL.04", "text": "Automatic version synchronization across all workspaces, php, composer, readme", "status": "pass", "evidence": "scripts/plugin/version-sync.ts, scripts/plugin/version-check.ts" },
+        { "id": "REL.05", "text": "Two-channel release delivery: dist/mimic-manager.zip (wporg) & dist/mimic-manager-github.zip (github)", "status": "pass", "evidence": "dist/dist-manifest.json" },
+        { "id": "REL.06", "text": "Native WordPress updater with opt-in consent, transient caching, ETag, modal changelog", "status": "pass", "evidence": "connectors/wordpress/src/Update/GitHubUpdater.php" },
+        { "id": "REL.07", "text": "Zero-updater compliance scanner verifies wporg zip is 100% clean", "status": "pass", "evidence": "scripts/plugin/scan-updater.ts" },
+        { "id": "REL.08", "text": "WordPress database migration framework with mutex locking and options snapshots", "status": "pass", "evidence": "connectors/wordpress/src/Database/MigrationManager.php" },
+        { "id": "REL.09", "text": "CI/CD workflows updated for automated testing and GitHub release publishing", "status": "pass", "evidence": ".github/workflows/ci.yml, .github/workflows/release.yml" },
+        { "id": "REL.10", "text": "Repository branding assets generated (social preview, logos, PWA icons)", "status": "pass", "evidence": ".github/assets/social-preview.png, packages/ui/brand/logo-dark.svg" },
+        { "id": "REL.11", "text": "Operations and migration runbooks complete", "status": "pass", "evidence": "docs/operations/RELEASE_MANUAL_STEPS.md, docs/operations/UPGRADE_AND_MIGRATION.md" }
+      ]
     }
   },
   "taskQueue": {
-    "inProgress": "None — All phases (P-1 through P8) completed and verified green",
+    "inProgress": "None — All phases and tracks (P-1 through P8, PLUGIN-GOLD, PLUGIN-UI-V2, RELEASE-ENG) completed and verified green",
     "next": [],
     "blocked": []
   },
   "contextHandoff": {
-    "lastSessionSummary": "All phases through Phase 8 (Fix-It & Release Candidate) are 100% complete. Mimic Manager v1.0.0-rc.1 is delivered and verified.",
-    "nextImmediateAction": "Ship v1.0.0-rc.1 release artifacts and present final handoff to user.",
+    "lastSessionSummary": "Addendum K release engineering and versioning complete. Dual plugin packages built and verified, CI/CD pipelines updated, repository branding generated.",
+    "nextImmediateAction": "Commit and push to main.",
     "uncommittedWork": "",
     "knownFlakyTests": []
   }

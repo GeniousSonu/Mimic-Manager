@@ -31,5 +31,6 @@
     "sort-packages": true,
     "allow-plugins": {}
   },
-  "homepage": "https://www.wefik.in"
+  "homepage": "https://www.wefik.in",
+  "version": "1.0.0-rc.1"
 }

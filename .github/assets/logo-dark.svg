@@ -1,0 +1,12 @@
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 80" width="400" height="80" fill="none">
+      <g transform="translate(10, 8) scale(0.0625)">
+        <path d="M512 621 838 805Q855 815 838 829L538 1000Q512 1015 486 1000L186 829Q169 815 186 805Z" fill="#6C2A00"/>
+        <path d="M512 432 837 616Q856 627 837 641L538 812Q512 827 486 812L187 641Q168 627 187 616Z" fill="#FFB13A"/>
+        <path d="M512 234 837 418Q856 429 837 443L538 614Q512 629 486 614L187 443Q168 429 187 418Z" fill="#00E5FF"/>
+      </g>
+      <text x="80" y="52" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="32" font-weight="800" fill="#F4F4F6" letter-spacing="-0.8px">
+        Mimic <tspan fill="#7B61FF">Manager</tspan>
+      </text>
+    </svg>
+  

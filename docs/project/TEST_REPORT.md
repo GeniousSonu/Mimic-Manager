@@ -132,3 +132,56 @@ All 33 token contrast pairs passed WCAG 2.2 AA standards (min 4.5:1 text, 3:1 bo
   SHA256:  7e25a10fe448f2b0730dbc89cb4ad9dfee177e90c1be53818099e8bfa52bad9c
 ```
 
+---
+
+## Run: 2026-10-30T11:20:00Z — RELEASE-ENG (Addendum K)
+
+### 1. Version Synchronization & Consistency Audit (`version:check`)
+```
+[version:check] Running version consistency audit across monorepo and built artifacts...
+  [•] Authoritative root version: 1.0.0-rc.1
+[✓] Version Check PASS: all source files and built artifacts are strictly synchronized.
+```
+
+### 2. Full Monorepo Production Build (`pnpm build`)
+```
+Tasks:    7 successful, 7 total
+Cached:   0 cached, 7 total
+Time:     18.26s
+All packages built: @mimic-manager/api, @mimic-manager/pwa, @mimic-manager/worker, @mimic-manager/ir, @mimic-manager/ssrf-guard, @mimic-manager/types, @mimic-manager/ui
+```
+
+### 3. WordPress Connector PHPUnit Suite (`pnpm test:php`)
+```
+PHPUnit 10.5.66 by Sebastian Bergmann and contributors.
+.......................................                           39 / 39 (100%)
+Time: 00:00.061, Memory: 8.00 MB
+OK (39 tests, 119 assertions)
+```
+
+### 4. Dual Plugin Packaging & WP.org Scanner (`pnpm plugin:build` & `scan-updater`)
+```
+======================================================
+  WP.org Artifact: dist/mimic-manager.zip
+  Size:            70.5 KB (Files: 42)
+  SHA256:          69d21d0c2b1e2fcfe53487a55c2982c234c9ebf8017b083c3e9c79ef50adbfa1
+------------------------------------------------------
+  GitHub Artifact: dist/mimic-manager-github.zip
+  Size:            73.0 KB (Files: 43)
+  SHA256:          4f8cd2797ae47a4778d18ddec6ebf1c0532958597afde41f22058c1751f7d09c
+======================================================
+[plugin:scan-updater] Verifying channel flavor separation & WP.org compliance...
+[1/2] Scanning wporg package for forbidden third-party updater code...
+  [✓] wporg package contains ZERO third-party updater code or endpoints.
+[2/2] Scanning github package for auditable updater implementation...
+  [✓] github package correctly includes auditable GitHubUpdater with consent guard.
+[✓] Channel flavor separation PASS: wporg is 100% clean and github channel is fully verified.
+```
+
+### 5. Full End-to-End Suite (`e2e/roundtrip.test.ts` & `e2e/spa-zero-reload.test.ts`)
+```
+ ✓ e2e/roundtrip.test.ts (1 test) 160ms
+ ✓ e2e/spa-zero-reload.test.ts (8 tests) 5941ms
+ Test Files  2 passed (2)
+      Tests  9 passed (9)
+```

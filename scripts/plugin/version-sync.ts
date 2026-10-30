@@ -2,66 +2,112 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const ROOT_DIR = process.cwd();
-const pkgPath = path.join(ROOT_DIR, 'package.json');
+const rootPkgPath = path.join(ROOT_DIR, 'package.json');
 const brandPath = path.join(ROOT_DIR, 'brand.config.json');
-const mainPhpPath = path.join(ROOT_DIR, 'connectors/wordpress/mimic-manager.php');
-const brandPhpPath = path.join(ROOT_DIR, 'connectors/wordpress/includes/Brand.php');
-const readmePath = path.join(ROOT_DIR, 'connectors/wordpress/readme.txt');
 
-export function syncVersions(checkOnly = false): boolean {
-  const brandJson = JSON.parse(fs.readFileSync(brandPath, 'utf-8'));
-  const targetVersion = brandJson.product.version;
+export function syncAllVersions(): string {
+  if (!fs.existsSync(rootPkgPath)) {
+    throw new Error('Root package.json not found!');
+  }
 
-  let allMatch = true;
+  const rootPkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf-8'));
+  const version = rootPkg.version;
+  console.log(`[version:sync] Synchronizing authoritative SemVer: ${version}`);
 
-  // 1. Check/Update mimic-manager.php
-  const phpContent = fs.readFileSync(mainPhpPath, 'utf-8');
-  const phpVersionMatch = phpContent.match(/\* Version:\s+([^\r\n]+)/);
-  if (!phpVersionMatch || phpVersionMatch[1] !== targetVersion) {
-    allMatch = false;
-    if (!checkOnly) {
-      const updated = phpContent.replace(/\* Version:\s+[^\r\n]+/, `* Version: ${targetVersion}`);
+  // 1. brand.config.json
+  if (fs.existsSync(brandPath)) {
+    const brand = JSON.parse(fs.readFileSync(brandPath, 'utf-8'));
+    if (brand.product.version !== version) {
+      brand.product.version = version;
+      fs.writeFileSync(brandPath, JSON.stringify(brand, null, 2) + '\n', 'utf-8');
+      console.log(`  [✓] Updated brand.config.json -> ${version}`);
+    }
+  }
+
+  // 2. Workspace package.json files
+  const workspaces = [
+    'apps/api',
+    'apps/worker',
+    'apps/pwa',
+    'packages/config',
+    'packages/types',
+    'packages/ir',
+    'packages/ui',
+    'packages/ssrf-guard',
+  ];
+
+  for (const ws of workspaces) {
+    const wsPkgPath = path.join(ROOT_DIR, ws, 'package.json');
+    if (fs.existsSync(wsPkgPath)) {
+      const pkg = JSON.parse(fs.readFileSync(wsPkgPath, 'utf-8'));
+      if (pkg.version !== version) {
+        pkg.version = version;
+        fs.writeFileSync(wsPkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf-8');
+        console.log(`  [✓] Updated ${ws}/package.json -> ${version}`);
+      }
+    }
+  }
+
+  // 3. connectors/wordpress/composer.json
+  const composerPath = path.join(ROOT_DIR, 'connectors/wordpress/composer.json');
+  if (fs.existsSync(composerPath)) {
+    const comp = JSON.parse(fs.readFileSync(composerPath, 'utf-8'));
+    if (comp.version !== version) {
+      comp.version = version;
+      fs.writeFileSync(composerPath, JSON.stringify(comp, null, 2) + '\n', 'utf-8');
+      console.log(`  [✓] Updated connectors/wordpress/composer.json -> ${version}`);
+    }
+  }
+
+  // 4. connectors/wordpress/mimic-manager.php
+  const mainPhpPath = path.join(ROOT_DIR, 'connectors/wordpress/mimic-manager.php');
+  if (fs.existsSync(mainPhpPath)) {
+    const content = fs.readFileSync(mainPhpPath, 'utf-8');
+    const updated = content.replace(/\* Version:\s+[^\r\n]+/, `* Version: ${version}`);
+    if (updated !== content) {
       fs.writeFileSync(mainPhpPath, updated, 'utf-8');
-      console.log(`[version-sync] Updated mimic-manager.php -> ${targetVersion}`);
+      console.log(`  [✓] Updated mimic-manager.php -> ${version}`);
     }
   }
 
-  // 2. Check/Update Brand.php
-  const brandPhpContent = fs.readFileSync(brandPhpPath, 'utf-8');
-  const brandPhpMatch = brandPhpContent.match(/public const VERSION = '([^']+)'/);
-  if (!brandPhpMatch || brandPhpMatch[1] !== targetVersion) {
-    allMatch = false;
-    if (!checkOnly) {
-      const updated = brandPhpContent.replace(/public const VERSION = '[^']+'/, `public const VERSION = '${targetVersion}'`);
-      fs.writeFileSync(brandPhpPath, updated, 'utf-8');
-      console.log(`[version-sync] Updated Brand.php -> ${targetVersion}`);
-    }
+  // 5. connectors/wordpress/includes/Brand.php
+  const brandPhpPath = path.join(ROOT_DIR, 'connectors/wordpress/includes/Brand.php');
+  if (fs.existsSync(brandPhpPath)) {
+    let brandPhp = fs.readFileSync(brandPhpPath, 'utf-8');
+    brandPhp = brandPhp.replace(/public const VERSION = '[^']+';/, `public const VERSION = '${version}';`);
+    brandPhp = brandPhp.replace(/public const USER_AGENT = 'MimicManager\/[^' ]+/, `public const USER_AGENT = 'MimicManager/${version}`);
+    fs.writeFileSync(brandPhpPath, brandPhp, 'utf-8');
+    console.log(`  [✓] Updated Brand.php -> ${version}`);
   }
 
-  // 3. Check/Update readme.txt
-  const readmeContent = fs.readFileSync(readmePath, 'utf-8');
-  const readmeMatch = readmeContent.match(/Stable tag:\s+([^\r\n]+)/);
-  if (!readmeMatch || readmeMatch[1] !== targetVersion) {
-    allMatch = false;
-    if (!checkOnly) {
-      const updated = readmeContent.replace(/Stable tag:\s+[^\r\n]+/, `Stable tag: ${targetVersion}`);
+  // 6. connectors/wordpress/readme.txt
+  const readmePath = path.join(ROOT_DIR, 'connectors/wordpress/readme.txt');
+  if (fs.existsSync(readmePath)) {
+    const readme = fs.readFileSync(readmePath, 'utf-8');
+    const updated = readme.replace(/Stable tag:\s+[^\r\n]+/, `Stable tag: ${version}`);
+    if (updated !== readme) {
       fs.writeFileSync(readmePath, updated, 'utf-8');
-      console.log(`[version-sync] Updated readme.txt -> ${targetVersion}`);
+      console.log(`  [✓] Updated readme.txt -> ${version}`);
     }
   }
 
-  return allMatch;
+  // 7. apps/pwa/public/manifest.webmanifest
+  const manifestPath = path.join(ROOT_DIR, 'apps/pwa/public/manifest.webmanifest');
+  if (fs.existsSync(manifestPath)) {
+    try {
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+      manifest.version = version;
+      fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf-8');
+      console.log(`  [✓] Updated manifest.webmanifest -> ${version}`);
+    } catch {
+      // ignore
+    }
+  }
+
+  return version;
 }
 
-const args = process.argv.slice(2);
-const isCheckOnly = args.includes('--check');
-
-console.log('[plugin:version-sync] Checking and synchronizing plugin version across all artifacts...');
-const match = syncVersions(isCheckOnly);
-
-if (isCheckOnly && !match) {
-  console.error('[-] ERROR: Version mismatch detected across plugin artifacts.');
-  process.exit(1);
+if (process.argv[1] && process.argv[1].endsWith('version-sync.ts')) {
+  syncAllVersions();
+  console.log('[✓] Version synchronization complete.');
 }
-
-console.log('[✓] Plugin versions are fully synchronized.');
