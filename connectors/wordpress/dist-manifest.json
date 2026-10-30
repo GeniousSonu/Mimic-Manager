@@ -1,29 +1,29 @@
 {
   "plugin": "mimic-manager",
   "version": "1.0.0-rc.1",
-  "builtAt": "2026-10-30T08:22:56.486Z",
-  "gitCommit": "27accb23024c9a4b470c700b164d81dafe6fa431",
+  "builtAt": "2026-10-30T14:13:29.342Z",
+  "gitCommit": "060eb0fe05e72e7afd39cb6303c3ae0e30a93548",
   "flavors": {
     "wporg": {
       "zipFile": "mimic-manager.zip",
-      "zipSizeBytes": 82833,
-      "zipSizeMb": "0.08",
-      "sha256": "44b3037f9a7599dcc7e8540e112d17dce080cae94f1ba415ef52d1e7f3fbc793",
-      "fileCount": 43
+      "zipSizeBytes": 106801,
+      "zipSizeMb": "0.10",
+      "sha256": "f53d697300934606f29cf8acf0b849f8af5726e5493b8a5a416c4970f185bec8",
+      "fileCount": 44
     },
     "github": {
       "zipFile": "mimic-manager-github.zip",
-      "zipSizeBytes": 85361,
-      "zipSizeMb": "0.08",
-      "sha256": "450fba745bd3a36da9767c75ef5724d7c78a021fa03d8c3414e9c9a1a2d051cb",
-      "fileCount": 44
+      "zipSizeBytes": 109329,
+      "zipSizeMb": "0.10",
+      "sha256": "6bedc05460561b06cbb96f8d2e1ba680261630d8ba4fb0d56a1880dd498c4f36",
+      "fileCount": 45
     }
   },
   "zipFile": "mimic-manager.zip",
-  "zipSizeBytes": 82833,
-  "zipSizeMb": "0.08",
-  "sha256": "44b3037f9a7599dcc7e8540e112d17dce080cae94f1ba415ef52d1e7f3fbc793",
-  "fileCount": 43,
+  "zipSizeBytes": 106801,
+  "zipSizeMb": "0.10",
+  "sha256": "f53d697300934606f29cf8acf0b849f8af5726e5493b8a5a416c4970f185bec8",
+  "fileCount": 44,
   "files": [
     {
       "path": ".wp-env.json",
@@ -32,8 +32,8 @@
     },
     {
       "path": "assets/css/admin.css",
-      "size": 27196,
-      "sha256": "6b002f6961e3e395c9470822a7e9619bf7c401b3d72f9e5cb2f754ffe67a4678"
+      "size": 32959,
+      "sha256": "014af1d25175848877ab801411d73224720aafd7c53605a833bc4256746da5df"
     },
     {
       "path": "assets/icon-20.svg",
@@ -42,8 +42,8 @@
     },
     {
       "path": "assets/js/admin.js",
-      "size": 73508,
-      "sha256": "c8159a467920cb8f4a0841963cf505087ac8c24d28afa0a18812986db2bf2107"
+      "size": 152119,
+      "sha256": "18d3e63799e44a5b417f6e4be903c8fd81ea8d8eed639cded2b84505cdddfd85"
     },
     {
       "path": "composer.json",
@@ -52,8 +52,8 @@
     },
     {
       "path": "dist-manifest.json",
-      "size": 7597,
-      "sha256": "2f1b26d0ecac3c3ebaf1b46a1f1caf366aeabf7e96c2906b510c0b51f1760d8e"
+      "size": 7771,
+      "sha256": "cb7bb82ef84a0287102fd610a9e25d34789e3c11768676382d3f7bf2e9e3bcc5"
     },
     {
       "path": "includes/Brand.php",
@@ -107,8 +107,13 @@
     },
     {
       "path": "src/Plugin.php",
-      "size": 52490,
-      "sha256": "5cd5ef40e2f329888764f99e762091ff948e90398f188b5fb235041be0e28617"
+      "size": 81489,
+      "sha256": "83216e5d55ed082ab464a9b4a7eadf9c6223577a8e08dce61e6a2dace8622e7c"
+    },
+    {
+      "path": "src/Replicator/ReplicatorEngine.php",
+      "size": 22384,
+      "sha256": "71075e0575261e9fce53a531c91711bd2b31d4bf694b465ad511cb662844e1db"
     },
     {
       "path": "src/Security/HmacSigner.php",
@@ -162,8 +167,8 @@
     },
     {
       "path": "vendor/composer/autoload_classmap.php",
-      "size": 1339,
-      "sha256": "fd6f8a96371490f8d7c530e6f55aae5aca8f202aa33210fb69543a5e0649f98e"
+      "size": 1449,
+      "sha256": "07bd16a7e146b3972e7b8c3e98023d2a8089457a4b16867b957dcde1b04309a5"
     },
     {
       "path": "vendor/composer/autoload_namespaces.php",
@@ -182,8 +187,8 @@
     },
     {
       "path": "vendor/composer/autoload_static.php",
-      "size": 2533,
-      "sha256": "725af4427ca122f80003db747edc19db08f71d8d01bc7420c0a1bce773c0b4d0"
+      "size": 2657,
+      "sha256": "47f58f370ab760dcd5a4de8ffbda55357e3652b64f394763a1227369367af307"
     },
     {
       "path": "vendor/composer/installed.json",

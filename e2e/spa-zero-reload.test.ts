@@ -276,9 +276,9 @@ describe('PLUGIN-UI-V2 Playwright SPA Zero-Reload & Full-Bleed Verification', ()
 
     expect(rootHeight).toBe(868);
 
-    // Verify document body does not scroll
+    // Verify document body does not lock overflow per Addendum M-A
     const bodyOverflow = await page.evaluate(() => window.getComputedStyle(document.body).overflow);
-    expect(bodyOverflow).toBe('hidden');
+    expect(bodyOverflow).not.toBe('hidden');
 
     await page.close();
   });

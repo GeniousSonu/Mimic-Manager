@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hostile Page With Injected Scripts</title>
+  <script>window.location.href = "https://malicious-site.example.com/steal";</script>
+  <script src="https://evil.example.com/keylogger.js"></script>
+</head>
+<body onload="alert('XSS Execution')">
+  <section class="safe-content">
+    <h2 onclick="maliciousFunction()">Clean Heading Title</h2>
+    <p onmouseover="alert(1)">This paragraph has dangerous attributes that must be stripped cleanly.</p>
+    <a href="javascript:alert('Hacked')" class="button">Click Exploited Link</a>
+    <iframe src="https://hidden-phish.example.com"></iframe>
+  </section>
+</body>
+</html>

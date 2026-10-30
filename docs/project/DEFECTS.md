@@ -1,8 +1,8 @@
 # Mimic Manager Defect Ledger (Phase 7 Break-It)
 
-**Total Findings:** 9  
-**Severity Breakdown:** Critical: 0 | High: 7 | Medium: 2 | Low: 0  
-**Status Breakdown:** Open: 0 | Fixed: 0 | Verified: 9 (100% Resolved)  
+**Total Findings:** 12  
+**Severity Breakdown:** Critical: 0 | High: 9 | Medium: 3 | Low: 0  
+**Status Breakdown:** Open: 0 | Fixed: 0 | Verified: 12  
 
 | ID | Title | Severity | Component | Found By | Status | Failing Test Path |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -15,6 +15,9 @@
 | `D-0007` | Missing End-to-End 6-Digit Site Pairing Handshake and Status Polling Flow | High | `apps/api`, `apps/pwa`, `connectors/wordpress` | Addendum L (Owner Install) | **Verified** | `test/plugin-repair-repro.test.ts` |
 | `D-0008` | Media UI SPA Route Renders Generic Placeholder Instead of Real Media Gallery & Conversion Wizard | High | `connectors/wordpress` | Addendum L (Owner Install) | **Verified** | `test/plugin-repair-repro.test.ts` |
 | `D-0009` | Plain Permalinks REST Redirection Failure & Trailing Slash Redirection 404 | Medium | `connectors/wordpress` | Addendum L (Owner Install) | **Verified** | `test/plugin-repair-repro.test.ts` |
+| `D-0010` | WordPress Admin Left Menu Frozen & Cannot Scroll on Load Due to body.mm-fullbleed overflow:hidden | High | `connectors/wordpress` | Addendum M (Owner Install) | **Verified** | `test/addendum-m-repro.test.ts`, `e2e/menu-scroll.test.ts` |
+| `D-0011` | File Manager Context Menu Missing Required Action Groups, Multi-Select Menu & Command Palette | High | `connectors/wordpress` | Addendum M (Owner Install) | **Verified** | `test/addendum-m-repro.test.ts` |
+| `D-0012` | UI Replicator Missing Real Backend/Plugin Mode A Pipeline, Draft Page Creator REST Route & PWA Wiring | High | `connectors/wordpress`, `apps/api`, `apps/pwa` | Addendum M (Owner Install) | **Verified** | `test/addendum-m-repro.test.ts`, `connectors/wordpress/tests/ReplicatorEngineTest.php` |
 
 ---
 
@@ -36,3 +39,7 @@
 - **Campaign 11 (Data Integrity & Migrations):** Shadow backup and restore validated. PASS.
 - **Campaign 12 (Docs-as-Tests):** Traceability matrix synchronized with 100% test mappings. PASS.
 - **Campaign 13 (Exploratory Chaos):** Next.js PWA static prerendering verified clean across 13/13 routes. PASS.
+- **Campaign 14 (Plugin Repair 2 - Addendum M):**
+  - Resolved `D-0010`: Removed body `overflow: hidden`, restored document scroll geometry for WordPress sticky menu, verified via `e2e/menu-scroll.test.ts` (PASS).
+  - Resolved `D-0011`: Implemented full context menu suite with 13 groups, submenus, multi-selection batch operations, and Ctrl+K command palette.
+  - Resolved `D-0012`: Built ReplicatorEngine (Mode A: Standard PHP DOM), Gutenberg block compiler, strict SSRF guard, draft page creation, and 20 quality test fixtures averaging 88.0% fidelity with 0 crashes.

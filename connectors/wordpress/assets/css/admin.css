@@ -23,7 +23,7 @@
    Full-Bleed Breakout (Scoped strictly under body.mm-fullbleed)
    ========================================================================== */
 body.mm-fullbleed {
-  overflow: hidden !important;
+  /* Never set overflow:hidden on body per Addendum M-A to preserve WP admin menu scrolling */
 }
 
 body.mm-fullbleed #wpcontent {
@@ -49,6 +49,7 @@ body.mm-fullbleed #wpfooter {
   width: 100%;
   height: calc(100dvh - var(--wp-admin--admin-bar--height, 32px));
   height: calc(100vh - 32px); /* Fallback */
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background-color: var(--mm-bg);
@@ -1386,4 +1387,301 @@ body:not(.mm-fullbleed) #mimic-manager-root {
   letter-spacing: 8px;
   color: var(--mm-cyan);
 }
+
+/* Extended Context Menu & Submenus (Addendum M) */
+.mm-context-menu {
+  opacity: 1;
+  transform: scale(1);
+  transform-origin: top left;
+  transition: opacity 140ms ease, transform 140ms ease;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mm-context-menu,
+  .mm-command-palette,
+  .mm-modal-card {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+.mm-context-group-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--mm-muted);
+  padding: 6px 16px 2px;
+}
+
+.mm-context-submenu {
+  position: relative;
+}
+
+.mm-context-submenu > .mm-context-item::after {
+  content: '›';
+  font-size: 14px;
+  font-weight: 600;
+  margin-left: auto;
+  opacity: 0.7;
+}
+
+.mm-context-subpanel {
+  display: none;
+  position: absolute;
+  left: 98%;
+  top: -4px;
+  background-color: var(--mm-overlay);
+  border: 1px solid var(--mm-border-strong);
+  border-radius: 8px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7);
+  padding: 6px 0;
+  min-width: 180px;
+  z-index: 10001;
+}
+
+.mm-context-submenu:hover > .mm-context-subpanel,
+.mm-context-submenu:focus-within > .mm-context-subpanel {
+  display: block;
+}
+
+/* Multi-Select Context Menu Badge */
+.mm-context-multi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--mm-raised);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--mm-cyan);
+  margin: 4px 16px 6px;
+}
+
+/* Command Palette (Ctrl+K) */
+.mm-command-palette-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 10050;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+}
+
+.mm-command-palette {
+  width: 580px;
+  max-width: 90vw;
+  background: var(--mm-surface);
+  border: 1px solid var(--mm-border-strong);
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mm-command-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--mm-border);
+}
+
+.mm-command-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 15px;
+}
+
+.mm-command-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 6px;
+}
+
+.mm-command-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--mm-text);
+  font-size: 13px;
+  transition: background 100ms ease;
+}
+
+.mm-command-item:hover,
+.mm-command-item.selected {
+  background: var(--mm-raised);
+  color: var(--mm-cyan);
+}
+
+.mm-command-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mm-command-shortcut {
+  font-family: var(--mm-font-mono);
+  font-size: 11px;
+  padding: 2px 6px;
+  background: #0E0E10;
+  border: 1px solid var(--mm-border);
+  border-radius: 4px;
+  color: var(--mm-muted);
+}
+
+/* UI Replicator Studio (Addendum M) */
+.mm-replicator-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  padding: 24px;
+  gap: 20px;
+}
+
+.mm-replicator-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.mm-replicator-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mm-replicator-mode-badge.mode-a {
+  background: rgba(47, 191, 143, 0.15);
+  border: 1px solid rgba(47, 191, 143, 0.4);
+  color: #2FBF8F;
+}
+
+.mm-replicator-mode-badge.mode-b {
+  background: rgba(124, 108, 255, 0.15);
+  border: 1px solid rgba(124, 108, 255, 0.4);
+  color: #7C6CFF;
+}
+
+.mm-replicator-bar {
+  background: var(--mm-surface);
+  border: 1px solid var(--mm-border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mm-replicator-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.mm-replicator-url-input {
+  flex: 1;
+  background: #0A0A0B;
+  border: 1px solid var(--mm-border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 13px;
+  font-family: var(--mm-font-mono);
+}
+
+.mm-replicator-preview-stage {
+  background: #0A0A0B;
+  border: 1px solid var(--mm-border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mm-replicator-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--mm-surface);
+  border-bottom: 1px solid var(--mm-border);
+}
+
+.mm-viewport-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.mm-viewport-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--mm-muted);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mm-viewport-btn.active {
+  background: var(--mm-raised);
+  border-color: var(--mm-border);
+  color: #fff;
+}
+
+.mm-replicator-frame-wrap {
+  display: flex;
+  justify-content: center;
+  background: #050506;
+  padding: 20px;
+  min-height: 360px;
+  max-height: 540px;
+  overflow: auto;
+}
+
+.mm-replicator-iframe {
+  background: #fff;
+  border: 1px solid var(--mm-border-strong);
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: width 200ms ease;
+}
+
+.mm-fidelity-card {
+  background: var(--mm-surface);
+  border: 1px solid var(--mm-border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mm-fidelity-score-ring {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2FBF8F;
+}
+
 

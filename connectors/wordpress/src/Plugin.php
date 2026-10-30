@@ -529,6 +529,98 @@ final class Plugin
             'callback' => [$this, 'restRestoreMediaOriginal'],
             'permission_callback' => fn() => current_user_can('manage_options'),
         ]);
+
+        // 5. Replicator (Addendum M)
+        register_rest_route(Brand::REST_NAMESPACE, '/replicator/status', [
+            'methods' => 'GET',
+            'callback' => [$this, 'restReplicatorStatus'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/replicator/extract', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restReplicatorExtract'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/replicator/create-draft', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restReplicatorCreateDraft'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        // 6. Extended File Manager Operations (Addendum M)
+        register_rest_route(Brand::REST_NAMESPACE, '/files/hash', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restHashFile'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/size', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restFolderSize'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/duplicate', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restDuplicateFile'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/batch-rename', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restBatchRenameFiles'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/archive/list', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restListArchive'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/archive/compress', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restCompressArchive'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/archive/extract', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restExtractArchive'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/template', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restGetTemplate'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/import-url', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restImportUrl'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/empty-trash', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restEmptyTrash'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/backups', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restListBackups'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
+
+        register_rest_route(Brand::REST_NAMESPACE, '/files/restore-backup', [
+            'methods' => 'POST',
+            'callback' => [$this, 'restRestoreBackup'],
+            'permission_callback' => fn() => current_user_can('manage_options'),
+        ]);
     }
 
     public function restGetStatus(): \WP_REST_Response
@@ -876,6 +968,569 @@ final class Plugin
             $resolved = $guard->resolveSecurePath($relPath);
             chmod($resolved, $modeInt);
             return new \WP_REST_Response(['success' => true]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    /**
+     * Replicator Endpoints (Addendum M)
+     */
+    public function restReplicatorStatus(): \WP_REST_Response
+    {
+        return new \WP_REST_Response(\Wefik\MimicManager\Replicator\ReplicatorEngine::getStatus());
+    }
+
+    public function restReplicatorExtract(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $params = $request->get_json_params() ?: [];
+        try {
+            $engine = new \Wefik\MimicManager\Replicator\ReplicatorEngine();
+            $result = $engine->extract($params);
+            return new \WP_REST_Response($result);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    public function restReplicatorCreateDraft(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $params = $request->get_json_params() ?: [];
+        $title = (string) ($params['title'] ?? 'Replicated Section');
+        $content = (string) ($params['content'] ?? '');
+
+        if (empty($content)) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'No content provided for draft page.'], 400);
+        }
+
+        try {
+            $engine = new \Wefik\MimicManager\Replicator\ReplicatorEngine();
+            $result = $engine->createDraftPage($title, $content);
+            return new \WP_REST_Response($result);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Extended File Manager Endpoints (Addendum M)
+     */
+    public function restHashFile(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $params = $request->get_json_params() ?: [];
+        $relPath = trim((string) ($params['path'] ?? ''));
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $resolved = $guard->resolveSecurePath($relPath);
+            if (!is_file($resolved)) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'File not found'], 404);
+            }
+            return new \WP_REST_Response([
+                'success' => true,
+                'path' => $relPath,
+                'md5' => md5_file($resolved),
+                'sha1' => sha1_file($resolved),
+                'sha256' => hash_file('sha256', $resolved),
+                'size' => filesize($resolved),
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restFolderSize(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $params = $request->get_json_params() ?: [];
+        $relPath = trim((string) ($params['path'] ?? ''));
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $resolved = $guard->resolveSecurePath($relPath);
+            if (!is_dir($resolved)) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Directory not found'], 404);
+            }
+
+            $totalBytes = 0;
+            $fileCount = 0;
+            $dirCount = 0;
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($resolved, \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS)
+            );
+            foreach ($iterator as $item) {
+                if ($item->isDir()) {
+                    $dirCount++;
+                } else {
+                    $fileCount++;
+                    $totalBytes += $item->getSize();
+                }
+            }
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'path' => $relPath,
+                'sizeBytes' => $totalBytes,
+                'sizeFormatted' => $this->formatBytes($totalBytes),
+                'fileCount' => $fileCount,
+                'dirCount' => $dirCount,
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restDuplicateFile(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $writeMode = (bool) get_option('mimic_manager_file_write_mode', false);
+        if (!$writeMode) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'File write mode is disabled in Settings'], 403);
+        }
+
+        $params = $request->get_json_params() ?: [];
+        $relPath = trim((string) ($params['path'] ?? ''));
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $resolved = $guard->resolveSecurePath($relPath);
+            $parent = dirname($resolved);
+            $filename = basename($resolved);
+
+            if (is_file($resolved)) {
+                $ext = pathinfo($filename, PATHINFO_EXTENSION);
+                $base = pathinfo($filename, PATHINFO_FILENAME);
+                $dupName = $ext ? "{$base}-copy.{$ext}" : "{$base}-copy";
+                $i = 1;
+                while (file_exists($parent . DIRECTORY_SEPARATOR . $dupName)) {
+                    $dupName = $ext ? "{$base}-copy-{$i}.{$ext}" : "{$base}-copy-{$i}";
+                    $i++;
+                }
+                copy($resolved, $parent . DIRECTORY_SEPARATOR . $dupName);
+            } else {
+                $dupName = "{$filename}-copy";
+                $i = 1;
+                while (file_exists($parent . DIRECTORY_SEPARATOR . $dupName)) {
+                    $dupName = "{$filename}-copy-{$i}";
+                    $i++;
+                }
+                $targetDir = $parent . DIRECTORY_SEPARATOR . $dupName;
+                mkdir($targetDir, 0755, true);
+                $iterator = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($resolved, \RecursiveDirectoryIterator::SKIP_DOTS),
+                    \RecursiveIteratorIterator::SELF_FIRST
+                );
+                foreach ($iterator as $item) {
+                    $subPath = $targetDir . DIRECTORY_SEPARATOR . $iterator->getSubPathname();
+                    if ($item->isDir()) {
+                        mkdir($subPath, 0755, true);
+                    } else {
+                        copy($item->getPathname(), $subPath);
+                    }
+                }
+            }
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'name' => $dupName,
+                'path' => ltrim((dirname($relPath) !== '.' && dirname($relPath) !== '' ? dirname($relPath) . '/' : '') . $dupName, '/'),
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restBatchRenameFiles(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $writeMode = (bool) get_option('mimic_manager_file_write_mode', false);
+        if (!$writeMode) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'File write mode is disabled in Settings'], 403);
+        }
+
+        $params = $request->get_json_params() ?: [];
+        $items = (array) ($params['items'] ?? []);
+        if (empty($items)) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'No items provided'], 400);
+        }
+
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        $renamed = [];
+        try {
+            foreach ($items as $item) {
+                $oldPath = trim((string) ($item['oldPath'] ?? ''));
+                $newName = trim((string) ($item['newName'] ?? ''));
+                if (!$oldPath || !$newName || str_contains($newName, '/') || str_contains($newName, '\\')) {
+                    continue;
+                }
+                $resolvedOld = $guard->resolveSecurePath($oldPath);
+                $targetPath = dirname($resolvedOld) . DIRECTORY_SEPARATOR . $newName;
+                if (!file_exists($targetPath)) {
+                    rename($resolvedOld, $targetPath);
+                    $renamed[] = ['oldPath' => $oldPath, 'newName' => $newName];
+                }
+            }
+            return new \WP_REST_Response(['success' => true, 'renamed' => $renamed]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restListArchive(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $params = $request->get_json_params() ?: [];
+        $relPath = trim((string) ($params['path'] ?? ''));
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $resolved = $guard->resolveSecurePath($relPath);
+            if (!is_file($resolved) || strtolower(pathinfo($resolved, PATHINFO_EXTENSION)) !== 'zip') {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Valid .zip archive required'], 400);
+            }
+
+            if (!class_exists('ZipArchive')) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'PHP ZipArchive extension is not available'], 500);
+            }
+
+            $zip = new \ZipArchive();
+            $res = $zip->open($resolved, \ZipArchive::RDONLY);
+            if ($res !== true) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Could not open zip archive (code ' . $res . ')'], 400);
+            }
+
+            $entries = [];
+            $totalEntries = $zip->numFiles;
+            $limit = min(1000, $totalEntries);
+            $totalUncompressedBytes = 0;
+
+            for ($i = 0; $i < $limit; $i++) {
+                $stat = $zip->statIndex($i);
+                if ($stat) {
+                    $totalUncompressedBytes += $stat['size'];
+                    $entries[] = [
+                        'name' => $stat['name'],
+                        'size' => $stat['size'],
+                        'sizeFormatted' => $this->formatBytes($stat['size']),
+                        'compressedSize' => $stat['comp_size'],
+                        'mtime' => $stat['mtime'],
+                    ];
+                }
+            }
+            $zip->close();
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'path' => $relPath,
+                'totalFiles' => $totalEntries,
+                'totalUncompressedBytes' => $totalUncompressedBytes,
+                'totalUncompressedFormatted' => $this->formatBytes($totalUncompressedBytes),
+                'entries' => $entries,
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restCompressArchive(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $writeMode = (bool) get_option('mimic_manager_file_write_mode', false);
+        if (!$writeMode) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'File write mode is disabled in Settings'], 403);
+        }
+
+        $params = $request->get_json_params() ?: [];
+        $paths = (array) ($params['paths'] ?? []);
+        $archiveName = trim((string) ($params['archiveName'] ?? 'archive.zip'));
+        if (!str_ends_with(strtolower($archiveName), '.zip')) {
+            $archiveName .= '.zip';
+        }
+        $targetDirRel = trim((string) ($params['targetDir'] ?? ''));
+
+        if (empty($paths)) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'No files specified to compress'], 400);
+        }
+
+        if (!class_exists('ZipArchive')) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'PHP ZipArchive extension is not available'], 500);
+        }
+
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $targetDirResolved = $guard->resolveSecurePath($targetDirRel);
+            $zipFileResolved = $targetDirResolved . DIRECTORY_SEPARATOR . basename($archiveName);
+
+            $zip = new \ZipArchive();
+            $res = $zip->open($zipFileResolved, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+            if ($res !== true) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Could not create zip archive (code ' . $res . ')'], 500);
+            }
+
+            $added = 0;
+            $maxFiles = 1000;
+            foreach ($paths as $p) {
+                $resolved = $guard->resolveSecurePath((string) $p);
+                $entryName = basename($resolved);
+                if (is_file($resolved)) {
+                    $zip->addFile($resolved, $entryName);
+                    $added++;
+                } elseif (is_dir($resolved)) {
+                    $iterator = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($resolved, \RecursiveDirectoryIterator::SKIP_DOTS),
+                        \RecursiveIteratorIterator::SELF_FIRST
+                    );
+                    foreach ($iterator as $item) {
+                        if ($added >= $maxFiles) break;
+                        $sub = $entryName . '/' . $iterator->getSubPathname();
+                        if ($item->isDir()) {
+                            $zip->addEmptyDir($sub);
+                        } else {
+                            $zip->addFile($item->getPathname(), $sub);
+                            $added++;
+                        }
+                    }
+                }
+            }
+            $zip->close();
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'archiveName' => basename($archiveName),
+                'path' => ltrim(($targetDirRel ? $targetDirRel . '/' : '') . basename($archiveName), '/'),
+                'size' => filesize($zipFileResolved),
+                'filesCount' => $added,
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restExtractArchive(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $writeMode = (bool) get_option('mimic_manager_file_write_mode', false);
+        if (!$writeMode) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'File write mode is disabled in Settings'], 403);
+        }
+
+        $params = $request->get_json_params() ?: [];
+        $relPath = trim((string) ($params['path'] ?? ''));
+        $targetDirRel = trim((string) ($params['targetDir'] ?? ''));
+
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $resolvedZip = $guard->resolveSecurePath($relPath);
+            if (!is_file($resolvedZip) || strtolower(pathinfo($resolvedZip, PATHINFO_EXTENSION)) !== 'zip') {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Valid .zip archive required'], 400);
+            }
+
+            $targetDirResolved = empty($targetDirRel) ? dirname($resolvedZip) : $guard->resolveSecurePath($targetDirRel);
+            if (!is_dir($targetDirResolved)) {
+                mkdir($targetDirResolved, 0755, true);
+            }
+
+            $zip = new \ZipArchive();
+            if ($zip->open($resolvedZip) !== true) {
+                return new \WP_REST_Response(['success' => false, 'error' => 'Failed to open archive'], 400);
+            }
+
+            $maxFiles = 1000;
+            $maxBytes = 52428800; // 50 MB
+            $totalBytes = 0;
+            $numFiles = $zip->numFiles;
+
+            if ($numFiles > $maxFiles) {
+                $zip->close();
+                return new \WP_REST_Response(['success' => false, 'error' => 'Archive contains too many entries (exceeds 1000)'], 400);
+            }
+
+            $realTargetRoot = realpath($targetDirResolved) ?: $targetDirResolved;
+
+            for ($i = 0; $i < $numFiles; $i++) {
+                $stat = $zip->statIndex($i);
+                if (!$stat) continue;
+                $entryName = $stat['name'];
+
+                if (str_contains($entryName, '..') || str_starts_with($entryName, '/') || str_starts_with($entryName, '\\')) {
+                    $zip->close();
+                    return new \WP_REST_Response(['success' => false, 'error' => 'Zip-slip directory traversal attack detected'], 403);
+                }
+
+                $totalBytes += $stat['size'];
+                if ($totalBytes > $maxBytes) {
+                    $zip->close();
+                    return new \WP_REST_Response(['success' => false, 'error' => 'Uncompressed archive exceeds 50MB limit'], 400);
+                }
+            }
+
+            $zip->extractTo($realTargetRoot);
+            $zip->close();
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'extractedTo' => $targetDirRel,
+                'filesCount' => $numFiles,
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restGetTemplate(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $params = $request->get_json_params() ?: [];
+        $type = strtolower(trim((string) ($params['type'] ?? 'text')));
+        $className = preg_replace('/[^a-zA-Z0-9_]/', '', (string) ($params['className'] ?? 'SampleClass'));
+
+        $templates = [
+            'php' => "<?php\n\ndeclare(strict_types=1);\n\nclass {$className}\n{\n    public function __construct()\n    {\n        // Initialize\n    }\n}\n",
+            'js' => "/**\n * JavaScript Module\n */\nexport function init() {\n  console.log('{$className} initialized');\n}\n",
+            'css' => "/**\n * Stylesheet\n */\n.{$className} {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 1rem;\n}\n",
+            'json' => "{\n  \"name\": \"{$className}\",\n  \"version\": \"1.0.0\",\n  \"active\": true\n}\n",
+            'html' => "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>{$className}</title>\n</head>\n<body>\n  <h1>{$className}</h1>\n</body>\n</html>\n",
+            'text' => "# {$className}\n\nCreated on " . date('Y-m-d H:i:s') . "\n",
+        ];
+
+        if ($type === 'htaccess') {
+            return new \WP_REST_Response(['success' => false, 'error' => '.htaccess templates are prohibited by security policy.'], 403);
+        }
+
+        $template = $templates[$type] ?? $templates['text'];
+        return new \WP_REST_Response(['success' => true, 'type' => $type, 'template' => $template]);
+    }
+
+    public function restImportUrl(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $writeMode = (bool) get_option('mimic_manager_file_write_mode', false);
+        if (!$writeMode) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'File write mode is disabled in Settings'], 403);
+        }
+
+        $params = $request->get_json_params() ?: [];
+        $url = trim((string) ($params['url'] ?? ''));
+        $targetDirRel = trim((string) ($params['targetDir'] ?? ''));
+        $fileName = trim((string) ($params['fileName'] ?? ''));
+
+        if (empty($url) || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'Valid URL required'], 400);
+        }
+
+        $engine = new \Wefik\MimicManager\Replicator\ReplicatorEngine();
+        try {
+            $engine->assertSsrfSafe($url);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'SSRF Guard: ' . $e->getMessage()], 403);
+        }
+
+        if (empty($fileName)) {
+            $fileName = basename(parse_url($url, PHP_URL_PATH) ?: 'downloaded_file');
+        }
+        $fileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $fileName);
+
+        $response = wp_safe_remote_get($url, [
+            'timeout' => 8,
+            'redirection' => 3,
+            'headers' => ['User-Agent' => 'MimicManager/1.0'],
+        ]);
+
+        if (is_wp_error($response)) {
+            return new \WP_REST_Response(['success' => false, 'error' => $response->get_error_message()], 400);
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        if (strlen($body) > 5242880) { // 5 MB max
+            return new \WP_REST_Response(['success' => false, 'error' => 'File exceeds 5MB download limit'], 400);
+        }
+
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $targetDirResolved = $guard->resolveSecurePath($targetDirRel);
+            $targetFile = $targetDirResolved . DIRECTORY_SEPARATOR . $fileName;
+            file_put_contents($targetFile, $body);
+
+            return new \WP_REST_Response([
+                'success' => true,
+                'fileName' => $fileName,
+                'path' => ltrim(($targetDirRel ? $targetDirRel . '/' : '') . $fileName, '/'),
+                'size' => strlen($body),
+            ]);
+        } catch (\Throwable $e) {
+            return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
+        }
+    }
+
+    public function restEmptyTrash(): \WP_REST_Response
+    {
+        $writeMode = (bool) get_option('mimic_manager_file_write_mode', false);
+        if (!$writeMode) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'File write mode is disabled in Settings'], 403);
+        }
+
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $trashDir = $contentDir . '/.mimic-trash';
+
+        if (is_dir($trashDir)) {
+            $files = array_diff(scandir($trashDir) ?: [], ['.', '..']);
+            foreach ($files as $f) {
+                $full = $trashDir . DIRECTORY_SEPARATOR . $f;
+                if (is_dir($full)) {
+                    @rmdir($full);
+                } else {
+                    @unlink($full);
+                }
+            }
+        }
+
+        return new \WP_REST_Response(['success' => true]);
+    }
+
+    public function restListBackups(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $params = $request->get_json_params() ?: [];
+        $relPath = trim((string) ($params['path'] ?? ''));
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $backupDir = $contentDir . '/.mimic-backups';
+
+        $backupMgr = new \Wefik\MimicManager\FileManager\ShadowBackup($backupDir);
+        $backups = $backupMgr->listBackups();
+
+        if ($relPath) {
+            $base = basename($relPath);
+            $backups = array_values(array_filter($backups, fn($b) => str_contains($b['filename'], $base)));
+        }
+
+        return new \WP_REST_Response(['success' => true, 'backups' => $backups]);
+    }
+
+    public function restRestoreBackup(\WP_REST_Request $request): \WP_REST_Response
+    {
+        $writeMode = (bool) get_option('mimic_manager_file_write_mode', false);
+        if (!$writeMode) {
+            return new \WP_REST_Response(['success' => false, 'error' => 'File write mode is disabled in Settings'], 403);
+        }
+
+        $params = $request->get_json_params() ?: [];
+        $relPath = trim((string) ($params['path'] ?? ''));
+        $backupPath = trim((string) ($params['backupPath'] ?? ''));
+
+        $contentDir = defined('WP_CONTENT_DIR') ? constant('WP_CONTENT_DIR') : dirname(dirname(dirname(dirname(__FILE__))));
+        $guard = new \Wefik\MimicManager\FileManager\JailGuard($contentDir);
+
+        try {
+            $targetResolved = $guard->resolveSecurePath($relPath);
+            $backupDir = $contentDir . '/.mimic-backups';
+            $backupMgr = new \Wefik\MimicManager\FileManager\ShadowBackup($backupDir);
+            $backupMgr->restoreBackup($backupPath, $targetResolved);
+
+            return new \WP_REST_Response(['success' => true, 'path' => $relPath]);
         } catch (\Throwable $e) {
             return new \WP_REST_Response(['success' => false, 'error' => $e->getMessage()], 403);
         }

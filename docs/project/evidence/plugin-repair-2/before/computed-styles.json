@@ -1,0 +1,62 @@
+{
+  "html": {
+    "overflow": "visible",
+    "overflowY": "visible",
+    "overflowX": "visible",
+    "height": "600px",
+    "position": "static",
+    "top": "auto",
+    "maxHeight": "none",
+    "boxSizing": "border-box"
+  },
+  "body": {
+    "overflow": "hidden",
+    "overflowY": "hidden",
+    "overflowX": "hidden",
+    "height": "568px",
+    "position": "static",
+    "top": "auto",
+    "maxHeight": "none",
+    "boxSizing": "content-box"
+  },
+  "wpwrap": {
+    "overflow": "visible",
+    "overflowY": "visible",
+    "overflowX": "visible",
+    "height": "696.562px",
+    "position": "relative",
+    "top": "0px",
+    "maxHeight": "none",
+    "boxSizing": "content-box"
+  },
+  "adminmenuwrap": {
+    "overflow": "visible",
+    "overflowY": "visible",
+    "overflowX": "visible",
+    "height": "696.562px",
+    "position": "relative",
+    "top": "0px",
+    "maxHeight": "none",
+    "boxSizing": "content-box"
+  },
+  "adminmenu": {
+    "overflow": "visible",
+    "overflowY": "visible",
+    "overflowX": "visible",
+    "height": "672.562px",
+    "position": "static",
+    "top": "auto",
+    "maxHeight": "none",
+    "boxSizing": "content-box"
+  },
+  "wpcontent": {
+    "overflow": "visible",
+    "overflowY": "visible",
+    "overflowX": "visible",
+    "height": "696.562px",
+    "position": "static",
+    "top": "auto",
+    "maxHeight": "none",
+    "boxSizing": "content-box"
+  }
+}
