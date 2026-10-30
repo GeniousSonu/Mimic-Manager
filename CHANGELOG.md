@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0-rc.1] - 2026-10-30
 
 ### Fixed & Enhanced (Addendum L - PLUGIN-REPAIR Pass)
+
 - **WordPress Admin Sidebar & Rail:**
   - Registered persistent top-level menu with brand SVG icon and 8 native submenus (Dashboard, Media, Speed, SEO, Files, Sites/Connection, Settings, About).
   - Added collapsible in-app left rail synchronized via hashchange without page reload.
@@ -24,7 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Built responsive media gallery grid with format, status, and savings pills.
   - Added multi-tier Compress & Convert Wizard supporting WebP conversion via local GD / Imagick.
 
-### Added
+### Added (1.0.0-rc.1)
+
 - **Phase 1 Media Optimization & AI Metadata (MVP):**
   - Next.js 15.5 Command Center shell (`apps/pwa`) with 13 prerendered routes and lightweight bundle footprint (< 130 kB).
   - 6-digit site pairing protocol and HMAC-signed handshake.
@@ -56,7 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.0-alpha] - 2026-10-29
 
-### Added
+### Added (0.1.0-alpha)
+
 - **Phase -1 Documentation Suite:**
   - Product specifications: PRD, Personas & JTBD, User Stories with Given/When/Then, Competitive Analysis, Roadmap, Glossary, Success Metrics, Pricing & Sustainability, Red Team Reviews.
   - Architecture specifications: C4 System Architecture, Data Model (MongoDB & WP DDL), REST API & OpenAPI 3.1, Events & Signed Webhooks, Queues & Workers, Storage Pipeline, WordPress Plugin Blueprint, Fix Registry, Fix Authoring Guide, Connector Authoring Guide, Replicator IR, Visual File Manager Design, AI Vision Providers, SEO Adapters, Observability, Performance Budgets, Scaling & Capacity, Compatibility Matrix, and 5 foundational ADRs.

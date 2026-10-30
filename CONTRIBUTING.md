@@ -18,14 +18,18 @@ Every contribution that modifies system behavior, APIs, or user interfaces must 
    - pnpm ≥ 9 (v12 recommended)
    - PHP ≥ 8.0 & Composer ≥ 2
    - Docker Engine & Docker Compose
+
 2. Clone and install:
+
    ```bash
    git clone https://github.com/GeniousSonu/Mimic-Manager.git
    cd Mimic-Manager
    pnpm install
    cd connectors/wordpress && composer install && cd ../..
    ```
+
 3. Run tests across the workspace:
+
    ```bash
    pnpm test
    cd connectors/wordpress && ./vendor/bin/phpunit tests/

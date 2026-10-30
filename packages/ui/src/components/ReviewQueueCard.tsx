@@ -16,7 +16,7 @@ export interface ReviewQueueCardProps {
   isActive?: boolean;
 }
 
-export const ReviewQueueCard: React.FC<ReviewQueueCardProps> = ({
+export function ReviewQueueCard({
   id,
   thumbnailUrl,
   filename,
@@ -28,7 +28,7 @@ export const ReviewQueueCard: React.FC<ReviewQueueCardProps> = ({
   onEdit,
   onReject,
   isActive = false
-}) => {
+}: ReviewQueueCardProps): React.ReactElement {
   const percent = Math.round(confidence * 100);
 
   // Global keyboard shortcuts when card is active: A (Accept), E (Edit), R (Reject)

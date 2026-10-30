@@ -92,15 +92,22 @@
     },
   };
 
-  const wpData = window.mimicManagerData || {
-    restUrl: '/wp-json/mimic-manager/v1',
-    nonce: '',
-    homeUrl: 'http://localhost:8888',
-    siteName: 'WordPress Site',
-    disallowFileEdit: false,
-    disallowFileMods: false,
-    brand: { name: 'Mimic Manager', version: '1.0.0-rc.1', creator: 'SK Sahinur Islam', owner: 'Wefik' },
-  };
+  const rawWpData = window.mimicManagerData || {};
+  const wpData = Object.assign(
+    {
+      restUrl: '/wp-json/mimic-manager/v1',
+      nonce: '',
+      homeUrl: 'http://localhost:8888',
+      siteName: 'WordPress Site',
+      disallowFileEdit: false,
+      disallowFileMods: false,
+      brand: { name: 'Mimic Manager', version: '1.0.0-rc.1', creator: 'SK Sahinur Islam', owner: 'Wefik' },
+    },
+    rawWpData
+  );
+  if (!wpData.brand) {
+    wpData.brand = { name: 'Mimic Manager', version: '1.0.0-rc.1', creator: 'SK Sahinur Islam', owner: 'Wefik' };
+  }
 
   function logError(source, err) {
     const entry = {
@@ -255,12 +262,24 @@
     handleHashChange();
   }
 
-  function handleHashChange() {
+  function parseHash() {
     const rawHash = window.location.hash.replace(/^#\/?/, '') || 'dashboard';
-    const parts = rawHash.split('/');
-    const route = parts[0] || 'dashboard';
+    const [pathPart, queryPart] = rawHash.split('?');
+    const params = {};
+    if (queryPart) {
+      new URLSearchParams(queryPart).forEach((val, key) => {
+        params[key] = val;
+      });
+    }
+    const parts = (pathPart || 'dashboard').split('/');
+    return { route: parts[0] || 'dashboard', params };
+  }
+
+  function handleHashChange() {
+    const { route, params } = parseHash();
 
     state.currentRoute = route;
+    state.routeParams = params;
     state.fileManager.contextMenu.visible = false;
 
     // Synchronize WordPress left-side admin menu active highlight
@@ -269,7 +288,8 @@
     renderApp();
 
     if (route === 'files') {
-      loadFiles(state.fileManager.currentPath);
+      const targetPath = params.path !== undefined ? params.path : state.fileManager.currentPath;
+      loadFiles(targetPath);
     } else if (route === 'media') {
       loadMedia();
     } else if (route === 'dashboard') {
@@ -566,11 +586,45 @@
     `;
 
     bindEvents();
+    relocateNotices();
     renderStatusBadges();
   }
 
+  // Relocate WordPress Notices into Collapsible Tray
+  function relocateNotices() {
+    const noticeContainer = document.getElementById('mm-notices-container');
+    if (!noticeContainer) return;
+
+    const externalNotices = document.querySelectorAll(
+      '#wpbody-content > .notice:not(.mm-internal), #wpbody-content > .updated, #wpbody-content > .error'
+    );
+
+    if (externalNotices.length === 0) {
+      noticeContainer.innerHTML = '';
+      return;
+    }
+
+    const tray = document.createElement('details');
+    tray.className = 'mm-notices-tray';
+    tray.innerHTML = `
+      <summary class="mm-notices-summary">
+        <span>⚠ WordPress notices (${externalNotices.length})</span>
+      </summary>
+      <div class="mm-notices-dropdown"></div>
+    `;
+
+    const dropdown = tray.querySelector('.mm-notices-dropdown');
+    externalNotices.forEach((n) => {
+      n.style.margin = '8px 0';
+      dropdown.appendChild(n);
+    });
+
+    noticeContainer.innerHTML = '';
+    noticeContainer.appendChild(tray);
+  }
+
   function renderHeader() {
-    const brand = wpData.brand;
+    const brand = (wpData && wpData.brand) || { name: 'Mimic Manager', version: '1.0.0-rc.1', creator: 'SK Sahinur Islam', owner: 'Wefik' };
     return `
       <header class="mm-shell-header">
         <div class="mm-header-left">
@@ -580,11 +634,12 @@
               <path d="M2.5 8L10 11.75L17.5 8L17.5 9.8L10 13.55L2.5 9.8V8Z"/>
               <path d="M2.5 12L10 15.75L17.5 12L17.5 13.8L10 17.55L2.5 13.8V12Z"/>
             </svg>
-            <span>${escapeHtml(brand.name)}</span>
-            <span class="mm-ext-badge">v${escapeHtml(brand.version)}</span>
+            <span>${escapeHtml(brand.name || 'Mimic Manager')}</span>
+            <span class="mm-ext-badge">v${escapeHtml(brand.version || '1.0.0-rc.1')}</span>
           </a>
         </div>
         <div class="mm-header-right">
+          <div id="mm-notices-container"></div>
           <div id="mm-connection-badge"></div>
           <button class="mm-icon-btn" id="mm-toggle-fullscreen" title="Toggle Fullscreen" type="button">
             ⛶
@@ -612,7 +667,7 @@
           ${items
             .map(
               (item) => `
-            <a href="#/${item.id}" class="mm-rail-link ${state.currentRoute === item.id ? 'active' : ''}" data-route="${item.id}" title="${item.label}">
+            <a href="#/${item.id}" class="mm-rail-link mm-nav-tab ${state.currentRoute === item.id ? 'active' : ''}" data-route="${item.id}" title="${item.label}">
               <span class="mm-rail-icon">${item.icon}</span>
               <span class="mm-rail-label">${escapeHtml(item.label)}</span>
             </a>
@@ -801,7 +856,7 @@
     const isElevated = state.elevation.active;
 
     return `
-      <div class="mm-fm-container" style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
+      <div class="mm-fm-container mm-filemanager" style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
         <!-- Elevation / Warning Banner -->
         ${
           wpData.disallowFileEdit || wpData.disallowFileMods
@@ -845,13 +900,60 @@
 
         <!-- Main 3-Pane Body -->
         <div class="mm-fm-body" style="display:flex; flex:1; overflow:hidden;">
+          <!-- Left Tree Pane -->
+          <aside class="mm-tree-pane" role="tree" aria-label="Jailed File Explorer">
+            <div class="mm-tree-header">
+              <span>Explorer</span>
+              <span class="mm-ext-badge">wp-content</span>
+            </div>
+            <div style="padding:6px 0;">
+              <div class="mm-tree-node ${fm.currentPath === '' ? 'selected' : ''}" data-tree-path="" role="treeitem">
+                <span>📁 wp-content</span>
+              </div>
+              <div style="padding-left:16px;">
+                <div class="mm-tree-node ${fm.currentPath === 'themes' ? 'selected' : ''}" data-tree-path="themes" role="treeitem">
+                  <span>📁 themes</span>
+                </div>
+                <div class="mm-tree-node ${fm.currentPath === 'plugins' ? 'selected' : ''}" data-tree-path="plugins" role="treeitem">
+                  <span>📁 plugins</span>
+                </div>
+                <div class="mm-tree-node ${fm.currentPath === 'uploads' ? 'selected' : ''}" data-tree-path="uploads" role="treeitem">
+                  <span>📁 uploads</span>
+                </div>
+              </div>
+              <div style="padding-top:12px; border-top:1px solid var(--mm-border); margin-top:12px;">
+                <div style="font-size:11px; color:var(--mm-muted); padding:0 8px 4px 8px; font-weight:600;">LOCKED CORE NODES</div>
+                ${fm.lockedNodes
+                  .map(
+                    (n) => `
+                  <div class="mm-tree-node locked" title="${escapeHtml(n.reason)}" role="treeitem" aria-disabled="true">
+                    <span>🔒 ${escapeHtml(n.name)}</span>
+                  </div>
+                `
+                  )
+                  .join('')}
+              </div>
+            </div>
+          </aside>
+
           <!-- Directory Grid / List -->
           <div class="mm-fm-grid-wrap" id="mm-fm-grid-wrap" style="flex:1; overflow-y:auto; padding:16px;">
+            <table class="mm-data-table" style="width:100%; border-collapse:collapse; margin-bottom:12px;"><thead><tr><th style="padding:4px 8px; text-align:left; font-size:11px; color:var(--mm-muted); text-transform:uppercase;">Explorer View</th></tr></thead></table>
             ${
               state.loading.files
                 ? `<div style="padding:32px; text-align:center; color:var(--mm-muted);">Loading files...</div>`
                 : fm.files.length === 0 && fm.lockedNodes.length === 0
-                ? `<div style="padding:48px; text-align:center; color:var(--mm-muted);">This folder is empty. Right-click or use toolbar to create a file.</div>`
+                ? `
+                <div class="mm-empty-state" role="status" style="padding:48px; text-align:center;">
+                  <svg class="mm-empty-icon" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 12px; color:var(--mm-muted); display:block;"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+                  <h4 class="mm-empty-title" style="margin:0 0 8px; font-size:16px;">Folder is empty</h4>
+                  <p class="mm-empty-desc" style="margin:0 0 16px; font-size:13px; color:var(--mm-muted);">No files or subdirectories found in this directory.</p>
+                  <div class="mm-empty-cta">
+                    <button class="mm-btn mm-btn-primary" id="mm-empty-new-file-btn" ${!fm.writeMode ? 'disabled title="Read-only mode: Elevation required to create files"' : ''}>+ New File</button>
+                    ${!fm.writeMode ? `<div style="font-size:11px; color:var(--mm-muted); margin-top:4px;">Read-only mode: Elevation required to create files</div>` : ''}
+                  </div>
+                </div>
+              `
                 : `
               <div class="mm-fm-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px;">
                 ${fm.lockedNodes
@@ -1219,9 +1321,11 @@
     const el = document.getElementById('mm-connection-badge');
     if (!el) return;
     const isConn = state.connectionStatus === 'connected';
+    el.className = `mm-conn-badge ${state.connectionStatus}`;
+    el.setAttribute('title', state.connectionReason || '100% Local Mode');
     el.innerHTML = `
       <span class="mm-status-pill ${isConn ? 'success' : 'info'}" style="font-size:11px;">
-        ● ${isConn ? 'Connected' : 'Local Mode'}
+        ● ${isConn ? 'Connected' : 'Local-only'}
       </span>
     `;
   }

@@ -9,13 +9,13 @@ export interface BeforeAfterSliderProps {
   className?: string;
 }
 
-export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({
+export function BeforeAfterSlider({
   beforeSrc,
   afterSrc,
   beforeLabel = 'Original',
   afterLabel = 'Optimized',
   className
-}) => {
+}: BeforeAfterSliderProps): React.ReactElement {
   const [sliderPosition, setSliderPosition] = useState(50); // 0 to 100%
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);

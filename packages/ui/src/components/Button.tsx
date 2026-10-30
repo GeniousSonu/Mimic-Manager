@@ -10,7 +10,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   rightIcon?: React.ReactNode;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export function Button({
   className,
   variant = 'primary',
   size = 'md',
@@ -20,7 +20,7 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   disabled,
   ...props
-}) => {
+}: ButtonProps): React.ReactElement {
   const baseStyles =
     'inline-flex items-center justify-center font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none select-none';
 
@@ -56,6 +56,6 @@ export const Button: React.FC<ButtonProps> = ({
       {!isLoading && rightIcon}
     </button>
   );
-};
+}
 
 Button.displayName = 'Button';

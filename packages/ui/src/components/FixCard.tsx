@@ -21,7 +21,7 @@ export interface FixCardProps {
   onRevert: (id: string) => void;
 }
 
-export const FixCard: React.FC<FixCardProps> = ({
+export function FixCard({
   id,
   tier,
   title,
@@ -33,7 +33,7 @@ export const FixCard: React.FC<FixCardProps> = ({
   onPreview,
   onApply,
   onRevert
-}) => {
+}: FixCardProps): React.ReactElement {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (

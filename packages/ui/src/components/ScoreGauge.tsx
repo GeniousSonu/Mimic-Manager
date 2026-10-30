@@ -10,14 +10,14 @@ export interface ScoreGaugeProps {
   className?: string;
 }
 
-export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
+export function ScoreGauge({
   score,
   label = 'Performance',
   delta,
   size = 120,
   strokeWidth = 8,
   className
-}) => {
+}: ScoreGaugeProps): React.ReactElement {
   const clampedScore = Math.max(0, Math.min(100, Math.round(score)));
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;

@@ -22,8 +22,8 @@ export interface PairingSession {
   expiresAt: number;
   attempts: number;
   status: 'waiting' | 'approved' | 'consumed' | 'expired' | 'locked';
-  siteId?: string;
-  secret?: string;
+  siteId?: string | undefined;
+  secret?: string | undefined;
   createdAt: Date;
 }
 
@@ -207,9 +207,9 @@ export class SitesService {
    */
   public getPairingStatus(sessionId: string): {
     status: 'waiting' | 'approved' | 'consumed' | 'expired' | 'locked';
-    siteId?: string;
-    secret?: string;
-    apiBaseUrl?: string;
+    siteId?: string | undefined;
+    secret?: string | undefined;
+    apiBaseUrl?: string | undefined;
   } {
     const session = this.pairingSessions.get(sessionId);
     if (!session) {

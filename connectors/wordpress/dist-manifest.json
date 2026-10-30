@@ -1,28 +1,28 @@
 {
   "plugin": "mimic-manager",
   "version": "1.0.0-rc.1",
-  "builtAt": "2026-10-30T06:50:01.535Z",
-  "gitCommit": "a9de2f2c7e20b08ab0e58b0452a1262241ea6cff",
+  "builtAt": "2026-10-30T08:22:56.486Z",
+  "gitCommit": "27accb23024c9a4b470c700b164d81dafe6fa431",
   "flavors": {
     "wporg": {
       "zipFile": "mimic-manager.zip",
-      "zipSizeBytes": 81746,
+      "zipSizeBytes": 82833,
       "zipSizeMb": "0.08",
-      "sha256": "9a4b78d9a62f39f4c06a2086ca226705759b654b37e0c45dcd0cf6255d67af1b",
+      "sha256": "44b3037f9a7599dcc7e8540e112d17dce080cae94f1ba415ef52d1e7f3fbc793",
       "fileCount": 43
     },
     "github": {
       "zipFile": "mimic-manager-github.zip",
-      "zipSizeBytes": 84274,
+      "zipSizeBytes": 85361,
       "zipSizeMb": "0.08",
-      "sha256": "2f84f7f3b9606cd063d2280e44589b319c549a08e8f01410d562d9b7da2a4533",
+      "sha256": "450fba745bd3a36da9767c75ef5724d7c78a021fa03d8c3414e9c9a1a2d051cb",
       "fileCount": 44
     }
   },
   "zipFile": "mimic-manager.zip",
-  "zipSizeBytes": 81746,
+  "zipSizeBytes": 82833,
   "zipSizeMb": "0.08",
-  "sha256": "9a4b78d9a62f39f4c06a2086ca226705759b654b37e0c45dcd0cf6255d67af1b",
+  "sha256": "44b3037f9a7599dcc7e8540e112d17dce080cae94f1ba415ef52d1e7f3fbc793",
   "fileCount": 43,
   "files": [
     {
@@ -42,8 +42,8 @@
     },
     {
       "path": "assets/js/admin.js",
-      "size": 68333,
-      "sha256": "5eebc6fab645134c292ab43638ad78b7a6df281f8b81903bdf340265f9546663"
+      "size": 73508,
+      "sha256": "c8159a467920cb8f4a0841963cf505087ac8c24d28afa0a18812986db2bf2107"
     },
     {
       "path": "composer.json",
@@ -53,7 +53,7 @@
     {
       "path": "dist-manifest.json",
       "size": 7597,
-      "sha256": "47a1c0ba5767496a91b2febb21833dabf10957c702700d9ebf2b90bbd4e55c61"
+      "sha256": "2f1b26d0ecac3c3ebaf1b46a1f1caf366aeabf7e96c2906b510c0b51f1760d8e"
     },
     {
       "path": "includes/Brand.php",

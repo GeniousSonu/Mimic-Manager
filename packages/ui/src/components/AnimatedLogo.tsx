@@ -11,13 +11,13 @@ export interface AnimatedLogoProps {
   withGlow?: boolean;
 }
 
-export const AnimatedLogo: React.FC<AnimatedLogoProps> = ({
+export function AnimatedLogo({
   size = 32,
   className,
   animated = true,
   interactive = true,
   withGlow = true,
-}) => {
+}: AnimatedLogoProps): React.ReactElement {
   return (
     <div
       className={clsx(

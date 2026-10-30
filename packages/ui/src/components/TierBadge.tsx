@@ -9,7 +9,7 @@ export interface TierBadgeProps {
   className?: string;
 }
 
-export const TierBadge: React.FC<TierBadgeProps> = ({ tier, className }) => {
+export function TierBadge({ tier, className }: TierBadgeProps): React.ReactElement {
   const configs = {
     safe: {
       label: 'Safe',
