@@ -14,7 +14,7 @@
     "php": ">=8.0"
   },
   "require-dev": {
-    "php-stubs/wordpress-stubs": "^6.7",
+    "php-stubs/wordpress-stubs": "^7.1",
     "phpunit/phpunit": "^10.0"
   },
   "autoload": {
